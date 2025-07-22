@@ -354,7 +354,7 @@
   align-items: center;
   gap: 8px;
   padding: 12px 20px;
-  background: #3b82f6;
+  background: black;
   color: white;
   border: none;
   border-radius: 8px;
@@ -365,7 +365,8 @@
 }
 
 .btn-primary:hover {
-  background: #2563eb;
+  background: rgb(193, 193, 193);
+  color: black;
 }
 
 .btn-primary:disabled {
@@ -644,7 +645,7 @@
 .action-btn:focus,
 .btn-primary:focus,
 .btn-secondary:focus {
-  outline: 2px solid #3b82f6;
+  outline: 2px solid black;
   outline-offset: 2px;
 }
 

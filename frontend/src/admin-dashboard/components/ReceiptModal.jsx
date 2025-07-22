@@ -1,86 +1,217 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import {
   X,
-  Save,
   Calendar,
   User,
   Scissors,
   Package,
   DollarSign,
   FileText,
+  CreditCard,
+  Download,
+  Wrench,
 } from "lucide-react";
+import "../styles/ReceiptModal.css";
 
-export default function ReceiptModal({
-  receipt,
-  mode,
-  onClose,
-  onSave,
-  canEdit,
-}) {
-  const [editData, setEditData] = useState({});
-  const [isEditing, setIsEditing] = useState(mode === "edit");
-
-  useEffect(() => {
-    setEditData({
-      customer_name: receipt.customer_name || "",
-      barber_name: receipt.barber_name || "",
-      total: receipt.total || 0,
-      payment_method: receipt.payment_method || "cash",
-      service_date:
-        receipt.service_date || receipt.created_at?.split("T")[0] || "",
-      notes: receipt.notes || "",
-    });
-    setIsEditing(mode === "edit");
-  }, [receipt, mode]);
-
-  const handleSave = () => {
-    if (!editData.customer_name.trim() || !editData.barber_name.trim()) {
-      alert("Customer name and barber name are required.");
-      return;
-    }
-
-    if (!editData.total || editData.total <= 0) {
-      alert("Total amount must be greater than 0.");
-      return;
-    }
-
-    onSave({
-      ...receipt,
-      ...editData,
-      total: parseFloat(editData.total),
-    });
-  };
-
+export default function ReceiptModal({ receipt, onClose }) {
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString("en-US", {
+      weekday: "short",
       year: "numeric",
-      month: "long",
+      month: "short",
       day: "numeric",
       hour: "2-digit",
       minute: "2-digit",
     });
   };
 
-  const formatServices = (services) => {
-    if (!services || services.length === 0) return [];
-    return services.map((service) => ({
-      name: service.name || service,
-      price: service.price || 0,
-      quantity: service.quantity || 1,
-    }));
+  const downloadReceipt = () => {
+    const receiptContent = generateReceiptHTML();
+    const blob = new Blob([receiptContent], { type: "text/html" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `receipt-${receipt.id.substring(0, 8)}.html`;
+    link.click();
+    URL.revokeObjectURL(url);
   };
 
-  const formatProducts = (products) => {
-    if (!products || products.length === 0) return [];
-    return products.map((product) => ({
-      name: product.name || product,
-      price: product.price || 0,
-      quantity: product.quantity || 1,
-    }));
+  const generateReceiptHTML = () => {
+    return `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Receipt - ${receipt.id.substring(0, 8)}</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { 
+      font-family: 'Arial', sans-serif; 
+      width: 80mm; 
+      padding: 10px; 
+      background: white;
+      color: #333;
+    }
+    .header { 
+      text-align: center; 
+      border-bottom: 2px solid #000; 
+      padding-bottom: 10px; 
+      margin-bottom: 15px; 
+    }
+    .shop-name { 
+      font-size: 18px; 
+      font-weight: bold; 
+      margin-bottom: 5px;
+    }
+    .receipt-id { 
+      font-size: 12px; 
+      margin-top: 5px; 
+      color: #666;
+    }
+    .section { 
+      margin: 10px 0; 
+    }
+    .row { 
+      display: flex; 
+      justify-content: space-between; 
+      margin: 3px 0; 
+      font-size: 14px;
+    }
+    .items-section {
+      margin: 15px 0;
+    }
+    .item-header {
+      font-weight: bold;
+      border-bottom: 1px solid #ccc;
+      padding-bottom: 5px;
+      margin-bottom: 5px;
+    }
+    .item-row {
+      display: flex;
+      justify-content: space-between;
+      margin: 3px 0;
+      font-size: 13px;
+    }
+    .total-row { 
+      border-top: 2px solid #000; 
+      font-weight: bold; 
+      margin-top: 15px; 
+      padding-top: 8px; 
+      font-size: 16px;
+    }
+    .footer { 
+      text-align: center; 
+      margin-top: 20px; 
+      font-size: 11px; 
+      color: #666;
+    }
+    .empty-note {
+      font-style: italic;
+      color: #999;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="shop-name">NASSIM BARBER SHOP</div>
+    <div>Premium Grooming Services</div>
+    <div class="receipt-id">Receipt: ${receipt.id.substring(0, 8)}</div>
+  </div>
+  
+  <div class="section">
+    <div class="row">
+      <span>Date:</span>
+      <span>${formatDate(receipt.created_at)}</span>
+    </div>
+    <div class="row">
+      <span>Customer:</span>
+      <span>${receipt.customer_name || "Walk-in"}</span>
+    </div>
+    <div class="row">
+      <span>Barber:</span>
+      <span>${receipt.barber_name || "N/A"}</span>
+    </div>
+    <div class="row">
+      <span>Payment:</span>
+      <span>${(receipt.payment_method || "cash").toUpperCase()}</span>
+    </div>
+  </div>
+
+  ${
+    receipt.services && receipt.services.length > 0
+      ? `
+  <div class="items-section">
+    <div class="item-header">SERVICES</div>
+    ${receipt.services
+      .map(
+        (service) => `
+    <div class="item-row">
+      <span>${service.name} ${
+          service.quantity > 1 ? `x${service.quantity}` : ""
+        }</span>
+      <span>${(service.price * (service.quantity || 1)).toFixed(2)} EGP</span>
+    </div>
+    `
+      )
+      .join("")}
+  </div>
+  `
+      : ""
+  }
+
+  ${
+    receipt.products && receipt.products.length > 0
+      ? `
+  <div class="items-section">
+    <div class="item-header">PRODUCTS</div>
+    ${receipt.products
+      .map(
+        (product) => `
+    <div class="item-row">
+      <span>${product.name} ${
+          product.quantity > 1 ? `x${product.quantity}` : ""
+        }</span>
+      <span>${(product.price * (product.quantity || 1)).toFixed(2)} EGP</span>
+    </div>
+    `
+      )
+      .join("")}
+  </div>
+  `
+      : ""
+  }
+
+  ${
+    (!receipt.services || receipt.services.length === 0) &&
+    (!receipt.products || receipt.products.length === 0)
+      ? `
+  <div class="items-section">
+    <div class="empty-note">No items recorded</div>
+  </div>
+  `
+      : ""
+  }
+
+  <div class="total-row">
+    <div class="row">
+      <span>TOTAL:</span>
+      <span>${(receipt.total || 0).toFixed(2)} EGP</span>
+    </div>
+  </div>
+
+  <div class="footer">
+    Thank you for visiting Nassim Barber Shop!<br>
+    We appreciate your business
+  </div>
+</body>
+</html>
+    `;
   };
 
-  const services = formatServices(receipt.services);
-  const products = formatProducts(receipt.products);
+  const hasItems =
+    (receipt.services && receipt.services.length > 0) ||
+    (receipt.products && receipt.products.length > 0);
 
   return (
     <div className="modal-overlay">
@@ -88,295 +219,165 @@ export default function ReceiptModal({
         <div className="modal-header">
           <div className="header-info">
             <h2>
-              <FileText size={20} />
+              <FileText size={18} />
               Receipt Details
             </h2>
             <div className="receipt-id">
-              <span>
-                Receipt ID: <code>{receipt.id}</code>
-              </span>
+              ID: <code>{receipt.id.substring(0, 16)}...</code>
             </div>
           </div>
           <button className="close-btn" onClick={onClose}>
-            <X size={20} />
+            <X size={18} />
           </button>
         </div>
 
         <div className="modal-content">
-          {/* Receipt Header */}
-          <div className="receipt-header-info">
+          <div className="receipt-header">
             <div className="receipt-date">
               <Calendar size={16} />
-              <span>Created: {formatDate(receipt.created_at)}</span>
+              <span>{formatDate(receipt.created_at)}</span>
             </div>
             <div className="receipt-status">
               <span className="status-badge">Completed</span>
             </div>
           </div>
 
-          {/* Customer & Barber Info */}
-          <div className="receipt-parties">
-            <div className="customer-section">
+          <div className="receipt-info-grid">
+            <div className="info-section">
               <h3>
                 <User size={16} />
-                Customer Information
+                Customer
               </h3>
-              {isEditing ? (
-                <input
-                  type="text"
-                  value={editData.customer_name}
-                  onChange={(e) =>
-                    setEditData({ ...editData, customer_name: e.target.value })
-                  }
-                  placeholder="Customer name"
-                  className="edit-input"
-                />
-              ) : (
-                <p className="customer-name">
-                  {receipt.customer_name || "Walk-in Customer"}
-                </p>
-              )}
+              <p>{receipt.customer_name || "Walk-in Customer"}</p>
             </div>
 
-            <div className="barber-section">
+            <div className="info-section">
               <h3>
                 <Scissors size={16} />
-                Service Provider
+                Barber
               </h3>
-              {isEditing ? (
-                <input
-                  type="text"
-                  value={editData.barber_name}
-                  onChange={(e) =>
-                    setEditData({ ...editData, barber_name: e.target.value })
-                  }
-                  placeholder="Barber name"
-                  className="edit-input"
-                />
-              ) : (
-                <p className="barber-name">{receipt.barber_name || "N/A"}</p>
-              )}
+              <p>{receipt.barber_name || "N/A"}</p>
             </div>
           </div>
 
-          {/* Services Section */}
-          {services.length > 0 && (
-            <div className="receipt-section">
-              <h3>
-                <Scissors size={16} />
-                Services Provided
-              </h3>
-              <div className="items-list">
-                {services.map((service, index) => (
-                  <div key={index} className="item-row">
-                    <div className="item-info">
-                      <span className="item-name">{service.name}</span>
-                      {service.quantity > 1 && (
-                        <span className="item-quantity">
-                          x{service.quantity}
-                        </span>
-                      )}
-                    </div>
-                    <div className="item-price">
-                      {service.price
-                        ? `${service.price.toFixed(2)} EGP`
-                        : "Price not set"}
+          <div className="items-section">
+            <h3>
+              <Package size={16} />
+              Items & Services
+            </h3>
+
+            {hasItems ? (
+              <div className="items-container">
+                {receipt.services && receipt.services.length > 0 && (
+                  <div className="item-category">
+                    <h4>
+                      <Wrench size={14} />
+                      Services ({receipt.services.length})
+                    </h4>
+                    <div className="items-list">
+                      {receipt.services.map((service, index) => (
+                        <div key={index} className="item-row">
+                          <div className="item-info">
+                            <span className="item-name">{service.name}</span>
+                            {service.quantity > 1 && (
+                              <span className="item-quantity">
+                                ×{service.quantity}
+                              </span>
+                            )}
+                          </div>
+                          <div className="item-price">
+                            {(
+                              (service.price || 0) * (service.quantity || 1)
+                            ).toFixed(2)}{" "}
+                            EGP
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
-                ))}
-              </div>
-            </div>
-          )}
+                )}
 
-          {/* Products Section */}
-          {products.length > 0 && (
-            <div className="receipt-section">
-              <h3>
-                <Package size={16} />
-                Products Purchased
-              </h3>
-              <div className="items-list">
-                {products.map((product, index) => (
-                  <div key={index} className="item-row">
-                    <div className="item-info">
-                      <span className="item-name">{product.name}</span>
-                      {product.quantity > 1 && (
-                        <span className="item-quantity">
-                          x{product.quantity}
-                        </span>
-                      )}
-                    </div>
-                    <div className="item-price">
-                      {product.price
-                        ? `${product.price.toFixed(2)} EGP`
-                        : "Price not set"}
+                {receipt.products && receipt.products.length > 0 && (
+                  <div className="item-category">
+                    <h4>
+                      <Package size={14} />
+                      Products ({receipt.products.length})
+                    </h4>
+                    <div className="items-list">
+                      {receipt.products.map((product, index) => (
+                        <div key={index} className="item-row">
+                          <div className="item-info">
+                            <span className="item-name">{product.name}</span>
+                            {product.quantity > 1 && (
+                              <span className="item-quantity">
+                                ×{product.quantity}
+                              </span>
+                            )}
+                          </div>
+                          <div className="item-price">
+                            {(
+                              (product.price || 0) * (product.quantity || 1)
+                            ).toFixed(2)}{" "}
+                            EGP
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
-                ))}
+                )}
               </div>
+            ) : (
+              <div className="empty-items">
+                <p>No items recorded for this receipt</p>
+              </div>
+            )}
+          </div>
+
+          <div className="payment-section">
+            <div className="payment-info">
+              <div className="payment-method">
+                <CreditCard size={16} />
+                <span>Payment Method</span>
+                <span
+                  className={`payment-badge ${
+                    receipt.payment_method || "cash"
+                  }`}
+                >
+                  {(receipt.payment_method || "cash").toUpperCase()}
+                </span>
+              </div>
+            </div>
+
+            <div className="total-section">
+              <div className="total-row">
+                <DollarSign size={18} />
+                <span>Total Amount</span>
+                <span className="total-amount">
+                  {(receipt.total || 0).toFixed(2)} EGP
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {receipt.notes && (
+            <div className="notes-section">
+              <h3>
+                <FileText size={16} />
+                Additional Notes
+              </h3>
+              <p>{receipt.notes}</p>
             </div>
           )}
-
-          {/* Payment Information */}
-          <div className="receipt-section">
-            <h3>
-              <DollarSign size={16} />
-              Payment Details
-            </h3>
-            <div className="payment-details">
-              <div className="payment-row">
-                <span>Payment Method:</span>
-                {isEditing ? (
-                  <select
-                    value={editData.payment_method}
-                    onChange={(e) =>
-                      setEditData({
-                        ...editData,
-                        payment_method: e.target.value,
-                      })
-                    }
-                    className="edit-select"
-                  >
-                    <option value="cash">Cash</option>
-                    <option value="card">Card</option>
-                  </select>
-                ) : (
-                  <span
-                    className={`payment-badge ${
-                      receipt.payment_method === "cash"
-                        ? "payment-cash"
-                        : "payment-card"
-                    }`}
-                  >
-                    {receipt.payment_method?.toUpperCase() || "CASH"}
-                  </span>
-                )}
-              </div>
-              <div className="payment-row total-row">
-                <span>Total Amount:</span>
-                {isEditing ? (
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={editData.total}
-                    onChange={(e) =>
-                      setEditData({ ...editData, total: e.target.value })
-                    }
-                    placeholder="0.00"
-                    className="edit-input amount-input"
-                  />
-                ) : (
-                  <span className="total-amount">
-                    {(receipt.total || 0).toFixed(2)} EGP
-                  </span>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Service Date */}
-          <div className="receipt-section">
-            <h3>
-              <Calendar size={16} />
-              Service Date
-            </h3>
-            {isEditing ? (
-              <input
-                type="date"
-                value={editData.service_date}
-                onChange={(e) =>
-                  setEditData({ ...editData, service_date: e.target.value })
-                }
-                className="edit-input"
-              />
-            ) : (
-              <p>
-                {receipt.service_date
-                  ? new Date(receipt.service_date).toLocaleDateString()
-                  : "Not specified"}
-              </p>
-            )}
-          </div>
-
-          {/* Notes Section */}
-          <div className="receipt-section">
-            <h3>
-              <FileText size={16} />
-              Additional Notes
-            </h3>
-            {isEditing ? (
-              <textarea
-                value={editData.notes}
-                onChange={(e) =>
-                  setEditData({ ...editData, notes: e.target.value })
-                }
-                placeholder="Add any additional notes..."
-                rows={3}
-                className="edit-textarea"
-              />
-            ) : (
-              <p className="receipt-notes">
-                {receipt.notes || "No additional notes"}
-              </p>
-            )}
-          </div>
-
-          {/* Receipt Summary */}
-          <div className="receipt-summary">
-            <div className="summary-row">
-              <span>Subtotal:</span>
-              <span>
-                {(receipt.subtotal || receipt.total || 0).toFixed(2)} EGP
-              </span>
-            </div>
-            {receipt.discount_amount && receipt.discount_amount > 0 && (
-              <div className="summary-row discount">
-                <span>Discount:</span>
-                <span>-{receipt.discount_amount.toFixed(2)} EGP</span>
-              </div>
-            )}
-            {receipt.tax && receipt.tax > 0 && (
-              <div className="summary-row">
-                <span>Tax:</span>
-                <span>{receipt.tax.toFixed(2)} EGP</span>
-              </div>
-            )}
-            <div className="summary-row total">
-              <span>Total:</span>
-              <span>{(receipt.total || 0).toFixed(2)} EGP</span>
-            </div>
-          </div>
         </div>
 
-        {/* Modal Actions */}
         <div className="modal-actions">
-          <button className="btn-secondary" onClick={onClose}>
+          <button className="btn btn-secondary" onClick={onClose}>
             Close
           </button>
-
-          {canEdit && !isEditing && (
-            <button
-              className="btn-secondary"
-              onClick={() => setIsEditing(true)}
-            >
-              Edit Receipt
-            </button>
-          )}
-
-          {isEditing && (
-            <>
-              <button
-                className="btn-secondary"
-                onClick={() => setIsEditing(false)}
-              >
-                Cancel Edit
-              </button>
-              <button className="btn-primary" onClick={handleSave}>
-                <Save size={16} />
-                Save Changes
-              </button>
-            </>
-          )}
+          <button className="btn btn-primary" onClick={downloadReceipt}>
+            <Download size={16} />
+            Download Receipt
+          </button>
         </div>
       </div>
     </div>
