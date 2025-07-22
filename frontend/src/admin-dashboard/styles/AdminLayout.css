@@ -1,0 +1,41 @@
+.admin-container {
+  display: flex;
+  height: 100vh;
+}
+
+.admin-sidebar {
+  width: 200px;
+  background-color: #111;
+  color: #fff;
+  padding: 20px;
+}
+
+.admin-sidebar h2 {
+  font-size: 20px;
+  margin-bottom: 20px;
+}
+
+.admin-sidebar nav {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.admin-sidebar nav a {
+  color: #ccc;
+  text-decoration: none;
+  font-size: 16px;
+  transition: all 0.2s ease;
+}
+
+.admin-sidebar nav a:hover,
+.admin-sidebar nav a.active {
+  color: white;
+  font-weight: bold;
+}
+
+.admin-content {
+  flex: 1;
+  padding: 30px;
+  overflow-y: auto;
+}

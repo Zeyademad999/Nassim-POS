@@ -1,0 +1,487 @@
+/* ReportCard Component Styles */
+.report-card {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.report-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+/* Card Size Variants */
+.report-card.large {
+  padding: 32px;
+}
+
+.report-card.small {
+  padding: 16px;
+}
+
+/* Card Structure */
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.card-content {
+  flex: 1;
+}
+
+/* Card Title */
+.card-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: #6b7280;
+  margin: 0 0 8px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Card Value */
+.card-value {
+  font-size: 32px;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0 0 4px 0;
+  line-height: 1;
+}
+
+.card-value.large {
+  font-size: 40px;
+}
+
+.card-value.small {
+  font-size: 24px;
+}
+
+/* Card Subtitle */
+.card-subtitle {
+  font-size: 12px;
+  color: #9ca3af;
+  margin: 0;
+}
+
+/* Card Icon Container */
+.card-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  position: relative;
+}
+
+.card-icon.large {
+  width: 56px;
+  height: 56px;
+}
+
+.card-icon.small {
+  width: 40px;
+  height: 40px;
+}
+
+/* Color Schemes for Icons */
+.card-icon.blue {
+  background-color: #dbeafe;
+  color: #2563eb;
+}
+
+.card-icon.green {
+  background-color: #dcfce7;
+  color: #059669;
+}
+
+.card-icon.orange {
+  background-color: #fef3c7;
+  color: #d97706;
+}
+
+.card-icon.purple {
+  background-color: #f3e8ff;
+  color: #7c3aed;
+}
+
+.card-icon.red {
+  background-color: #fee2e2;
+  color: #dc2626;
+}
+
+.card-icon.gray {
+  background-color: #f3f4f6;
+  color: #6b7280;
+}
+
+/* Trend Indicators */
+.card-trend {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.trend-positive {
+  color: #059669;
+}
+
+.trend-negative {
+  color: #dc2626;
+}
+
+.trend-neutral {
+  color: #6b7280;
+}
+
+/* Background Decoration */
+.card-background-decoration {
+  position: absolute;
+  top: -20px;
+  right: -20px;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  opacity: 0.05;
+  pointer-events: none;
+}
+
+.card-background-decoration.blue {
+  background-color: #2563eb;
+}
+
+.card-background-decoration.green {
+  background-color: #059669;
+}
+
+.card-background-decoration.orange {
+  background-color: #d97706;
+}
+
+.card-background-decoration.purple {
+  background-color: #7c3aed;
+}
+
+.card-background-decoration.red {
+  background-color: #dc2626;
+}
+
+.card-background-decoration.gray {
+  background-color: #6b7280;
+}
+
+/* Pulse Animation Effect */
+.pulse-effect {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  height: 100%;
+  border-radius: 12px;
+  opacity: 0.3;
+  animation: pulse 2s infinite;
+}
+
+.pulse-effect.blue {
+  color: #2563eb;
+}
+
+.pulse-effect.green {
+  color: #059669;
+}
+
+.pulse-effect.orange {
+  color: #d97706;
+}
+
+.pulse-effect.purple {
+  color: #7c3aed;
+}
+
+.pulse-effect.red {
+  color: #dc2626;
+}
+
+.pulse-effect.gray {
+  color: #6b7280;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 currentColor;
+  }
+  70% {
+    box-shadow: 0 0 0 10px transparent;
+  }
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+  }
+}
+
+/* Loading Skeleton Animations */
+.loading-skeleton {
+  background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+  border-radius: 4px;
+}
+
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.value-loading {
+  height: 32px;
+  width: 120px;
+  margin: 8px 0;
+}
+
+.title-loading {
+  height: 14px;
+  width: 80px;
+  margin-bottom: 8px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .report-card {
+    padding: 16px;
+  }
+
+  .report-card.large {
+    padding: 20px;
+  }
+
+  .card-header {
+    flex-direction: column;
+    gap: 12px;
+    align-items: center;
+    text-align: center;
+  }
+
+  .card-content {
+    order: 2;
+  }
+
+  .card-icon {
+    order: 1;
+    align-self: center;
+  }
+
+  .card-value {
+    font-size: 28px;
+  }
+
+  .card-value.large {
+    font-size: 32px;
+  }
+
+  .card-value.small {
+    font-size: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .report-card {
+    padding: 12px;
+  }
+
+  .card-value {
+    font-size: 24px;
+  }
+
+  .card-value.large {
+    font-size: 28px;
+  }
+
+  .card-value.small {
+    font-size: 18px;
+  }
+
+  .card-icon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .card-icon.large {
+    width: 48px;
+    height: 48px;
+  }
+
+  .card-icon.small {
+    width: 32px;
+    height: 32px;
+  }
+}
+
+/* Accessibility Improvements */
+.report-card:focus-within {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+  .report-card {
+    border: 2px solid #000;
+  }
+
+  .card-icon {
+    border: 1px solid currentColor;
+  }
+
+  .card-trend {
+    font-weight: 700;
+  }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  .report-card {
+    transition: none;
+  }
+
+  .report-card:hover {
+    transform: none;
+  }
+
+  .pulse-effect {
+    animation: none;
+  }
+
+  .loading-skeleton {
+    animation: none;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .report-card {
+    box-shadow: none;
+    border: 1px solid #ddd;
+    break-inside: avoid;
+    margin-bottom: 16px;
+  }
+
+  .card-background-decoration,
+  .pulse-effect {
+    display: none;
+  }
+
+  .loading-skeleton {
+    display: none;
+  }
+
+  .card-trend {
+    color: #333 !important;
+  }
+}
+
+/* Dark Mode Support (Optional) */
+@media (prefers-color-scheme: dark) {
+  .report-card {
+    background: #1f2937;
+    border-color: #374151;
+    color: #f9fafb;
+  }
+
+  .card-title {
+    color: #9ca3af;
+  }
+
+  .card-value {
+    color: #f9fafb;
+  }
+
+  .card-subtitle {
+    color: #6b7280;
+  }
+
+  .loading-skeleton {
+    background: linear-gradient(90deg, #374151 25%, #4b5563 50%, #374151 75%);
+  }
+}
+
+/* Hover Effects for Interactive Cards */
+.report-card.interactive {
+  cursor: pointer;
+}
+
+.report-card.interactive:hover {
+  border-color: #2563eb;
+}
+
+.report-card.interactive:active {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+/* Special States */
+.report-card.loading {
+  opacity: 0.7;
+}
+
+.report-card.error {
+  border-color: #dc2626;
+  background: #fef2f2;
+}
+
+.report-card.success {
+  border-color: #059669;
+  background: #f0fdf4;
+}
+
+.report-card.warning {
+  border-color: #d97706;
+  background: #fffbeb;
+}
+
+/* Animation Classes for Dynamic Updates */
+.report-card.updating .card-value {
+  animation: valueUpdate 0.5s ease-in-out;
+}
+
+@keyframes valueUpdate {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+    color: #2563eb;
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Grid Integration */
+.report-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+@media (max-width: 768px) {
+  .report-cards-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+}

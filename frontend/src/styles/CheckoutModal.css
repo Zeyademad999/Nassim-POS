@@ -1,0 +1,151 @@
+.checkout-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  padding: 16px;
+}
+
+.checkout-modal {
+  background: white;
+  border-radius: 20px;
+  max-width: 480px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+}
+
+.checkout-header {
+  background: black;
+  color: white;
+  padding: 16px 20px;
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.checkout-content {
+  padding: 24px;
+}
+
+.receipt-info {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.receipt-icon {
+  width: 64px;
+  height: 64px;
+  background: #f4f4f4;
+  margin: 0 auto 12px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.receipt-meta {
+  background: #f9f9f9;
+  padding: 12px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  font-size: 14px;
+}
+
+.receipt-services {
+  margin-bottom: 20px;
+}
+
+.receipt-services h4 {
+  font-weight: bold;
+  margin-bottom: 12px;
+}
+
+.receipt-service-item {
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid #eee;
+  padding: 10px 0;
+}
+
+.receipt-service-item .name {
+  font-weight: 500;
+}
+
+.receipt-service-item .qty {
+  font-size: 13px;
+  color: #666;
+}
+
+.receipt-service-item .total {
+  font-weight: bold;
+}
+
+.receipt-totals {
+  background: #f4f4f4;
+  border-radius: 10px;
+  padding: 12px;
+  margin-bottom: 20px;
+}
+
+.receipt-totals .line {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  margin: 4px 0;
+}
+
+.receipt-totals .total {
+  font-size: 16px;
+  font-weight: bold;
+  border-top: 1px solid #ccc;
+  padding-top: 8px;
+  margin-top: 8px;
+}
+
+.export-buttons {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.pdf-btn,
+.excel-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: center;
+  padding: 10px;
+  border: none;
+  border-radius: 10px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.pdf-btn {
+  background: #e60000;
+  color: white;
+}
+
+.excel-btn {
+  background: #1d8f35;
+  color: white;
+}
+
+.complete-btn {
+  width: 100%;
+  background: black;
+  color: white;
+  padding: 12px;
+  font-weight: bold;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+}

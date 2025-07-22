@@ -1,0 +1,73 @@
+.barber-profiles {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+  font-family: "Inter", sans-serif;
+}
+
+.barber-profiles h2 {
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  color: #002c43;
+}
+
+.barber-form {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+.barber-form input {
+  flex: 1 1 200px;
+  padding: 10px 12px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.barber-form button {
+  padding: 10px 16px;
+  background-color: #002c43;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.barber-form button:hover {
+  background-color: #004164;
+}
+
+.barber-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.barber-item {
+  padding: 12px 16px;
+  border: 1px solid #eee;
+  border-radius: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #fafafa;
+  font-size: 15px;
+}
+
+.barber-item button {
+  background-color: #e15759;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.barber-item button:hover {
+  background-color: #c04445;
+}
