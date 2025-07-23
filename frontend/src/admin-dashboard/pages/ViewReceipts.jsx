@@ -62,8 +62,8 @@ export default function ViewReceipts() {
       const data = await res.json();
       const parsedData = data.map((receipt) => ({
         ...receipt,
-        services: parseServices(receipt.services),
-        products: parseProducts(receipt.products),
+        services: receipt.services || [],
+        products: [], // No products returned from backend
       }));
 
       setReceipts(parsedData);
@@ -73,26 +73,6 @@ export default function ViewReceipts() {
       setError("Failed to load receipts. Please try again.");
     } finally {
       setLoading(false);
-    }
-  };
-
-  const parseServices = (services) => {
-    if (!services) return [];
-    try {
-      const parsed = JSON.parse(services);
-      return Array.isArray(parsed) ? parsed : [];
-    } catch {
-      return [];
-    }
-  };
-
-  const parseProducts = (products) => {
-    if (!products) return [];
-    try {
-      const parsed = JSON.parse(products);
-      return Array.isArray(parsed) ? parsed : [];
-    } catch {
-      return [];
     }
   };
 

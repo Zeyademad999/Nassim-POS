@@ -708,41 +708,43 @@ export default function Reports() {
       {activeTab === "financial" && (
         <>
           <div className="charts-grid">
-            <div className="chart-card">
-              <div className="chart-header">
-                <h2 className="chart-title">
-                  <PieChart size={20} />
-                  Revenue by Service
-                </h2>
-              </div>
-              <div className="chart-container">
-                {reportData.serviceRevenue?.length > 0 ? (
-                  <Pie
-                    data={servicesPieData}
-                    options={{
-                      responsive: true,
-                      maintainAspectRatio: false,
-                      plugins: {
-                        legend: {
-                          position: "bottom",
-                        },
-                        tooltip: {
-                          callbacks: {
-                            label: function (context) {
-                              return (
-                                context.label + ": " + context.parsed + " EGP"
-                              );
+            <div className="financial-charts">
+              <div className="chart-card">
+                <div className="chart-header">
+                  <h2 className="chart-title">
+                    <PieChart size={20} />
+                    Revenue by Service
+                  </h2>
+                </div>
+                <div className="chart-container">
+                  {reportData.serviceRevenue?.length > 0 ? (
+                    <Pie
+                      data={servicesPieData}
+                      options={{
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                          legend: {
+                            position: "bottom",
+                          },
+                          tooltip: {
+                            callbacks: {
+                              label: function (context) {
+                                return (
+                                  context.label + ": " + context.parsed + " EGP"
+                                );
+                              },
                             },
                           },
                         },
-                      },
-                    }}
-                  />
-                ) : (
-                  <div className="empty-state">
-                    <p>No service revenue data available</p>
-                  </div>
-                )}
+                      }}
+                    />
+                  ) : (
+                    <div className="empty-state">
+                      <p>No service revenue data available</p>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -788,7 +790,7 @@ export default function Reports() {
           {/* Financial Insights */}
           <div className="insights-grid">
             <div className="insight-card revenue-insight">
-              <h3 className="insight-title">💡 Revenue Insight</h3>
+              <h3 className="insight-title"> Revenue Insight</h3>
               <p className="insight-description">
                 {reportData.topService?.name || "Your top service"} generates
                 the highest revenue. Consider promoting similar services to
@@ -796,7 +798,7 @@ export default function Reports() {
               </p>
             </div>
             <div className="insight-card payment-insight">
-              <h3 className="insight-title">📊 Payment Trends</h3>
+              <h3 className="insight-title">Payment Trends</h3>
               <p className="insight-description">
                 {reportData.paymentMethods?.[0]?.method || "Cash"} is your most
                 popular payment method. Consider offering incentives for digital
@@ -918,10 +920,10 @@ export default function Reports() {
                         }`}
                       >
                         {index === 0
-                          ? "⭐ Top Performer"
+                          ? " Top Performer"
                           : index === 1
-                          ? "🥈 Good"
-                          : "📈 Average"}
+                          ? " Good"
+                          : " Average"}
                       </span>
                     </td>
                   </tr>
@@ -933,7 +935,7 @@ export default function Reports() {
           {/* Staff Insights */}
           <div className="insights-grid">
             <div className="insight-card staff-insight">
-              <h3 className="insight-title">🏆 Top Performer</h3>
+              <h3 className="insight-title"> Top Performer</h3>
               <p className="insight-description">
                 {reportData.barberPerformance?.[0]?.name || "Your top barber"}{" "}
                 is leading with{" "}
@@ -942,7 +944,7 @@ export default function Reports() {
               </p>
             </div>
             <div className="insight-card growth-insight">
-              <h3 className="insight-title">📈 Growth Opportunity</h3>
+              <h3 className="insight-title">Growth Opportunity</h3>
               <p className="insight-description">
                 Focus on training and development for lower-performing staff
                 members to boost overall team productivity and customer

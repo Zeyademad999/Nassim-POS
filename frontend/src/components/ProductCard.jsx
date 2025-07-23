@@ -37,7 +37,6 @@ const ProductCard = ({ product }) => {
         }
 
         .product-card:hover:not(.out-of-stock) {
-          border-color: #2563eb;
           transform: translateY(-2px);
           box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
         }
@@ -87,7 +86,7 @@ const ProductCard = ({ product }) => {
         .product-price {
           font-size: 18px;
           font-weight: 700;
-          color: #2563eb;
+          color: green;
           margin: 8px 0;
         }
 
@@ -106,7 +105,7 @@ const ProductCard = ({ product }) => {
         }
 
         .product-btn {
-          background: #2563eb;
+          background: black;
           color: white;
           border: none;
           padding: 8px 16px;
@@ -116,10 +115,6 @@ const ProductCard = ({ product }) => {
           cursor: pointer;
           transition: background-color 0.2s ease;
           margin-top: 8px;
-        }
-
-        .product-btn:hover:not(:disabled) {
-          background: #1d4ed8;
         }
 
         .product-btn:disabled {

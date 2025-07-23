@@ -7,45 +7,68 @@ router.get("/", async (req, res) => {
   try {
     const db = await dbPromise;
 
+    // Get all transactions with proper customer and barber joins
     const transactions = await db.all(`
       SELECT 
-        t.id as id,
-        t.customer_name,
-        t.barber_name,
+        t.id,
+        t.customer_id,
+        COALESCE(c.name, t.customer_name, 'Walk-in') as customer_name,
+        t.barber_id,
+        COALESCE(b.name, t.barber_name, 'N/A') as barber_name,
         t.total,
-        t.created_at,
-        GROUP_CONCAT(
-          json_object(
-            'name', s.name,
-            'quantity', ti.quantity
-          )
-        ) AS services_json
+        t.payment_method,
+        t.discount_amount,
+        t.tax,
+        t.service_date,
+        t.created_at
       FROM transactions t
-      LEFT JOIN transaction_items ti ON t.id = ti.transaction_id
-      LEFT JOIN services s ON ti.service_id = s.id
-      GROUP BY t.id
+      LEFT JOIN customers c ON t.customer_id = c.id
+      LEFT JOIN barbers b ON t.barber_id = b.id
       ORDER BY t.created_at DESC
     `);
 
-    const parsed = transactions.map((tx) => {
-      let services = [];
+    // For each transaction, fetch both services and products
+    const receipts = await Promise.all(
+      transactions.map(async (tx) => {
+        // Get services for this transaction
+        const services = await db.all(
+          `
+          SELECT 
+            ti.service_id as id,
+            COALESCE(s.name, ti.item_name, 'Unknown Service') as name,
+            ti.price,
+            ti.quantity
+          FROM transaction_items ti
+          LEFT JOIN services s ON ti.service_id = s.id
+          WHERE ti.transaction_id = ? AND ti.item_type = 'service'
+        `,
+          [tx.id]
+        );
 
-      try {
-        if (tx.services_json) {
-          const cleanJson = `[${tx.services_json}]`;
-          services = JSON.parse(cleanJson);
-        }
-      } catch (e) {
-        console.error("❌ Failed to parse services JSON:", e.message);
-      }
+        // Get products for this transaction
+        const products = await db.all(
+          `
+          SELECT 
+            ti.product_id as id,
+            COALESCE(p.name, ti.item_name, 'Unknown Product') as name,
+            ti.price,
+            ti.quantity
+          FROM transaction_items ti
+          LEFT JOIN products p ON ti.product_id = p.id
+          WHERE ti.transaction_id = ? AND ti.item_type = 'product'
+        `,
+          [tx.id]
+        );
 
-      return {
-        ...tx,
-        services,
-      };
-    });
+        return {
+          ...tx,
+          services: services || [],
+          products: products || [],
+        };
+      })
+    );
 
-    res.json(parsed);
+    res.json(receipts);
   } catch (err) {
     console.error("❌ Failed to fetch receipts:", err.message);
     res.status(500).json({ message: "Failed to fetch receipts" });

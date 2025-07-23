@@ -12,6 +12,7 @@ import {
   Receipt,
 } from "lucide-react";
 import { usePOS } from "../context/POSContext";
+import { useLanguage } from "../context/LanguageContext";
 import CheckoutModal from "./CheckoutModal";
 import "../styles/BillPanel.css";
 
@@ -35,7 +36,9 @@ const BillPanel = () => {
     tax,
     total,
     customerName,
+    customerId,
     selectedBarber,
+    selectedBarberId,
     serviceDate,
     paymentMethod,
     setPaymentMethod,
@@ -43,7 +46,10 @@ const BillPanel = () => {
     setSendInvoice,
     isCheckoutOpen,
     setIsCheckoutOpen,
+    addPayment,
   } = usePOS();
+
+  const { t, isRTL } = useLanguage();
 
   const handleCheckout = async () => {
     // ✅ Enhanced validation
@@ -51,51 +57,58 @@ const BillPanel = () => {
       !customerName.trim() ||
       (!selectedBarber.trim() && customerName !== "Walk-in")
     ) {
-      alert(
-        "Please enter customer name and select a barber (or use Walk-in option)."
-      );
+      alert(t("pleaseEnterCustomer"));
       return;
     }
 
     if (itemCount === 0) {
-      alert("Please add at least one service or product.");
+      alert(t("pleaseAddItems"));
       return;
     }
 
     setIsCheckoutOpen(true);
 
-    // ✅ Enhanced bill data with products and payment info
-    const bill = {
-      customerName: customerName.trim(),
-      barber: customerName === "Walk-in" ? "Walk-in" : selectedBarber,
-      serviceDate: serviceDate.toISOString().split("T")[0],
-      services: selectedServices.map((s) => ({
+    // ✅ Create items array with proper structure for transaction_items table
+    const items = [
+      ...selectedServices.map((s) => ({
         id: s.id,
         name: s.name,
         price: s.price,
         quantity: s.quantity,
+        type: "service",
       })),
-      products: selectedProducts.map((p) => ({
+      ...selectedProducts.map((p) => ({
         id: p.id,
         name: p.name,
         price: p.price,
         quantity: p.quantity,
+        type: "product",
       })),
+    ];
+
+    // ✅ Enhanced bill data with proper field names matching the API
+    const transactionData = {
+      customer_name: customerName.trim(),
+      customer_id: customerId || null,
+      barber_name: customerName === "Walk-in" ? "Walk-in" : selectedBarber,
+      barber_id: customerName === "Walk-in" ? null : selectedBarberId || null,
+      service_date: serviceDate.toISOString().split("T")[0],
       subtotal,
-      discountAmount,
+      discount_amount: discountAmount,
       tax,
       total,
-      paymentMethod,
-      sendInvoice,
+      payment_method: paymentMethod,
+      send_invoice: sendInvoice,
+      items,
     };
 
-    console.log("📦 Sending enhanced bill to backend:", bill);
+    console.log("📦 Sending transaction data to backend:", transactionData);
 
     try {
       const res = await fetch("http://localhost:5000/api/transactions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(bill),
+        body: JSON.stringify(transactionData),
       });
 
       if (!res.ok) {
@@ -104,14 +117,17 @@ const BillPanel = () => {
       }
 
       const result = await res.json();
-      console.log("✅ Bill saved to backend:", result);
+      console.log("✅ Transaction saved to backend:", result);
+
+      // ✅ Track payment in local storage
+      addPayment(total, paymentMethod);
 
       if (result.stockUpdated) {
         console.log("✅ Product stock levels updated");
       }
     } catch (err) {
-      console.error("🔥 Failed to save bill:", err);
-      alert(`Failed to checkout: ${err.message}`);
+      console.error("🔥 Failed to save transaction:", err);
+      alert(`${t("checkoutFailed")}: ${err.message}`);
       setIsCheckoutOpen(false);
     }
   };
@@ -142,7 +158,7 @@ const BillPanel = () => {
   };
 
   return (
-    <div className="bill-wrapper">
+    <div className="bill-wrapper" dir={isRTL ? "rtl" : "ltr"}>
       <style jsx>{`
         .payment-options {
           margin: 16px 0;
@@ -244,13 +260,23 @@ const BillPanel = () => {
           color: #6b7280;
           margin-bottom: 4px;
         }
+
+        /* RTL specific styles */
+        ${isRTL
+          ? `
+          .bill-item-type {
+            margin-right: 8px;
+            margin-left: 0;
+          }
+        `
+          : ""}
       `}</style>
 
       <div className="bill-header">
         <div className="bill-header-top">
           <div className="bill-header-title">
             <ShoppingCart className="icon" />
-            <h2>Current Bill</h2>
+            <h2>{t("currentBill")}</h2>
             {itemCount > 0 && (
               <span
                 style={{
@@ -278,11 +304,17 @@ const BillPanel = () => {
         </div>
         {(customerName || selectedBarber) && (
           <div className="bill-meta">
-            {customerName && <p>Customer: {customerName}</p>}
-            {selectedBarber && customerName !== "Walk-in" && (
-              <p>Barber: {selectedBarber}</p>
+            {customerName && (
+              <p>
+                {t("customer")}: {customerName}
+              </p>
             )}
-            {customerName === "Walk-in" && <p>Walk-in Customer</p>}
+            {selectedBarber && customerName !== "Walk-in" && (
+              <p>
+                {t("barber")}: {selectedBarber}
+              </p>
+            )}
+            {customerName === "Walk-in" && <p>{t("walkIn")}</p>}
           </div>
         )}
       </div>
@@ -291,8 +323,8 @@ const BillPanel = () => {
         {itemCount === 0 ? (
           <div className="bill-empty">
             <ShoppingCart className="icon-large" />
-            <p>No items added</p>
-            <small>Select services or products to add them</small>
+            <p>{t("noItemsAdded")}</p>
+            <small>{t("selectItemsToAdd")}</small>
           </div>
         ) : (
           allItems.map((item) => (
@@ -305,12 +337,12 @@ const BillPanel = () => {
                       {item.itemType === "service" ? (
                         <>
                           <Wrench size={10} />
-                          Service
+                          {t("service")}
                         </>
                       ) : (
                         <>
                           <Package size={10} />
-                          Product
+                          {t("product")}
                         </>
                       )}
                     </span>
@@ -318,7 +350,7 @@ const BillPanel = () => {
                   <p className="price">{item.price.toFixed(2)} EGP</p>
                   {item.itemType === "product" && item.stock_quantity && (
                     <p style={{ fontSize: "11px", color: "#6b7280" }}>
-                      Stock: {item.stock_quantity} available
+                      {t("stock")}: {item.stock_quantity} {t("available")}
                     </p>
                   )}
                 </div>
@@ -356,7 +388,9 @@ const BillPanel = () => {
           {/* Payment Options */}
           <div className="payment-options">
             <div className="payment-option-group">
-              <label className="payment-option-label">Payment Method</label>
+              <label className="payment-option-label">
+                {t("paymentMethod")}
+              </label>
               <div className="payment-methods">
                 <button
                   className={`payment-method ${
@@ -364,7 +398,7 @@ const BillPanel = () => {
                   }`}
                   onClick={() => setPaymentMethod("cash")}
                 >
-                  💵 Cash
+                  💵 {t("cash")}
                 </button>
                 <button
                   className={`payment-method ${
@@ -372,7 +406,7 @@ const BillPanel = () => {
                   }`}
                   onClick={() => setPaymentMethod("card")}
                 >
-                  💳 Card
+                  💳 {t("card")}
                 </button>
               </div>
             </div>
@@ -383,7 +417,7 @@ const BillPanel = () => {
                   size={14}
                   style={{ display: "inline", marginRight: "4px" }}
                 />
-                Discount Amount (EGP)
+                {t("discountAmount")}
               </label>
               <input
                 type="number"
@@ -393,7 +427,7 @@ const BillPanel = () => {
                 value={discountAmount}
                 onChange={handleDiscountChange}
                 className="discount-input"
-                placeholder="Enter discount amount"
+                placeholder={t("enterDiscountAmount")}
               />
             </div>
 
@@ -405,7 +439,7 @@ const BillPanel = () => {
                   onChange={(e) => setSendInvoice(e.target.checked)}
                 />
                 <Receipt size={14} />
-                Send Invoice (visible to financial users)
+                {t("sendInvoice")}
               </label>
             </div>
           </div>
@@ -415,37 +449,43 @@ const BillPanel = () => {
             {/* Breakdown */}
             <div className="breakdown-section">
               <div className="breakdown-item">
-                <span>Services ({selectedServices.length})</span>
+                <span>
+                  {t("services")} ({selectedServices.length})
+                </span>
                 <span>{serviceSubtotal.toFixed(2)} EGP</span>
               </div>
               <div className="breakdown-item">
-                <span>Products ({selectedProducts.length})</span>
+                <span>
+                  {t("products")} ({selectedProducts.length})
+                </span>
                 <span>{productSubtotal.toFixed(2)} EGP</span>
               </div>
             </div>
 
             {/* Totals */}
             <div className="line">
-              <span>Subtotal</span>
+              <span>{t("subtotal")}</span>
               <span>{subtotal.toFixed(2)} EGP</span>
             </div>
             {discountAmount > 0 && (
               <div className="line discount-line">
-                <span>Discount</span>
+                <span>{t("discount")}</span>
                 <span>-{discountAmount.toFixed(2)} EGP</span>
               </div>
             )}
             <div className="line">
-              <span>Tax (8%)</span>
+              <span>{t("tax")}</span>
               <span>{tax.toFixed(2)} EGP</span>
             </div>
             <div className="line bold">
-              <span>Total</span>
+              <span>{t("total")}</span>
               <span>{total.toFixed(2)} EGP</span>
             </div>
             <button className="checkout-btn" onClick={handleCheckout}>
               <CreditCard className="icon-small white" />
-              <span>Checkout - {total.toFixed(2)} EGP</span>
+              <span>
+                {t("checkout")} - {total.toFixed(2)} EGP
+              </span>
             </button>
           </div>
         </>

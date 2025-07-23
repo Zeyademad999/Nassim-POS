@@ -14,13 +14,23 @@ export const POSProvider = ({ children }) => {
     return stored ? JSON.parse(stored) : [];
   });
 
-  // Customer and transaction info
+  // Customer and transaction info - Store both ID and name for proper lookup
   const [customerName, setCustomerName] = useState(() => {
     return localStorage.getItem("customerName") || "";
   });
 
+  const [customerId, setCustomerId] = useState(() => {
+    return localStorage.getItem("customerId") || "";
+  });
+
+  // Store both barber ID and name for proper database storage
   const [selectedBarber, setSelectedBarber] = useState(() => {
-    return localStorage.getItem("selectedBarber") || "";
+    const stored = localStorage.getItem("selectedBarber");
+    return stored ? stored : "";
+  });
+
+  const [selectedBarberId, setSelectedBarberId] = useState(() => {
+    return localStorage.getItem("selectedBarberId") || "";
   });
 
   const [serviceDate, setServiceDate] = useState(() => {
@@ -34,22 +44,231 @@ export const POSProvider = ({ children }) => {
   const [sendInvoice, setSendInvoice] = useState(false);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
 
+  // Payment tracking state - NEW
+  const [cashTotal, setCashTotal] = useState(() => {
+    const stored = localStorage.getItem("cashTotal");
+    return stored ? parseFloat(stored) : 0;
+  });
+
+  const [cardTotal, setCardTotal] = useState(() => {
+    const stored = localStorage.getItem("cardTotal");
+    return stored ? parseFloat(stored) : 0;
+  });
+
+  const [transactionCount, setTransactionCount] = useState(() => {
+    const stored = localStorage.getItem("transactionCount");
+    return stored ? parseInt(stored) : 0;
+  });
+
+  const [cashCount, setCashCount] = useState(() => {
+    const stored = localStorage.getItem("cashCount");
+    return stored ? parseInt(stored) : 0;
+  });
+
+  const [cardCount, setCardCount] = useState(() => {
+    const stored = localStorage.getItem("cardCount");
+    return stored ? parseInt(stored) : 0;
+  });
+
   const taxRate = 0.08;
 
-  // LocalStorage sync
+  // LocalStorage sync - Updated to include payment tracking
   useEffect(() => {
     localStorage.setItem("selectedServices", JSON.stringify(selectedServices));
     localStorage.setItem("selectedProducts", JSON.stringify(selectedProducts));
     localStorage.setItem("customerName", customerName);
+    localStorage.setItem("customerId", customerId);
     localStorage.setItem("selectedBarber", selectedBarber);
+    localStorage.setItem("selectedBarberId", selectedBarberId);
     localStorage.setItem("serviceDate", serviceDate.toISOString());
+    localStorage.setItem("cashTotal", cashTotal.toString());
+    localStorage.setItem("cardTotal", cardTotal.toString());
+    localStorage.setItem("transactionCount", transactionCount.toString());
+    localStorage.setItem("cashCount", cashCount.toString());
+    localStorage.setItem("cardCount", cardCount.toString());
   }, [
     selectedServices,
     selectedProducts,
     customerName,
+    customerId,
     selectedBarber,
+    selectedBarberId,
     serviceDate,
+    cashTotal,
+    cardTotal,
+    transactionCount,
+    cashCount,
+    cardCount,
   ]);
+
+  // Helper function to set barber with both ID and name
+  const setBarberInfo = (barberId, barberName) => {
+    setSelectedBarberId(barberId);
+    setSelectedBarber(barberName);
+  };
+
+  // Helper function to set customer with both ID and name
+  const setCustomerInfo = (id, name) => {
+    setCustomerId(id);
+    setCustomerName(name);
+  };
+
+  // Payment tracking functions - NEW
+  const addPayment = (amount, method) => {
+    if (method === "cash") {
+      setCashTotal((prev) => prev + amount);
+      setCashCount((prev) => prev + 1);
+    } else if (method === "card") {
+      setCardTotal((prev) => prev + amount);
+      setCardCount((prev) => prev + 1);
+    }
+    setTransactionCount((prev) => prev + 1);
+  };
+
+  const resetPaymentTotals = () => {
+    setCashTotal(0);
+    setCardTotal(0);
+    setTransactionCount(0);
+    setCashCount(0);
+    setCardCount(0);
+    localStorage.removeItem("cashTotal");
+    localStorage.removeItem("cardTotal");
+    localStorage.removeItem("transactionCount");
+    localStorage.removeItem("cashCount");
+    localStorage.removeItem("cardCount");
+  };
+
+  const generateSettlementReceipt = () => {
+    const now = new Date();
+    const dateStr = now.toLocaleDateString();
+    const timeStr = now.toLocaleTimeString();
+
+    return `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Settlement Receipt - ${dateStr}</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { 
+      font-family: 'Arial', sans-serif; 
+      width: 80mm; 
+      padding: 10px; 
+      background: white;
+      color: #333;
+    }
+    .header { 
+      text-align: center; 
+      border-bottom: 2px solid #000; 
+      padding-bottom: 10px; 
+      margin-bottom: 15px; 
+    }
+    .shop-name { 
+      font-size: 16px; 
+      font-weight: bold; 
+      margin-bottom: 5px;
+    }
+    .settlement-title {
+      font-size: 14px;
+      font-weight: bold;
+      margin-top: 10px;
+    }
+    .section { 
+      margin: 15px 0; 
+    }
+    .row { 
+      display: flex; 
+      justify-content: space-between; 
+      margin: 5px 0; 
+      font-size: 14px;
+    }
+    .total-row { 
+      border-top: 2px solid #000; 
+      font-weight: bold; 
+      margin-top: 15px; 
+      padding-top: 8px; 
+      font-size: 16px;
+    }
+    .payment-section {
+      margin: 15px 0;
+      padding: 10px 0;
+      border-top: 1px dashed #666;
+    }
+    .payment-method {
+      font-weight: bold;
+      margin-bottom: 5px;
+      font-size: 13px;
+    }
+    .footer { 
+      text-align: center; 
+      margin-top: 20px; 
+      font-size: 11px; 
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="shop-name">NASSIM BARBER SHOP</div>
+    <div>Settlement Report</div>
+    <div class="settlement-title">End of Day Summary</div>
+  </div>
+  
+  <div class="section">
+    <div class="row">
+      <span>Date:</span>
+      <span>${dateStr}</span>
+    </div>
+    <div class="row">
+      <span>Time:</span>
+      <span>${timeStr}</span>
+    </div>
+  </div>
+
+  <div class="payment-section">
+    <div class="payment-method">💵 CASH PAYMENTS</div>
+    <div class="row">
+      <span>Transactions:</span>
+      <span>${cashCount}</span>
+    </div>
+    <div class="row">
+      <span>Total Amount:</span>
+      <span>${cashTotal.toFixed(2)} EGP</span>
+    </div>
+  </div>
+
+  <div class="payment-section">
+    <div class="payment-method">💳 CARD PAYMENTS</div>
+    <div class="row">
+      <span>Transactions:</span>
+      <span>${cardCount}</span>
+    </div>
+    <div class="row">
+      <span>${texts.totalAmount}:</span>
+      <span>${cardTotal.toFixed(2)} EGP</span>
+    </div>
+  </div>
+
+  <div class="total-row">
+    <div class="row">
+      <span>${texts.totalTransactions}:</span>
+      <span>${transactionCount}</span>
+    </div>
+    <div class="row">
+      <span>${texts.totalRevenue}:</span>
+      <span>${(cashTotal + cardTotal).toFixed(2)} EGP</span>
+    </div>
+  </div>
+
+  <div class="footer">
+    ${texts.settlementCompleted}<br>
+    ${texts.thankYou}
+  </div>
+</body>
+</html>
+    `;
+  };
 
   // Service management functions
   const addService = (service) => {
@@ -137,7 +356,9 @@ export const POSProvider = ({ children }) => {
     setSelectedServices([]);
     setSelectedProducts([]);
     setCustomerName("");
+    setCustomerId("");
     setSelectedBarber("");
+    setSelectedBarberId("");
     setServiceDate(new Date());
     setDiscountAmount(0);
     setPaymentMethod("cash");
@@ -146,7 +367,9 @@ export const POSProvider = ({ children }) => {
     localStorage.removeItem("selectedServices");
     localStorage.removeItem("selectedProducts");
     localStorage.removeItem("customerName");
+    localStorage.removeItem("customerId");
     localStorage.removeItem("selectedBarber");
+    localStorage.removeItem("selectedBarberId");
     localStorage.removeItem("serviceDate");
   };
 
@@ -204,11 +427,17 @@ export const POSProvider = ({ children }) => {
         tax,
         total,
 
-        // Customer & Transaction
+        // Customer & Transaction - Updated to handle IDs
         customerName,
         setCustomerName,
+        customerId,
+        setCustomerId,
+        setCustomerInfo,
         selectedBarber,
         setSelectedBarber,
+        selectedBarberId,
+        setSelectedBarberId,
+        setBarberInfo,
         serviceDate,
         setServiceDate,
 
@@ -221,6 +450,16 @@ export const POSProvider = ({ children }) => {
         // Checkout
         isCheckoutOpen,
         setIsCheckoutOpen,
+
+        // Payment Tracking - NEW
+        cashTotal,
+        cardTotal,
+        transactionCount,
+        cashCount,
+        cardCount,
+        addPayment,
+        resetPaymentTotals,
+        generateSettlementReceipt,
       }}
     >
       {children}

@@ -768,12 +768,12 @@
 }
 
 .service-card:hover {
-  border-color: #3b82f6;
+  border-color: black;
   background: #f0f9ff;
 }
 
 .service-card.selected {
-  border-color: #3b82f6;
+  border-color: black;
   background: #eff6ff;
 }
 

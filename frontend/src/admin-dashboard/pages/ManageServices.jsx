@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
+import { FaSave, FaTimes, FaEdit, FaTrash } from "react-icons/fa";
 import "../styles/ManageServices.css";
-import { FaPlus, FaSave, FaTimes, FaEdit, FaTrash } from "react-icons/fa";
 
 export default function ManageServices() {
   const [services, setServices] = useState([]);
@@ -33,22 +33,66 @@ export default function ManageServices() {
     fetchServices();
   };
 
+  const handleEdit = (s) => {
+    setEditing(s);
+  };
+
   return (
     <div className="manage-services-container">
       <div className="card add-service-card">
         <h2>Add New Service</h2>
         <p className="subtext">Create a new service for your barbershop</p>
+        <div className="form-grid">
+          <div>
+            <label>Service Name</label>
+            <input
+              className="form-input service-name-input"
+              type="text"
+              placeholder="e.g., Hair Cut"
+              value={newService.name}
+              onChange={(e) =>
+                setNewService({ ...newService, name: e.target.value })
+              }
+            />
+          </div>
+          <div>
+            <label>Price ($)</label>
+            <input
+              className="form-input service-price-input"
+              type="number"
+              placeholder="25.00"
+              value={newService.price}
+              onChange={(e) =>
+                setNewService({
+                  ...newService,
+                  price: parseFloat(e.target.value),
+                })
+              }
+            />
+          </div>
+          <div className="form-button">
+            <button
+              className="primary"
+              onClick={() => {
+                if (newService.name && newService.price > 0) {
+                  handleSave(newService);
+                }
+              }}
+            >
+              + Add Service
+            </button>
+          </div>
+        </div>
       </div>
 
       <div className="card services-list">
         <h3>Services Management</h3>
-        <p className="subtext">Manage your services and pricing</p>
-        <table>
+        <table className="services-table">
           <thead>
             <tr>
-              <th>Service</th>
+              <th>Service Name</th>
               <th>Price</th>
-              <th style={{ textAlign: "center" }}>Actions</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -57,6 +101,7 @@ export default function ManageServices() {
                 <td>
                   {editing?.id === s.id ? (
                     <input
+                      className="service-name-input"
                       type="text"
                       value={editing.name}
                       onChange={(e) =>
@@ -70,6 +115,7 @@ export default function ManageServices() {
                 <td>
                   {editing?.id === s.id ? (
                     <input
+                      className="service-price-input"
                       type="number"
                       value={editing.price}
                       onChange={(e) =>
@@ -83,7 +129,7 @@ export default function ManageServices() {
                     `$${s.price.toFixed(2)}`
                   )}
                 </td>
-                <td className="actions">
+                <td>
                   {editing?.id === s.id ? (
                     <>
                       <button
@@ -105,7 +151,7 @@ export default function ManageServices() {
                     <>
                       <button
                         className="icon-btn"
-                        onClick={() => setEditing(s)}
+                        onClick={() => handleEdit(s)}
                         title="Edit"
                       >
                         <FaEdit />
