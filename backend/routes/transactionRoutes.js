@@ -3,7 +3,7 @@ import dbPromise from "../utils/db.js";
 
 const router = express.Router();
 
-// GET all transactions with filtering
+// GET all transactions with filtering and items
 router.get("/", async (req, res) => {
   try {
     const { period = "30days", startDate, endDate, limit = 100 } = req.query;
@@ -13,18 +13,19 @@ router.get("/", async (req, res) => {
     let params = [];
 
     if (period === "custom" && startDate && endDate) {
-      dateCondition = `WHERE DATE(created_at) BETWEEN ? AND ?`;
+      dateCondition = `WHERE DATE(t.created_at) BETWEEN ? AND ?`;
       params = [startDate, endDate];
     } else {
       const days = { today: 0, "7days": 7, "30days": 30, "3months": 90 };
       const daysBack = days[period] || 30;
       if (period === "today") {
-        dateCondition = `WHERE DATE(created_at) = DATE('now')`;
+        dateCondition = `WHERE DATE(t.created_at) = DATE('now')`;
       } else {
-        dateCondition = `WHERE DATE(created_at) >= DATE('now', '-${daysBack} day')`;
+        dateCondition = `WHERE DATE(t.created_at) >= DATE('now', '-${daysBack} day')`;
       }
     }
 
+    // First get all transactions
     const transactions = await db.all(
       `
       SELECT 
@@ -40,14 +41,38 @@ router.get("/", async (req, res) => {
       [...params, parseInt(limit)]
     );
 
-    res.json(transactions);
+    // Then get items for each transaction
+    const transactionsWithItems = await Promise.all(
+      transactions.map(async (transaction) => {
+        const items = await db.all(
+          `
+          SELECT 
+            ti.*,
+            COALESCE(s.name, p.name, ti.item_name) as item_name,
+            ti.item_type
+          FROM transaction_items ti
+          LEFT JOIN services s ON ti.service_id = s.id AND ti.item_type = 'service'
+          LEFT JOIN products p ON ti.product_id = p.id AND ti.item_type = 'product'
+          WHERE ti.transaction_id = ?
+        `,
+          [transaction.id]
+        );
+
+        return {
+          ...transaction,
+          items: items || [],
+        };
+      })
+    );
+
+    res.json(transactionsWithItems);
   } catch (err) {
     console.error("Failed to fetch transactions:", err);
     res.status(500).json({ error: "Failed to fetch transactions" });
   }
 });
 
-// GET single transaction with items
+// GET single transaction with items - FIXED
 router.get("/:id", async (req, res) => {
   try {
     const { id } = req.params;
@@ -70,16 +95,16 @@ router.get("/:id", async (req, res) => {
       return res.status(404).json({ error: "Transaction not found" });
     }
 
-    // Get transaction items
+    // Get transaction items - FIXED QUERY
     const items = await db.all(
       `
       SELECT 
         ti.*,
-        COALESCE(s.name, p.name) as item_name,
-        CASE WHEN s.id IS NOT NULL THEN 'service' ELSE 'product' END as item_type
+        COALESCE(s.name, p.name, ti.item_name) as item_name,
+        ti.item_type
       FROM transaction_items ti
-      LEFT JOIN services s ON ti.service_id = s.id
-      LEFT JOIN products p ON ti.service_id = p.id
+      LEFT JOIN services s ON ti.service_id = s.id AND ti.item_type = 'service'
+      LEFT JOIN products p ON ti.product_id = p.id AND ti.item_type = 'product'
       WHERE ti.transaction_id = ?
     `,
       [id]
@@ -257,7 +282,7 @@ router.put("/:id", async (req, res) => {
   }
 });
 
-// DELETE transaction
+// DELETE transaction - FIXED
 router.delete("/:id", async (req, res) => {
   try {
     const { id } = req.params;
@@ -276,27 +301,28 @@ router.delete("/:id", async (req, res) => {
     await db.run("BEGIN TRANSACTION");
 
     try {
-      // Get transaction items to restore product stock
+      // Get transaction items to restore product stock - FIXED QUERY
       const items = await db.all(
         `
-        SELECT ti.*, p.id as product_id
+        SELECT ti.*, ti.product_id, ti.quantity
         FROM transaction_items ti
-        LEFT JOIN products p ON ti.service_id = p.id
-        WHERE ti.transaction_id = ? AND p.id IS NOT NULL
+        WHERE ti.transaction_id = ? AND ti.item_type = 'product'
       `,
         [id]
       );
 
       // Restore product stock
       for (const item of items) {
-        await db.run(
-          `
-          UPDATE products 
-          SET stock_quantity = stock_quantity + ?, updated_at = CURRENT_TIMESTAMP
-          WHERE id = ?
-        `,
-          [item.quantity, item.product_id]
-        );
+        if (item.product_id) {
+          await db.run(
+            `
+            UPDATE products 
+            SET stock_quantity = stock_quantity + ?, updated_at = CURRENT_TIMESTAMP
+            WHERE id = ?
+          `,
+            [item.quantity, item.product_id]
+          );
+        }
       }
 
       // Delete transaction items

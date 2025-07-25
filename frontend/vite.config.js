@@ -9,7 +9,7 @@ export default defineConfig({
     port: 5173, // Optional: specify port explicitly
 
     proxy: {
-      "/api": "http://192.168.0.160:5000", // Redirect API calls to backend
+      "/api": "http://localhost:5000", // Redirect API calls to backend
     },
   },
 });

@@ -16,10 +16,25 @@ const ProductCard = ({ product }) => {
   const stockInfo = getStockStatus(product.stock_quantity);
   const isOutOfStock = product.stock_quantity === 0;
 
+  // Extract only serializable data
+  const handleAddProduct = () => {
+    if (isOutOfStock) return;
+
+    const serializableProduct = {
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      stock_quantity: product.stock_quantity,
+      category: product.category,
+      // Add any other properties you need, but NO React icons
+    };
+    addProduct(serializableProduct);
+  };
+
   return (
     <div
       className={`product-card ${isOutOfStock ? "out-of-stock" : ""}`}
-      onClick={() => !isOutOfStock && addProduct(product)}
+      onClick={handleAddProduct}
       style={{ opacity: isOutOfStock ? 0.5 : 1 }}
     >
       <style jsx>{`
@@ -181,7 +196,7 @@ const ProductCard = ({ product }) => {
         disabled={isOutOfStock}
         onClick={(e) => {
           e.stopPropagation();
-          if (!isOutOfStock) addProduct(product);
+          handleAddProduct();
         }}
       >
         {isOutOfStock ? "Out of Stock" : "Add to Bill"}

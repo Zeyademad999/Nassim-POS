@@ -63,7 +63,7 @@ export default function ViewReceipts() {
       const parsedData = data.map((receipt) => ({
         ...receipt,
         services: receipt.services || [],
-        products: [], // No products returned from backend
+        products: receipt.products || [], //
       }));
 
       setReceipts(parsedData);

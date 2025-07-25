@@ -168,10 +168,14 @@ export default function ManageCustomers() {
   };
 
   const handleViewCustomer = async (customer) => {
+    console.log("Viewing customer ID:", customer.id); // 👈 LOG HERE
+
     try {
       const res = await fetch(`/api/customers/${customer.id}`);
       if (!res.ok) throw new Error("Failed to fetch customer details");
       const data = await res.json();
+      console.log("Preferred Barber ID:", data.preferred_barber_id); // 👈 Add this
+
       setViewingCustomer(data);
     } catch (err) {
       console.error("Failed to fetch customer details:", err);

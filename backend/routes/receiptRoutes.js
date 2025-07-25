@@ -45,7 +45,7 @@ router.get("/", async (req, res) => {
           [tx.id]
         );
 
-        // Get products for this transaction
+        // Get products for this transaction - FIXED QUERY
         const products = await db.all(
           `
           SELECT 
@@ -58,6 +58,10 @@ router.get("/", async (req, res) => {
           WHERE ti.transaction_id = ? AND ti.item_type = 'product'
         `,
           [tx.id]
+        );
+
+        console.log(
+          `Transaction ${tx.id}: ${services.length} services, ${products.length} products`
         );
 
         return {

@@ -11,6 +11,7 @@ import supplierRoutes from "./routes/supplierRoutes.js";
 import customerRoutes from "./routes/customerRoutes.js";
 import bookingRoutes from "./routes/bookingRoutes.js";
 import expenseRoutes from "./routes/expenseRoutes.js"; // ✅ New expense routes
+import authRoutes from "./routes/authRoutes.js";
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -30,7 +31,7 @@ app.use("/api/expenses", expenseRoutes); // ✅ Expense tracking routes
 app.use("/api/reports", reportRoutes);
 app.use("/api/transactions", transactionRoutes);
 app.use("/api/receipts", receiptRoutes);
-
+app.use("/api/auth", authRoutes);
 // Health check endpoint
 app.get("/api/health", (req, res) => {
   res.json({ status: "OK", message: "Server is running" });

@@ -183,6 +183,19 @@ const initDB = async () => {
     )
   `);
 
+  await db.exec(`
+  CREATE TABLE IF NOT EXISTS users (
+    id TEXT PRIMARY KEY,
+    username TEXT UNIQUE NOT NULL,
+    password TEXT NOT NULL,
+    role TEXT NOT NULL CHECK (role IN ('admin', 'accountant', 'cashier')),
+    full_name TEXT,
+    is_active BOOLEAN DEFAULT 1,
+    created_by TEXT,
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+  )
+`);
   // Add new columns to existing transactions table
   try {
     await db.exec(`ALTER TABLE transactions ADD COLUMN customer_id TEXT`);
@@ -217,6 +230,22 @@ const initDB = async () => {
   try {
     await db.exec(
       `ALTER TABLE transactions ADD COLUMN updated_at TEXT DEFAULT CURRENT_TIMESTAMP`
+    );
+  } catch (err) {
+    // Column already exists, ignore
+  }
+
+  try {
+    await db.exec(
+      `ALTER TABLE transactions ADD COLUMN discount_type TEXT DEFAULT 'flat'`
+    );
+  } catch (err) {
+    // Column already exists, ignore
+  }
+
+  try {
+    await db.exec(
+      `ALTER TABLE transactions ADD COLUMN discount_percentage REAL DEFAULT 0`
     );
   } catch (err) {
     // Column already exists, ignore
@@ -284,6 +313,14 @@ const initDB = async () => {
     INSERT OR IGNORE INTO user_roles (id, username, role) 
     VALUES ('super-admin-1', 'admin', 'super_admin')
   `);
+  await db.run(`
+  INSERT OR IGNORE INTO users (id, username, password, role, full_name) 
+  VALUES ('admin-1', 'admin', 'admin', 'admin', 'System Administrator')
+`);
+  await db.run(`
+  INSERT OR IGNORE INTO users (id, username, password, role, full_name) 
+  VALUES ('cashier-1', 'floki', 'floki', 'cashier', 'Cashier User')
+`);
 
   await db.run(`
     INSERT OR IGNORE INTO user_roles (id, username, role) 
@@ -363,6 +400,8 @@ const initDB = async () => {
       updated_at TEXT DEFAULT CURRENT_TIMESTAMP
     )
   `);
+
+  await db.exec(`DROP TABLE IF EXISTS user_roles`);
 
   // ✅ Create indexes for better performance
   await db.exec(

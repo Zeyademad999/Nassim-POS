@@ -22,8 +22,6 @@ export default function BookingForm({
     booking_time: "",
     service_ids: [],
     duration_minutes: 60,
-    notes: "",
-    estimated_cost: 0,
   });
 
   const [services, setServices] = useState([]);

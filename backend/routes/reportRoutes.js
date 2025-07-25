@@ -7,13 +7,16 @@ const router = express.Router();
 
 router.get("/", async (req, res) => {
   try {
-    const { period = "7days", startDate, endDate } = req.query;
+    const { period = "7days", startDate, endDate, invoiceOnly } = req.query;
     const db = await dbPromise;
 
     // Enhanced date condition calculation
     let dateCondition = "";
+    let invoiceCondition =
+      invoiceOnly === "true" ? "AND t.send_invoice = 1" : "";
+
     if (period === "custom" && startDate && endDate) {
-      dateCondition = `WHERE DATE(t.created_at) BETWEEN '${startDate}' AND '${endDate}'`;
+      dateCondition = `WHERE DATE(t.created_at) BETWEEN '${startDate}' AND '${endDate}' ${invoiceCondition}`;
     } else {
       const days = {
         today: 0,
@@ -23,9 +26,9 @@ router.get("/", async (req, res) => {
       };
       const daysBack = days[period] || 7;
       if (period === "today") {
-        dateCondition = `WHERE DATE(t.created_at) = DATE('now')`;
+        dateCondition = `WHERE DATE(t.created_at) = DATE('now') ${invoiceCondition}`;
       } else {
-        dateCondition = `WHERE DATE(t.created_at) >= DATE('now', '-${daysBack} day')`;
+        dateCondition = `WHERE DATE(t.created_at) >= DATE('now', '-${daysBack} day') ${invoiceCondition}`;
       }
     }
 
@@ -33,7 +36,6 @@ router.get("/", async (req, res) => {
       "📊 Generating comprehensive report with condition:",
       dateCondition
     );
-
     // Get active barbers to filter deleted ones
     const activeBarbers = await db.all(`SELECT id, name FROM barbers`);
     const activeBarberIds = new Set(activeBarbers.map((b) => b.id));
@@ -125,24 +127,20 @@ router.get("/", async (req, res) => {
 
     // 4. Enhanced Product Sales Analysis with units sold
     const productSales = await db.all(`
-      SELECT 
-        p.name,
-        SUM(ti.quantity) as quantity,
-        SUM(ti.price * ti.quantity) as revenue,
-        AVG(ti.price) as avg_price,
-        p.cost_price,
-        (ti.price - COALESCE(p.cost_price, 0)) * SUM(ti.quantity) as profit
-      FROM transaction_items ti
-      JOIN products p ON ti.service_id = p.id
-      JOIN transactions t ON ti.transaction_id = t.id
-      ${dateCondition.replace(
-        "WHERE",
-        "WHERE ti.service_id IS NOT NULL AND p.id IS NOT NULL AND"
-      )}
-      GROUP BY p.id, p.name, p.cost_price, ti.price
-      ORDER BY revenue DESC
-    `);
-
+  SELECT 
+    p.name,
+    SUM(ti.quantity) as quantity,
+    SUM(ti.price * ti.quantity) as revenue,
+    AVG(ti.price) as avg_price,
+    p.cost_price,
+    (ti.price - COALESCE(p.cost_price, 0)) * SUM(ti.quantity) as profit
+  FROM transaction_items ti
+  JOIN products p ON ti.product_id = p.id  
+  JOIN transactions t ON ti.transaction_id = t.id
+  ${dateCondition.replace("WHERE", "WHERE ti.item_type = 'product' AND")}
+  GROUP BY p.id, p.name, p.cost_price, ti.price
+  ORDER BY revenue DESC
+`);
     // 5. Enhanced Barber Performance Analysis (filter out deleted barbers)
     const barberPerformance = await db
       .all(
@@ -186,27 +184,26 @@ router.get("/", async (req, res) => {
     const topBarber = barberPerformance[0] || null;
     const lowBarber = barberPerformance[barberPerformance.length - 1] || null;
 
-    // 8. Recent Transactions for detailed view
     const recentTransactions = await db.all(`
-      SELECT 
-        t.*,
-        GROUP_CONCAT(
-          json_object(
-            'name', COALESCE(s.name, p.name),
-            'quantity', ti.quantity,
-            'price', ti.price,
-            'type', CASE WHEN s.id IS NOT NULL THEN 'service' ELSE 'product' END
-          )
-        ) as items_json
-      FROM transactions t
-      LEFT JOIN transaction_items ti ON t.id = ti.transaction_id
-      LEFT JOIN services s ON ti.service_id = s.id
-      LEFT JOIN products p ON ti.service_id = p.id
-      ${dateCondition}
-      GROUP BY t.id
-      ORDER BY t.created_at DESC
-      LIMIT 50
-    `);
+  SELECT 
+    t.*,
+    GROUP_CONCAT(
+      json_object(
+        'name', COALESCE(s.name, p.name, ti.item_name),
+        'quantity', ti.quantity,
+        'price', ti.price,
+        'type', ti.item_type
+      )
+    ) as items_json
+  FROM transactions t
+  LEFT JOIN transaction_items ti ON t.id = ti.transaction_id
+  LEFT JOIN services s ON ti.service_id = s.id AND ti.item_type = 'service'
+  LEFT JOIN products p ON ti.product_id = p.id AND ti.item_type = 'product'
+  ${dateCondition}
+  GROUP BY t.id
+  ORDER BY t.created_at DESC
+  LIMIT 50
+`);
 
     // Parse recent transactions items
     const parsedRecentTransactions = recentTransactions.map((tx) => {
@@ -245,6 +242,54 @@ router.get("/", async (req, res) => {
       ${dateCondition}
     `);
 
+    // Add this after your existing data fetching (around line 150, after the customer stats)
+
+    // 13. Expense Analysis - NEW for P&L Report
+    let expenseCondition = "";
+    if (period === "custom" && startDate && endDate) {
+      expenseCondition = `WHERE DATE(expense_date) BETWEEN '${startDate}' AND '${endDate}'`;
+    } else {
+      const days = { today: 0, "7days": 7, "30days": 30, "3months": 90 };
+      const daysBack = days[period] || 7;
+      if (period === "today") {
+        expenseCondition = `WHERE DATE(expense_date) = DATE('now')`;
+      } else {
+        expenseCondition = `WHERE DATE(expense_date) >= DATE('now', '-${daysBack} day')`;
+      }
+    }
+
+    // Get total expenses
+    const totalExpensesRow = await db.get(`
+  SELECT 
+    SUM(amount) as total_expenses,
+    COUNT(*) as expense_count,
+    AVG(amount) as avg_expense
+  FROM expenses
+  ${expenseCondition}
+`);
+
+    // Get expenses by category/type
+    const expenseCategories = await db.all(`
+  SELECT 
+    expense_type,
+    SUM(amount) as amount,
+    COUNT(*) as count,
+    AVG(amount) as avg_amount
+  FROM expenses
+  ${expenseCondition}
+  GROUP BY expense_type
+  ORDER BY amount DESC
+`);
+
+    // Get detailed expenses for the period
+    const detailedExpenses = await db.all(`
+  SELECT *
+  FROM expenses
+  ${expenseCondition}
+  ORDER BY expense_date DESC
+  LIMIT 50
+`);
+
     // 11. Hourly Performance (if we have time data)
     const hourlyPerformance = await db.all(`
       SELECT 
@@ -259,16 +304,19 @@ router.get("/", async (req, res) => {
 
     // 12. Profit Analysis (for products with cost price)
     const profitAnalysis = await db.get(`
-      SELECT 
-        SUM((ti.price - COALESCE(p.cost_price, 0)) * ti.quantity) as total_profit,
-        AVG((ti.price - COALESCE(p.cost_price, 0)) * ti.quantity) as avg_profit_per_sale,
-        SUM(ti.price * ti.quantity) as total_product_revenue,
-        COUNT(*) as product_sales_count
-      FROM transaction_items ti
-      JOIN products p ON ti.service_id = p.id
-      JOIN transactions t ON ti.transaction_id = t.id
-      ${dateCondition.replace("WHERE", "WHERE p.cost_price IS NOT NULL AND")}
-    `);
+  SELECT 
+    SUM((ti.price - COALESCE(p.cost_price, 0)) * ti.quantity) as total_profit,
+    AVG((ti.price - COALESCE(p.cost_price, 0)) * ti.quantity) as avg_profit_per_sale,
+    SUM(ti.price * ti.quantity) as total_product_revenue,
+    COUNT(*) as product_sales_count
+  FROM transaction_items ti
+  JOIN products p ON ti.product_id = p.id  
+  JOIN transactions t ON ti.transaction_id = t.id
+  ${dateCondition.replace(
+    "WHERE",
+    "WHERE ti.item_type = 'product' AND p.cost_price IS NOT NULL AND"
+  )}
+`);
 
     // Compile comprehensive report
     const report = {
@@ -299,6 +347,24 @@ router.get("/", async (req, res) => {
       customerStats,
       hourlyPerformance,
       profitAnalysis,
+      // P&L Report Data - Fixed calculations
+      totalExpenses: totalExpensesRow?.total_expenses || 0,
+      expenseCategories,
+      detailedExpenses,
+      netProfit:
+        (totalRevenueRow?.revenue || 0) -
+        (totalExpensesRow?.total_expenses || 0),
+      profitMargin:
+        (totalRevenueRow?.revenue || 0) > 0
+          ? (((totalRevenueRow?.revenue || 0) -
+              (totalExpensesRow?.total_expenses || 0)) /
+              (totalRevenueRow?.revenue || 0)) *
+            100
+          : 0,
+
+      // Enhanced financial metrics
+      expenseCount: totalExpensesRow?.expense_count || 0,
+      averageExpense: totalExpensesRow?.avg_expense || 0,
 
       // Metadata
       generatedAt: new Date().toISOString(),
@@ -535,21 +601,24 @@ router.get("/export/pdf", async (req, res) => {
 // Transaction Management Routes
 
 // GET all transactions with date filtering
+// GET all transactions with date filtering
 router.get("/transactions", async (req, res) => {
   try {
-    const { period = "7days", startDate, endDate } = req.query;
+    const { period = "7days", startDate, endDate, invoiceOnly } = req.query;
     const db = await dbPromise;
 
     let dateCondition = "";
+    let invoiceCondition = invoiceOnly === "true" ? "AND send_invoice = 1" : "";
+
     if (period === "custom" && startDate && endDate) {
-      dateCondition = `WHERE DATE(created_at) BETWEEN '${startDate}' AND '${endDate}'`;
+      dateCondition = `WHERE DATE(created_at) BETWEEN '${startDate}' AND '${endDate}' ${invoiceCondition}`;
     } else {
       const days = { today: 0, "7days": 7, "30days": 30, "3months": 90 };
       const daysBack = days[period] || 7;
       if (period === "today") {
-        dateCondition = `WHERE DATE(created_at) = DATE('now')`;
+        dateCondition = `WHERE DATE(created_at) = DATE('now') ${invoiceCondition}`;
       } else {
-        dateCondition = `WHERE DATE(created_at) >= DATE('now', '-${daysBack} day')`;
+        dateCondition = `WHERE DATE(created_at) >= DATE('now', '-${daysBack} day') ${invoiceCondition}`;
       }
     }
 

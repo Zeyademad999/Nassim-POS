@@ -11,10 +11,12 @@ import {
   Calendar,
   DollarSign,
   Home,
+  Settings,
+  LogOut,
 } from "lucide-react";
 import "../styles/Sidebar.css";
 
-export default function Sidebar() {
+export default function Sidebar({ user, onLogout }) {
   const [expandedGroup, setExpandedGroup] = useState(null);
   const location = useLocation();
 
@@ -73,13 +75,18 @@ export default function Sidebar() {
       path: "reports",
       icon: BarChart3,
     },
+    {
+      type: "single",
+      title: "Manage Users",
+      path: "users",
+      icon: Settings,
+    },
   ];
 
   return (
     <header className="navbar">
       <div className="navbar-left">
-        <Home size={20} />
-        <span className="brand-name">Nassim Barber Shop</span>
+        <span className="brand-name">Nassim Admin</span>
       </div>
       <nav className="navbar-menu">
         {menuItems.map((item) =>
@@ -87,9 +94,7 @@ export default function Sidebar() {
             <div className="dropdown" key={item.key}>
               <button
                 className={`dropdown-toggle ${
-                  item.items.some((sub) =>
-                    location.pathname.startsWith(sub.path)
-                  )
+                  item.items.some((sub) => location.pathname.includes(sub.path))
                     ? "active"
                     : ""
                 }`}
@@ -131,6 +136,12 @@ export default function Sidebar() {
           )
         )}
       </nav>
+      <div className="navbar-right">
+        <span className="user-info">{user?.full_name || user?.username}</span>
+        <button className="logout-btn" onClick={onLogout}>
+          <LogOut size={16} />
+        </button>
+      </div>
     </header>
   );
 }

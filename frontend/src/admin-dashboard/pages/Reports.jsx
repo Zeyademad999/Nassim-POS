@@ -36,6 +36,7 @@ import {
   Plus,
   Save,
   X,
+  Receipt,
 } from "lucide-react";
 import "../styles/Reports.css";
 
@@ -51,7 +52,7 @@ ChartJS.register(
   Title
 );
 
-export default function Reports() {
+export default function Reports({ user }) {
   const [reportData, setReportData] = useState(null);
   const [selectedPeriod, setSelectedPeriod] = useState("7days");
   const [startDate, setStartDate] = useState("");
@@ -96,13 +97,20 @@ export default function Reports() {
         params.append("period", selectedPeriod);
       }
 
+      // Add role-based filtering for accountants
+      if (user && user.role === "accountant") {
+        params.append("invoiceOnly", "true");
+      }
+
+      // Add expense data request - NEW
+      params.append("includeExpenses", "true");
+
       if (params.toString()) {
         url += `?${params.toString()}`;
       }
 
       const res = await fetch(url);
       const data = await res.json();
-
       // Filter out deleted barbers from performance data
       if (data.barberPerformance) {
         const activeBarberRes = await fetch("/api/barbers");
@@ -134,6 +142,11 @@ export default function Reports() {
         params.append("period", selectedPeriod);
       }
 
+      // Add role-based filtering for accountants
+      if (user && user.role === "accountant") {
+        params.append("invoiceOnly", "true");
+      }
+
       if (params.toString()) {
         url += `?${params.toString()}`;
       }
@@ -145,7 +158,6 @@ export default function Reports() {
       console.error("Failed to fetch transactions:", err);
     }
   };
-
   // Real-time data refresh when filters change
   useEffect(() => {
     fetchReports();
@@ -544,6 +556,7 @@ export default function Reports() {
       </div>
 
       {/* Tabs Navigation */}
+      {/* Tabs Navigation */}
       <div className="tabs-navigation">
         <button
           className={`tab-button ${activeTab === "overview" ? "active" : ""}`}
@@ -558,6 +571,15 @@ export default function Reports() {
         >
           <DollarSign size={16} />
           Financial
+        </button>
+        <button
+          className={`tab-button ${
+            activeTab === "profit-loss" ? "active" : ""
+          }`}
+          onClick={() => setActiveTab("profit-loss")}
+        >
+          <BarChart3 size={16} />
+          P&L Report
         </button>
         <button
           className={`tab-button ${activeTab === "products" ? "active" : ""}`}
@@ -806,6 +828,306 @@ export default function Reports() {
               </p>
             </div>
           </div>
+        </>
+      )}
+
+      {/* Profit & Loss Tab */}
+      {activeTab === "profit-loss" && (
+        <>
+          {/* P&L Summary Cards */}
+          <div className="pl-summary-grid">
+            <div className="pl-card income">
+              <div className="pl-header">
+                <h3>Total Income</h3>
+                <TrendingUp size={24} className="pl-icon" />
+              </div>
+              <div className="pl-amount positive">
+                {reportData.totalRevenue?.toFixed(2)} EGP
+              </div>
+              <div className="pl-breakdown">
+                <div className="pl-item">
+                  <span>Service Revenue:</span>
+                  <span>
+                    {reportData.serviceRevenue
+                      ?.reduce((sum, s) => sum + (s.revenue || 0), 0)
+                      ?.toFixed(2)}{" "}
+                    EGP
+                  </span>
+                </div>
+                <div className="pl-item">
+                  <span>Product Revenue:</span>
+                  <span>
+                    {reportData.productSales
+                      ?.reduce((sum, p) => sum + (p.revenue || 0), 0)
+                      ?.toFixed(2)}{" "}
+                    EGP
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className="pl-card expenses">
+              <div className="pl-header">
+                <h3>Total Expenses</h3>
+                <TrendingDown size={24} className="pl-icon" />
+              </div>
+              <div className="pl-amount negative">
+                {reportData.totalExpenses?.toFixed(2)} EGP
+              </div>
+              <div className="pl-breakdown">
+                {reportData.expenseCategories?.map((expense, index) => (
+                  <div key={index} className="pl-item">
+                    <span>
+                      {expense.expense_type === "general"
+                        ? "General"
+                        : "Recurring"}
+                      :
+                    </span>
+                    <span>{expense.amount?.toFixed(2)} EGP</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="pl-card profit">
+              <div className="pl-header">
+                <h3>Net Profit</h3>
+                <Target size={24} className="pl-icon" />
+              </div>
+              <div
+                className={`pl-amount ${
+                  reportData.netProfit >= 0 ? "positive" : "negative"
+                }`}
+              >
+                {reportData.netProfit?.toFixed(2)} EGP
+              </div>
+              <div className="pl-breakdown">
+                <div className="pl-item">
+                  <span>Profit Margin:</span>
+                  <span>{reportData.profitMargin?.toFixed(1)}%</span>
+                </div>
+                <div className="pl-item">
+                  <span>Expense Ratio:</span>
+                  <span>
+                    {reportData.totalRevenue > 0
+                      ? (
+                          (reportData.totalExpenses / reportData.totalRevenue) *
+                          100
+                        ).toFixed(1)
+                      : 0}
+                    %
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Detailed P&L Statement */}
+          <div className="pl-statement">
+            <div className="statement-header">
+              <h2>Profit & Loss Statement</h2>
+              <p>
+                Period:{" "}
+                {selectedPeriod === "custom"
+                  ? `${startDate} to ${endDate}`
+                  : selectedPeriod}
+              </p>
+            </div>
+
+            <div className="statement-table">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Description</th>
+                    <th>Amount (EGP)</th>
+                    <th>% of Revenue</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {/* Income Section */}
+                  <tr className="section-header">
+                    <td>
+                      <strong>INCOME</strong>
+                    </td>
+                    <td></td>
+                    <td></td>
+                  </tr>
+                  <tr>
+                    <td className="indent">Service Revenue</td>
+                    <td className="amount positive">
+                      {reportData.serviceRevenue
+                        ?.reduce((sum, s) => sum + (s.revenue || 0), 0)
+                        ?.toFixed(2)}
+                    </td>
+                    <td className="percentage">
+                      {reportData.totalRevenue > 0
+                        ? (
+                            (reportData.serviceRevenue?.reduce(
+                              (sum, s) => sum + (s.revenue || 0),
+                              0
+                            ) /
+                              reportData.totalRevenue) *
+                            100
+                          ).toFixed(1)
+                        : 0}
+                      %
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="indent">Product Revenue</td>
+                    <td className="amount positive">
+                      {reportData.productSales
+                        ?.reduce((sum, p) => sum + (p.revenue || 0), 0)
+                        ?.toFixed(2)}
+                    </td>
+                    <td className="percentage">
+                      {reportData.totalRevenue > 0
+                        ? (
+                            (reportData.productSales?.reduce(
+                              (sum, p) => sum + (p.revenue || 0),
+                              0
+                            ) /
+                              reportData.totalRevenue) *
+                            100
+                          ).toFixed(1)
+                        : 0}
+                      %
+                    </td>
+                  </tr>
+                  <tr className="subtotal">
+                    <td>
+                      <strong>Total Income</strong>
+                    </td>
+                    <td className="amount positive">
+                      <strong>{reportData.totalRevenue?.toFixed(2)}</strong>
+                    </td>
+                    <td className="percentage">
+                      <strong>100.0%</strong>
+                    </td>
+                  </tr>
+
+                  {/* Expenses Section */}
+                  <tr className="section-header">
+                    <td>
+                      <strong>EXPENSES</strong>
+                    </td>
+                    <td></td>
+                    <td></td>
+                  </tr>
+                  {reportData.expenseCategories?.map((expense, index) => (
+                    <tr key={index}>
+                      <td className="indent">
+                        {expense.expense_type === "general"
+                          ? "General Expenses"
+                          : "Recurring Expenses"}
+                      </td>
+                      <td className="amount negative">
+                        {expense.amount?.toFixed(2)}
+                      </td>
+                      <td className="percentage">
+                        {reportData.totalRevenue > 0
+                          ? (
+                              (expense.amount / reportData.totalRevenue) *
+                              100
+                            ).toFixed(1)
+                          : 0}
+                        %
+                      </td>
+                    </tr>
+                  ))}
+                  <tr className="subtotal">
+                    <td>
+                      <strong>Total Expenses</strong>
+                    </td>
+                    <td className="amount negative">
+                      <strong>{reportData.totalExpenses?.toFixed(2)}</strong>
+                    </td>
+                    <td className="percentage">
+                      <strong>
+                        {reportData.totalRevenue > 0
+                          ? (
+                              (reportData.totalExpenses /
+                                reportData.totalRevenue) *
+                              100
+                            ).toFixed(1)
+                          : 0}
+                        %
+                      </strong>
+                    </td>
+                  </tr>
+
+                  {/* Net Profit */}
+                  <tr className="total-row">
+                    <td>
+                      <strong>NET PROFIT/LOSS</strong>
+                    </td>
+                    <td
+                      className={`amount ${
+                        reportData.netProfit >= 0 ? "positive" : "negative"
+                      }`}
+                    >
+                      <strong>{reportData.netProfit?.toFixed(2)}</strong>
+                    </td>
+                    <td
+                      className={`percentage ${
+                        reportData.netProfit >= 0 ? "positive" : "negative"
+                      }`}
+                    >
+                      <strong>{reportData.profitMargin?.toFixed(1)}%</strong>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* Recent Expenses Table */}
+          {reportData.detailedExpenses?.length > 0 && (
+            <div className="data-table">
+              <div className="table-header">
+                <h2 className="table-title">
+                  <Receipt size={20} />
+                  Recent Expenses
+                </h2>
+              </div>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Name</th>
+                    <th>Type</th>
+                    <th>Amount</th>
+                    <th>Notes</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {reportData.detailedExpenses
+                    .slice(0, 10)
+                    .map((expense, index) => (
+                      <tr key={index}>
+                        <td>
+                          {new Date(expense.expense_date).toLocaleDateString()}
+                        </td>
+                        <td>{expense.name}</td>
+                        <td>
+                          <span
+                            className={`expense-type-badge ${expense.expense_type}`}
+                          >
+                            {expense.expense_type === "general"
+                              ? "General"
+                              : "Recurring"}
+                          </span>
+                        </td>
+                        <td className="amount negative">
+                          {expense.amount?.toFixed(2)} EGP
+                        </td>
+                        <td>{expense.notes || "-"}</td>
+                      </tr>
+                    ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </>
       )}
 

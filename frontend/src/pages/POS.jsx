@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import "../styles/POS.css";
 
-const POS = () => {
+const POS = ({ onLogout }) => {
   const {
     customerName,
     setCustomerName,
@@ -47,9 +47,9 @@ const POS = () => {
     const fetchData = async () => {
       try {
         const [serviceRes, productRes, barberRes] = await Promise.all([
-          fetch("http://192.168.0.160:5000/api/services"),
-          fetch("http://192.168.0.160:5000/api/products"),
-          fetch("http://192.168.0.160:5000/api/barbers"),
+          fetch("http://localhost:5000/api/services"),
+          fetch("http://localhost:5000/api/products"),
+          fetch("http://localhost:5000/api/barbers"),
         ]);
 
         const servicesData = await serviceRes.json();
@@ -348,14 +348,29 @@ const POS = () => {
           </p>
         </div>
 
-        <button className="language-toggle" onClick={toggleLanguage}>
-          <Languages size={14} />
-          {language === "en" ? "العربية" : "English"}
-        </button>
+        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+          <button className="language-toggle" onClick={toggleLanguage}>
+            <Languages size={14} />
+            {language === "en" ? "العربية" : "English"}
+          </button>
 
-        <button className="logout-btn">{t("logout")}</button>
+          <button
+            className="logout-btn"
+            onClick={onLogout}
+            style={{
+              background: "#ef4444",
+              color: "white",
+              border: "none",
+              padding: "8px 16px",
+              borderRadius: "6px",
+              cursor: "pointer",
+              fontSize: "14px",
+            }}
+          >
+            {t("logout")}
+          </button>
+        </div>
       </header>
-
       <div className="pos-main">
         <div className="pos-left">
           {/* Payment Tracking Section */}

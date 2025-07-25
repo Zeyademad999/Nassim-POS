@@ -38,13 +38,27 @@ export const POSProvider = ({ children }) => {
     return stored ? new Date(stored) : new Date();
   });
 
+  // Enhanced Discount State - NEW
+  const [discountType, setDiscountType] = useState(() => {
+    return localStorage.getItem("discountType") || "flat";
+  });
+
+  const [discountAmount, setDiscountAmount] = useState(() => {
+    const stored = localStorage.getItem("discountAmount");
+    return stored ? parseFloat(stored) : 0;
+  });
+
+  const [discountPercentage, setDiscountPercentage] = useState(() => {
+    const stored = localStorage.getItem("discountPercentage");
+    return stored ? parseFloat(stored) : 0;
+  });
+
   // Payment and checkout state
-  const [discountAmount, setDiscountAmount] = useState(0);
   const [paymentMethod, setPaymentMethod] = useState("cash");
   const [sendInvoice, setSendInvoice] = useState(false);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
 
-  // Payment tracking state - NEW
+  // Payment tracking state
   const [cashTotal, setCashTotal] = useState(() => {
     const stored = localStorage.getItem("cashTotal");
     return stored ? parseFloat(stored) : 0;
@@ -72,7 +86,7 @@ export const POSProvider = ({ children }) => {
 
   const taxRate = 0.08;
 
-  // LocalStorage sync - Updated to include payment tracking
+  // LocalStorage sync - Updated to include discount type
   useEffect(() => {
     localStorage.setItem("selectedServices", JSON.stringify(selectedServices));
     localStorage.setItem("selectedProducts", JSON.stringify(selectedProducts));
@@ -81,6 +95,9 @@ export const POSProvider = ({ children }) => {
     localStorage.setItem("selectedBarber", selectedBarber);
     localStorage.setItem("selectedBarberId", selectedBarberId);
     localStorage.setItem("serviceDate", serviceDate.toISOString());
+    localStorage.setItem("discountType", discountType);
+    localStorage.setItem("discountAmount", discountAmount.toString());
+    localStorage.setItem("discountPercentage", discountPercentage.toString());
     localStorage.setItem("cashTotal", cashTotal.toString());
     localStorage.setItem("cardTotal", cardTotal.toString());
     localStorage.setItem("transactionCount", transactionCount.toString());
@@ -94,6 +111,9 @@ export const POSProvider = ({ children }) => {
     selectedBarber,
     selectedBarberId,
     serviceDate,
+    discountType,
+    discountAmount,
+    discountPercentage,
     cashTotal,
     cardTotal,
     transactionCount,
@@ -113,7 +133,7 @@ export const POSProvider = ({ children }) => {
     setCustomerName(name);
   };
 
-  // Payment tracking functions - NEW
+  // Payment tracking functions
   const addPayment = (amount, method) => {
     if (method === "cash") {
       setCashTotal((prev) => prev + amount);
@@ -245,25 +265,25 @@ export const POSProvider = ({ children }) => {
       <span>${cardCount}</span>
     </div>
     <div class="row">
-      <span>${texts.totalAmount}:</span>
+      <span>Total Amount:</span>
       <span>${cardTotal.toFixed(2)} EGP</span>
     </div>
   </div>
 
   <div class="total-row">
     <div class="row">
-      <span>${texts.totalTransactions}:</span>
+      <span>Total Transactions:</span>
       <span>${transactionCount}</span>
     </div>
     <div class="row">
-      <span>${texts.totalRevenue}:</span>
+      <span>Total Revenue:</span>
       <span>${(cashTotal + cardTotal).toFixed(2)} EGP</span>
     </div>
   </div>
 
   <div class="footer">
-    ${texts.settlementCompleted}<br>
-    ${texts.thankYou}
+    Settlement Completed<br>
+    Thank You
   </div>
 </body>
 </html>
@@ -360,7 +380,9 @@ export const POSProvider = ({ children }) => {
     setSelectedBarber("");
     setSelectedBarberId("");
     setServiceDate(new Date());
+    setDiscountType("flat");
     setDiscountAmount(0);
+    setDiscountPercentage(0);
     setPaymentMethod("cash");
     setSendInvoice(false);
 
@@ -371,9 +393,12 @@ export const POSProvider = ({ children }) => {
     localStorage.removeItem("selectedBarber");
     localStorage.removeItem("selectedBarberId");
     localStorage.removeItem("serviceDate");
+    localStorage.removeItem("discountType");
+    localStorage.removeItem("discountAmount");
+    localStorage.removeItem("discountPercentage");
   };
 
-  // Calculations
+  // Enhanced Calculations with Discount Types
   const serviceSubtotal = selectedServices.reduce(
     (acc, s) => acc + s.price * s.quantity,
     0
@@ -385,7 +410,17 @@ export const POSProvider = ({ children }) => {
   );
 
   const subtotal = serviceSubtotal + productSubtotal;
-  const discountedSubtotal = Math.max(0, subtotal - discountAmount);
+
+  // Calculate actual discount amount based on type
+  const calculateDiscountAmount = () => {
+    if (discountType === "percentage") {
+      return (subtotal * discountPercentage) / 100;
+    }
+    return discountAmount;
+  };
+
+  const actualDiscountAmount = calculateDiscountAmount();
+  const discountedSubtotal = Math.max(0, subtotal - actualDiscountAmount);
   const tax = +(discountedSubtotal * taxRate).toFixed(2);
   const total = +(discountedSubtotal + tax).toFixed(2);
 
@@ -417,17 +452,22 @@ export const POSProvider = ({ children }) => {
         itemCount,
         clearBill,
 
-        // Calculations
+        // Enhanced Calculations with Discount Types
         subtotal,
         serviceSubtotal,
         productSubtotal,
+        discountType,
+        setDiscountType,
         discountAmount,
         setDiscountAmount,
+        discountPercentage,
+        setDiscountPercentage,
+        actualDiscountAmount,
         discountedSubtotal,
         tax,
         total,
 
-        // Customer & Transaction - Updated to handle IDs
+        // Customer & Transaction
         customerName,
         setCustomerName,
         customerId,
@@ -451,7 +491,7 @@ export const POSProvider = ({ children }) => {
         isCheckoutOpen,
         setIsCheckoutOpen,
 
-        // Payment Tracking - NEW
+        // Payment Tracking
         cashTotal,
         cardTotal,
         transactionCount,

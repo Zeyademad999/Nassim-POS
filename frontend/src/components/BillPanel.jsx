@@ -30,8 +30,13 @@ const BillPanel = () => {
     subtotal,
     serviceSubtotal,
     productSubtotal,
+    discountType,
+    setDiscountType,
     discountAmount,
     setDiscountAmount,
+    discountPercentage,
+    setDiscountPercentage,
+    actualDiscountAmount,
     discountedSubtotal,
     tax,
     total,
@@ -52,7 +57,7 @@ const BillPanel = () => {
   const { t, isRTL } = useLanguage();
 
   const handleCheckout = async () => {
-    // ✅ Enhanced validation
+    // Enhanced validation
     if (
       !customerName.trim() ||
       (!selectedBarber.trim() && customerName !== "Walk-in")
@@ -68,7 +73,7 @@ const BillPanel = () => {
 
     setIsCheckoutOpen(true);
 
-    // ✅ Create items array with proper structure for transaction_items table
+    // Create items array with proper structure for transaction_items table
     const items = [
       ...selectedServices.map((s) => ({
         id: s.id,
@@ -86,15 +91,17 @@ const BillPanel = () => {
       })),
     ];
 
-    // ✅ Enhanced bill data with proper field names matching the API
+    // Enhanced bill data with proper field names matching the API
     const transactionData = {
       customer_name: customerName.trim(),
-      customer_id: customerId || null,
       barber_name: customerName === "Walk-in" ? "Walk-in" : selectedBarber,
       barber_id: customerName === "Walk-in" ? null : selectedBarberId || null,
       service_date: serviceDate.toISOString().split("T")[0],
       subtotal,
-      discount_amount: discountAmount,
+      discount_amount: actualDiscountAmount,
+      discount_type: discountType,
+      discount_percentage:
+        discountType === "percentage" ? discountPercentage : null,
       tax,
       total,
       payment_method: paymentMethod,
@@ -119,7 +126,7 @@ const BillPanel = () => {
       const result = await res.json();
       console.log("✅ Transaction saved to backend:", result);
 
-      // ✅ Track payment in local storage
+      // Track payment in local storage
       addPayment(total, paymentMethod);
 
       if (result.stockUpdated) {
@@ -136,9 +143,28 @@ const BillPanel = () => {
     clearBill();
   };
 
+  // Enhanced discount change handler
   const handleDiscountChange = (e) => {
     const value = parseFloat(e.target.value) || 0;
-    setDiscountAmount(Math.max(0, Math.min(value, subtotal)));
+
+    if (discountType === "percentage") {
+      const clampedPercentage = Math.max(0, Math.min(value, 100));
+      setDiscountPercentage(clampedPercentage);
+    } else {
+      const clampedAmount = Math.max(0, Math.min(value, subtotal));
+      setDiscountAmount(clampedAmount);
+    }
+  };
+
+  // Handle discount type change
+  const handleDiscountTypeChange = (type) => {
+    setDiscountType(type);
+    // Reset discount values when switching types
+    if (type === "percentage") {
+      setDiscountPercentage(0);
+    } else {
+      setDiscountAmount(0);
+    }
   };
 
   const updateQuantity = (item, delta) => {
@@ -203,9 +229,45 @@ const BillPanel = () => {
           font-weight: 500;
         }
 
+        /* Enhanced Discount Styles */
+        .discount-type-toggle {
+          display: flex;
+          gap: 4px;
+          margin-bottom: 8px;
+        }
+
+        .discount-type-btn {
+          flex: 1;
+          padding: 6px 12px;
+          border: 1px solid #e5e7eb;
+          border-radius: 4px;
+          background: white;
+          cursor: pointer;
+          font-size: 12px;
+          font-weight: 500;
+          transition: all 0.2s ease;
+        }
+
+        .discount-type-btn.active {
+          border-color: #2563eb;
+          background: #eff6ff;
+          color: #2563eb;
+        }
+
+        .discount-type-btn:hover:not(.active) {
+          border-color: #9ca3af;
+          background: #f9fafb;
+        }
+
+        .discount-input-container {
+          position: relative;
+          display: flex;
+          align-items: center;
+        }
+
         .discount-input {
           width: 100%;
-          padding: 8px 12px;
+          padding: 8px 40px 8px 12px;
           border: 1px solid #e5e7eb;
           border-radius: 6px;
           font-size: 14px;
@@ -214,6 +276,28 @@ const BillPanel = () => {
         .discount-input:focus {
           outline: none;
           border-color: #2563eb;
+          box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .discount-unit {
+          position: absolute;
+          right: 12px;
+          font-size: 12px;
+          color: #6b7280;
+          font-weight: 500;
+          pointer-events: none;
+        }
+
+        .discount-preview {
+          font-size: 12px;
+          color: #059669;
+          font-weight: 500;
+          margin-top: 4px;
+          text-align: right;
+          padding: 4px 8px;
+          background: #ecfdf5;
+          border-radius: 4px;
+          border: 1px solid #d1fae5;
         }
 
         .invoice-checkbox {
@@ -267,6 +351,19 @@ const BillPanel = () => {
           .bill-item-type {
             margin-right: 8px;
             margin-left: 0;
+          }
+          
+          .discount-unit {
+            right: auto;
+            left: 12px;
+          }
+          
+          .discount-input {
+            padding: 8px 12px 8px 40px;
+          }
+          
+          .discount-preview {
+            text-align: left;
           }
         `
           : ""}
@@ -411,24 +508,69 @@ const BillPanel = () => {
               </div>
             </div>
 
+            {/* Enhanced Discount Section */}
             <div className="payment-option-group">
               <label className="payment-option-label">
                 <Percent
                   size={14}
                   style={{ display: "inline", marginRight: "4px" }}
                 />
-                {t("discountAmount")}
+                {t("discount")}
               </label>
-              <input
-                type="number"
-                min="0"
-                max={subtotal}
-                step="0.01"
-                value={discountAmount}
-                onChange={handleDiscountChange}
-                className="discount-input"
-                placeholder={t("enterDiscountAmount")}
-              />
+
+              {/* Discount Type Toggle */}
+              <div className="discount-type-toggle">
+                <button
+                  className={`discount-type-btn ${
+                    discountType === "flat" ? "active" : ""
+                  }`}
+                  onClick={() => handleDiscountTypeChange("flat")}
+                  type="button"
+                >
+                  EGP {t("flat")}
+                </button>
+                <button
+                  className={`discount-type-btn ${
+                    discountType === "percentage" ? "active" : ""
+                  }`}
+                  onClick={() => handleDiscountTypeChange("percentage")}
+                  type="button"
+                >
+                  % {t("percentage")}
+                </button>
+              </div>
+
+              {/* Discount Input */}
+              <div className="discount-input-container">
+                <input
+                  type="number"
+                  min="0"
+                  max={discountType === "percentage" ? 100 : subtotal}
+                  step={discountType === "percentage" ? "1" : "0.01"}
+                  value={
+                    discountType === "percentage"
+                      ? discountPercentage
+                      : discountAmount
+                  }
+                  onChange={handleDiscountChange}
+                  className="discount-input"
+                  placeholder={
+                    discountType === "percentage"
+                      ? t("enterDiscountPercentage")
+                      : t("enterDiscountAmount")
+                  }
+                />
+                <span className="discount-unit">
+                  {discountType === "percentage" ? "%" : "EGP"}
+                </span>
+              </div>
+
+              {/* Show calculated discount for percentage */}
+              {discountType === "percentage" && discountPercentage > 0 && (
+                <div className="discount-preview">
+                  {t("discountAmount")}: {actualDiscountAmount.toFixed(2)} EGP
+                </div>
+              )}
             </div>
 
             <div className="payment-option-group">
@@ -467,10 +609,13 @@ const BillPanel = () => {
               <span>{t("subtotal")}</span>
               <span>{subtotal.toFixed(2)} EGP</span>
             </div>
-            {discountAmount > 0 && (
+            {actualDiscountAmount > 0 && (
               <div className="line discount-line">
-                <span>{t("discount")}</span>
-                <span>-{discountAmount.toFixed(2)} EGP</span>
+                <span>
+                  {t("discount")}
+                  {discountType === "percentage" && ` (${discountPercentage}%)`}
+                </span>
+                <span>-{actualDiscountAmount.toFixed(2)} EGP</span>
               </div>
             )}
             <div className="line">
@@ -496,7 +641,9 @@ const BillPanel = () => {
           services={selectedServices}
           products={selectedProducts}
           subtotal={subtotal}
-          discountAmount={discountAmount}
+          discountAmount={actualDiscountAmount}
+          discountType={discountType}
+          discountPercentage={discountPercentage}
           tax={tax}
           total={total}
           customerName={customerName}

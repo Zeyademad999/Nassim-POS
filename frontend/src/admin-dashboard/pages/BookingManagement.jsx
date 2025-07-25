@@ -18,6 +18,7 @@ import {
   DollarSign,
   FileText,
   RefreshCcw,
+  X, // Add this
 } from "lucide-react";
 import BookingForm from "../components/BookingForm";
 import "../styles/BookingManagement.css";
@@ -34,6 +35,8 @@ export default function BookingManagement() {
   const [selectedBarber, setSelectedBarber] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("all");
   const [showAddBooking, setShowAddBooking] = useState(false);
+  const [newBookingsCount, setNewBookingsCount] = useState(0);
+
   const [editingBooking, setEditingBooking] = useState(null);
   const [stats, setStats] = useState(null);
 
@@ -50,6 +53,11 @@ export default function BookingManagement() {
     fetchBarbers();
     fetchStats();
   }, [selectedDate, selectedBarber, selectedStatus]);
+  // Check for new bookings every 30 seconds
+  useEffect(() => {
+    const interval = setInterval(checkForNewBookings, 1200000);
+    return () => clearInterval(interval);
+  }, []);
 
   const fetchBookings = async () => {
     setLoading(true);
@@ -68,6 +76,27 @@ export default function BookingManagement() {
       setError("Failed to load bookings");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const checkForNewBookings = async () => {
+    try {
+      const params = new URLSearchParams();
+      params.append("date", new Date().toISOString().split("T")[0]);
+      params.append("status", "scheduled");
+
+      const res = await fetch(`/api/bookings?${params}`);
+      if (res.ok) {
+        const data = await res.json();
+        const recentBookings = data.filter((booking) => {
+          const createdAt = new Date(booking.created_at);
+          const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+          return createdAt > fiveMinutesAgo;
+        });
+        setNewBookingsCount(recentBookings.length);
+      }
+    } catch (err) {
+      console.error("Failed to check new bookings:", err);
     }
   };
 
@@ -491,7 +520,7 @@ export default function BookingManagement() {
                   className="btn-primary"
                   onClick={() => {
                     setShowAddBooking(false);
-                    // Navigate to customers page - you can implement this with react-router
+
                     window.location.href = "/admin/customers";
                   }}
                 >
