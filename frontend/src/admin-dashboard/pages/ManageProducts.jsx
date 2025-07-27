@@ -16,8 +16,11 @@ import {
   Eye,
   EyeOff,
 } from "lucide-react";
+import { useLanguage } from "../../context/LanguageContext";
 
 export default function ManageProducts() {
+  const { t, isRTL } = useLanguage();
+
   const [products, setProducts] = useState([]);
   const [suppliers, setSuppliers] = useState([]);
   const [activeTab, setActiveTab] = useState("products"); // "products" or "suppliers"
@@ -51,12 +54,12 @@ export default function ManageProducts() {
   const fetchProducts = async () => {
     try {
       const res = await fetch("/api/products");
-      if (!res.ok) throw new Error("Failed to fetch products");
+      if (!res.ok) throw new Error(t("Failed to load products"));
       const data = await res.json();
       setProducts(data);
     } catch (err) {
       console.error("Failed to fetch products:", err);
-      setError("Failed to load products");
+      setError(t("Failed to load products"));
       setProducts([]);
     }
   };
@@ -64,12 +67,12 @@ export default function ManageProducts() {
   const fetchSuppliers = async () => {
     try {
       const res = await fetch("/api/suppliers");
-      if (!res.ok) throw new Error("Failed to fetch suppliers");
+      if (!res.ok) throw new Error(t("Failed to load suppliers"));
       const data = await res.json();
       setSuppliers(data);
     } catch (err) {
       console.error("Failed to fetch suppliers:", err);
-      setError("Failed to load suppliers");
+      setError(t("Failed to load suppliers"));
       setSuppliers([]);
     }
   };
@@ -86,7 +89,7 @@ export default function ManageProducts() {
     );
 
     if (missingFields.length > 0) {
-      setError(`Required fields missing: ${missingFields.join(", ")}`);
+      setError(`${t("Required fields missing")}: ${missingFields.join(", ")}`);
       return;
     }
 
@@ -117,7 +120,7 @@ export default function ManageProducts() {
 
       if (!res.ok) {
         const errorData = await res.json();
-        throw new Error(errorData.error || "Failed to add product");
+        throw new Error(errorData.error || t("Failed to add product"));
       }
 
       setNewProduct({
@@ -141,7 +144,7 @@ export default function ManageProducts() {
 
   const addSupplier = async () => {
     if (!newSupplier.name.trim()) {
-      setError("Supplier name is required");
+      setError(t("Supplier name is required"));
       return;
     }
 
@@ -164,7 +167,7 @@ export default function ManageProducts() {
 
       if (!res.ok) {
         const errorData = await res.json();
-        throw new Error(errorData.error || "Failed to add supplier");
+        throw new Error(errorData.error || t("Failed to add supplier"));
       }
 
       setNewSupplier({
@@ -192,7 +195,7 @@ export default function ManageProducts() {
     );
 
     if (missingFields.length > 0) {
-      setError(`Required fields missing: ${missingFields.join(", ")}`);
+      setError(`${t("Required fields missing")}: ${missingFields.join(", ")}`);
       return;
     }
 
@@ -223,7 +226,7 @@ export default function ManageProducts() {
 
       if (!res.ok) {
         const errorData = await res.json();
-        throw new Error(errorData.error || "Failed to update product");
+        throw new Error(errorData.error || t("Failed to update product"));
       }
 
       setEditingProduct(null);
@@ -237,7 +240,7 @@ export default function ManageProducts() {
   };
 
   const deleteProduct = async (id) => {
-    if (!confirm("Are you sure you want to delete this product?")) return;
+    if (!confirm(t("Are you sure you want to delete this product?"))) return;
 
     setLoading(true);
     setError("");
@@ -249,7 +252,7 @@ export default function ManageProducts() {
 
       if (!res.ok) {
         const errorData = await res.json();
-        throw new Error(errorData.error || "Failed to delete product");
+        throw new Error(errorData.error || t("Failed to delete product"));
       }
 
       fetchProducts();
@@ -262,7 +265,7 @@ export default function ManageProducts() {
   };
 
   const deleteSupplier = async (id) => {
-    if (!confirm("Are you sure you want to delete this supplier?")) return;
+    if (!confirm(t("Are you sure you want to delete this supplier?"))) return;
 
     setLoading(true);
     setError("");
@@ -274,7 +277,7 @@ export default function ManageProducts() {
 
       if (!res.ok) {
         const errorData = await res.json();
-        throw new Error(errorData.error || "Failed to delete supplier");
+        throw new Error(errorData.error || t("Failed to delete supplier"));
       }
 
       fetchSuppliers();
@@ -288,15 +291,15 @@ export default function ManageProducts() {
 
   const getStockStatus = (quantity, reorderLevel = 5) => {
     if (quantity === 0)
-      return { status: "out", color: "#dc2626", text: "Out of Stock" };
+      return { status: "out", color: "#dc2626", text: t("Out of Stock") };
     if (quantity <= reorderLevel)
-      return { status: "low", color: "#f59e0b", text: "Low Stock" };
-    return { status: "good", color: "#10b981", text: "In Stock" };
+      return { status: "low", color: "#f59e0b", text: t("Low Stock") };
+    return { status: "good", color: "#10b981", text: t("In Stock") };
   };
 
   const getSupplierName = (supplierId) => {
     const supplier = suppliers.find((s) => s.id === supplierId);
-    return supplier ? supplier.name : "No Supplier";
+    return supplier ? supplier.name : t("No Supplier");
   };
 
   const getMargin = (sellPrice, costPrice) => {
@@ -305,8 +308,50 @@ export default function ManageProducts() {
     return `${margin}%`;
   };
 
+  // Helper function for updating suppliers
+  const updateSupplier = async (id, updatedSupplier) => {
+    if (!updatedSupplier.name.trim()) {
+      setError(t("Supplier name is required"));
+      return;
+    }
+
+    setLoading(true);
+    setError("");
+
+    try {
+      const res = await fetch(`/api/suppliers/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: updatedSupplier.name.trim(),
+          contact_person: updatedSupplier.contact_person?.trim() || "",
+          phone: updatedSupplier.phone?.trim() || "",
+          email: updatedSupplier.email?.trim() || "",
+          address: updatedSupplier.address?.trim() || "",
+          notes: updatedSupplier.notes?.trim() || "",
+        }),
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || t("Failed to update supplier"));
+      }
+
+      setEditingSupplier(null);
+      fetchSuppliers();
+    } catch (err) {
+      console.error("Error updating supplier:", err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <div className="manage-products-page">
+    <div
+      className="manage-products-page"
+      style={{ direction: isRTL ? "rtl" : "ltr" }}
+    >
       <style jsx>{`
         .manage-products-page {
           padding: 32px;
@@ -739,7 +784,7 @@ export default function ManageProducts() {
       <div className="page-header">
         <h1 className="page-title">
           <Package size={32} />
-          Inventory Management
+          {t("Inventory Management")}
         </h1>
         <div className="tab-navigation">
           <button
@@ -747,7 +792,7 @@ export default function ManageProducts() {
             onClick={() => setActiveTab("products")}
           >
             <Package size={16} />
-            Products ({products.length})
+            {t("Products")} ({products.length})
           </button>
           <button
             className={`tab-button ${
@@ -756,7 +801,7 @@ export default function ManageProducts() {
             onClick={() => setActiveTab("suppliers")}
           >
             <Truck size={16} />
-            Suppliers ({suppliers.length})
+            {t("Suppliers")} ({suppliers.length})
           </button>
         </div>
       </div>
@@ -776,7 +821,7 @@ export default function ManageProducts() {
             <div className="card-header">
               <h2 className="card-title">
                 <ShoppingBag size={18} />
-                Add New Product
+                {t("Add New Product")}
               </h2>
               {!showSupplierForm && (
                 <button
@@ -784,12 +829,12 @@ export default function ManageProducts() {
                   onClick={() => setShowSupplierForm(true)}
                 >
                   <Plus size={16} />
-                  Quick Add Supplier
+                  {t("Quick Add Supplier")}
                 </button>
               )}
             </div>
             <p className="subtext">
-              Add a new retail product to your inventory
+              {t("Add a new retail product to your inventory")}
             </p>
 
             {showSupplierForm && (
@@ -817,7 +862,7 @@ export default function ManageProducts() {
                       size={16}
                       style={{ display: "inline", marginRight: "8px" }}
                     />
-                    Quick Add Supplier
+                    {t("Quick Add Supplier")}
                   </h3>
                   <button
                     className="form-button secondary"
@@ -829,7 +874,7 @@ export default function ManageProducts() {
                 </div>
                 <div className="form-grid">
                   <div className="form-group">
-                    <label className="form-label">Supplier Name *</label>
+                    <label className="form-label">{t("Supplier Name")} *</label>
                     <input
                       className="form-input"
                       type="text"
@@ -837,11 +882,11 @@ export default function ManageProducts() {
                       onChange={(e) =>
                         setNewSupplier({ ...newSupplier, name: e.target.value })
                       }
-                      placeholder="Enter supplier name"
+                      placeholder={t("Enter supplier name")}
                     />
                   </div>
                   <div className="form-group">
-                    <label className="form-label">Contact Person</label>
+                    <label className="form-label">{t("Contact Person")}</label>
                     <input
                       className="form-input"
                       type="text"
@@ -852,11 +897,11 @@ export default function ManageProducts() {
                           contact_person: e.target.value,
                         })
                       }
-                      placeholder="Contact person name"
+                      placeholder={t("Contact person name")}
                     />
                   </div>
                   <div className="form-group">
-                    <label className="form-label">Phone</label>
+                    <label className="form-label">{t("Phone")}</label>
                     <input
                       className="form-input"
                       type="tel"
@@ -878,7 +923,7 @@ export default function ManageProducts() {
                       style={{ marginTop: "23px" }}
                     >
                       <Plus size={16} />
-                      {loading ? "Adding..." : "Add Supplier"}
+                      {loading ? t("Adding...") : t("Add Supplier")}
                     </button>
                   </div>
                 </div>
@@ -887,7 +932,7 @@ export default function ManageProducts() {
 
             <div className="form-grid">
               <div className="form-group">
-                <label className="form-label">Product Name *</label>
+                <label className="form-label">{t("Product Name")} *</label>
                 <input
                   className="form-input"
                   type="text"
@@ -895,12 +940,14 @@ export default function ManageProducts() {
                   onChange={(e) =>
                     setNewProduct({ ...newProduct, name: e.target.value })
                   }
-                  placeholder="Enter product name"
+                  placeholder={t("Enter product name")}
                   disabled={loading}
                 />
               </div>
               <div className="form-group">
-                <label className="form-label">Selling Price (EGP) *</label>
+                <label className="form-label">
+                  {t("Selling Price (EGP)")} *
+                </label>
                 <input
                   className="form-input"
                   type="number"
@@ -914,7 +961,7 @@ export default function ManageProducts() {
                 />
               </div>
               <div className="form-group">
-                <label className="form-label">Cost Price (EGP)</label>
+                <label className="form-label">{t("Cost Price (EGP)")}</label>
                 <input
                   className="form-input"
                   type="number"
@@ -928,7 +975,7 @@ export default function ManageProducts() {
                 />
               </div>
               <div className="form-group">
-                <label className="form-label">Stock Quantity *</label>
+                <label className="form-label">{t("Stock Quantity")} *</label>
                 <input
                   className="form-input"
                   type="number"
@@ -944,7 +991,7 @@ export default function ManageProducts() {
                 />
               </div>
               <div className="form-group">
-                <label className="form-label">Reorder Level</label>
+                <label className="form-label">{t("Reorder Level")}</label>
                 <input
                   className="form-input"
                   type="number"
@@ -960,7 +1007,7 @@ export default function ManageProducts() {
                 />
               </div>
               <div className="form-group">
-                <label className="form-label">Category</label>
+                <label className="form-label">{t("Category")}</label>
                 <input
                   className="form-input"
                   type="text"
@@ -968,12 +1015,12 @@ export default function ManageProducts() {
                   onChange={(e) =>
                     setNewProduct({ ...newProduct, category: e.target.value })
                   }
-                  placeholder="e.g., Hair Care, Styling"
+                  placeholder={t("e.g., Hair Care, Styling")}
                   disabled={loading}
                 />
               </div>
               <div className="form-group">
-                <label className="form-label">Supplier</label>
+                <label className="form-label">{t("Supplier")}</label>
                 <select
                   className="form-select"
                   value={newProduct.supplier_id}
@@ -985,7 +1032,7 @@ export default function ManageProducts() {
                   }
                   disabled={loading}
                 >
-                  <option value="">Select Supplier (Optional)</option>
+                  <option value="">{t("Select Supplier (Optional)")}</option>
                   {suppliers.map((supplier) => (
                     <option key={supplier.id} value={supplier.id}>
                       {supplier.name}
@@ -1001,7 +1048,7 @@ export default function ManageProducts() {
                   style={{ marginTop: "23px" }}
                 >
                   <Plus size={16} />
-                  {loading ? "Adding..." : "Add Product"}
+                  {loading ? t("Adding...") : t("Add Product")}
                 </button>
               </div>
             </div>
@@ -1034,7 +1081,7 @@ export default function ManageProducts() {
                           name: e.target.value,
                         })
                       }
-                      placeholder="Product name"
+                      placeholder={t("Product name")}
                       disabled={loading}
                     />
                     <input
@@ -1047,7 +1094,7 @@ export default function ManageProducts() {
                           price: e.target.value,
                         })
                       }
-                      placeholder="Selling price"
+                      placeholder={t("Selling price")}
                       disabled={loading}
                     />
                     <input
@@ -1060,7 +1107,7 @@ export default function ManageProducts() {
                           cost_price: e.target.value,
                         })
                       }
-                      placeholder="Cost price"
+                      placeholder={t("Cost price")}
                       disabled={loading}
                     />
                     <input
@@ -1072,7 +1119,7 @@ export default function ManageProducts() {
                           stock_quantity: e.target.value,
                         })
                       }
-                      placeholder="Stock quantity"
+                      placeholder={t("Stock quantity")}
                       disabled={loading}
                     />
                     <select
@@ -1085,7 +1132,7 @@ export default function ManageProducts() {
                       }
                       disabled={loading}
                     >
-                      <option value="">Select Supplier</option>
+                      <option value="">{t("Select Supplier")}</option>
                       {suppliers.map((supplier) => (
                         <option key={supplier.id} value={supplier.id}>
                           {supplier.name}
@@ -1101,7 +1148,7 @@ export default function ManageProducts() {
                         disabled={loading}
                       >
                         <Save size={16} />
-                        {loading ? "Saving..." : "Save"}
+                        {loading ? t("Saving...") : t("Save")}
                       </button>
                       <button
                         className="action-button"
@@ -1109,7 +1156,7 @@ export default function ManageProducts() {
                         disabled={loading}
                       >
                         <X size={16} />
-                        Cancel
+                        {t("Cancel")}
                       </button>
                     </div>
                   </div>
@@ -1117,14 +1164,18 @@ export default function ManageProducts() {
                   <>
                     <div className="item-details">
                       <div className="detail-row">
-                        <span className="detail-label">Selling Price:</span>
+                        <span className="detail-label">
+                          {t("Selling Price:")}:
+                        </span>
                         <span className="price-display">
                           {product.price.toFixed(2)} EGP
                         </span>
                       </div>
                       {product.cost_price && (
                         <div className="detail-row">
-                          <span className="detail-label">Cost Price:</span>
+                          <span className="detail-label">
+                            {t("Cost Price:")}:
+                          </span>
                           <div
                             style={{
                               display: "flex",
@@ -1138,14 +1189,14 @@ export default function ManageProducts() {
                             {getMargin(product.price, product.cost_price) && (
                               <span className="margin-badge">
                                 {getMargin(product.price, product.cost_price)}{" "}
-                                margin
+                                {t("margin")}
                               </span>
                             )}
                           </div>
                         </div>
                       )}
                       <div className="detail-row">
-                        <span className="detail-label">Stock:</span>
+                        <span className="detail-label">{t("Stock:")}:</span>
                         <div
                           className="stock-display"
                           style={{
@@ -1164,7 +1215,7 @@ export default function ManageProducts() {
                               ).color,
                             }}
                           />
-                          {product.stock_quantity} units
+                          {product.stock_quantity} {t("units")}
                           {product.stock_quantity <=
                             (product.reorder_level || 5) &&
                             product.stock_quantity > 0 && (
@@ -1174,15 +1225,19 @@ export default function ManageProducts() {
                       </div>
                       {product.reorder_level && (
                         <div className="detail-row">
-                          <span className="detail-label">Reorder Level:</span>
+                          <span className="detail-label">
+                            {t("Reorder Level:")}:
+                          </span>
                           <span className="detail-value">
-                            {product.reorder_level} units
+                            {product.reorder_level} {t("units")}
                           </span>
                         </div>
                       )}
                       {product.supplier_id && (
                         <div className="detail-row">
-                          <span className="detail-label">Supplier:</span>
+                          <span className="detail-label">
+                            {t("Supplier:")}:
+                          </span>
                           <div className="supplier-info">
                             <Truck size={14} />
                             {getSupplierName(product.supplier_id)}
@@ -1197,7 +1252,7 @@ export default function ManageProducts() {
                         disabled={loading}
                       >
                         <Edit2 size={16} />
-                        Edit
+                        {t("Edit")}
                       </button>
                       <button
                         className="action-button danger"
@@ -1205,7 +1260,7 @@ export default function ManageProducts() {
                         disabled={loading}
                       >
                         <Trash2 size={16} />
-                        Remove
+                        {t("Remove")}
                       </button>
                     </div>
                   </>
@@ -1217,8 +1272,8 @@ export default function ManageProducts() {
           {products.length === 0 && (
             <div className="empty-state">
               <Package size={48} />
-              <h3>No products yet</h3>
-              <p>Add your first product to get started</p>
+              <h3>{t("No products yet")}</h3>
+              <p>{t("Add your first product to get started")}</p>
             </div>
           )}
         </>
@@ -1231,13 +1286,13 @@ export default function ManageProducts() {
           <div className="content-card">
             <h2 className="card-title">
               <Truck size={18} />
-              Add New Supplier
+              {t("Add New Supplier")}
             </h2>
-            <p className="subtext">Add a new supplier to your network</p>
+            <p className="subtext">{t("Add a new supplier to your network")}</p>
 
             <div className="form-grid">
               <div className="form-group">
-                <label className="form-label">Supplier Name *</label>
+                <label className="form-label">{t("Supplier Name")} *</label>
                 <input
                   className="form-input"
                   type="text"
@@ -1245,12 +1300,12 @@ export default function ManageProducts() {
                   onChange={(e) =>
                     setNewSupplier({ ...newSupplier, name: e.target.value })
                   }
-                  placeholder="Enter supplier name"
+                  placeholder={t("Enter supplier name")}
                   disabled={loading}
                 />
               </div>
               <div className="form-group">
-                <label className="form-label">Contact Person</label>
+                <label className="form-label">{t("Contact Person")}</label>
                 <input
                   className="form-input"
                   type="text"
@@ -1261,12 +1316,12 @@ export default function ManageProducts() {
                       contact_person: e.target.value,
                     })
                   }
-                  placeholder="Contact person name"
+                  placeholder={t("Contact person name")}
                   disabled={loading}
                 />
               </div>
               <div className="form-group">
-                <label className="form-label">Phone Number</label>
+                <label className="form-label">{t("Phone Number")}</label>
                 <input
                   className="form-input"
                   type="tel"
@@ -1279,7 +1334,7 @@ export default function ManageProducts() {
                 />
               </div>
               <div className="form-group">
-                <label className="form-label">Email</label>
+                <label className="form-label">{t("Email")}</label>
                 <input
                   className="form-input"
                   type="email"
@@ -1287,12 +1342,12 @@ export default function ManageProducts() {
                   onChange={(e) =>
                     setNewSupplier({ ...newSupplier, email: e.target.value })
                   }
-                  placeholder="supplier@example.com"
+                  placeholder={t("supplier@example.com")}
                   disabled={loading}
                 />
               </div>
               <div className="form-group">
-                <label className="form-label">Address</label>
+                <label className="form-label">{t("Address")}</label>
                 <input
                   className="form-input"
                   type="text"
@@ -1300,7 +1355,7 @@ export default function ManageProducts() {
                   onChange={(e) =>
                     setNewSupplier({ ...newSupplier, address: e.target.value })
                   }
-                  placeholder="Supplier address"
+                  placeholder={t("Supplier address")}
                   disabled={loading}
                 />
               </div>
@@ -1312,7 +1367,7 @@ export default function ManageProducts() {
                   style={{ marginTop: "23px" }}
                 >
                   <Plus size={16} />
-                  {loading ? "Adding..." : "Add Supplier"}
+                  {loading ? t("Adding...") : t("Add Supplier")}
                 </button>
               </div>
             </div>
@@ -1339,7 +1394,7 @@ export default function ManageProducts() {
                           marginTop: "4px",
                         }}
                       >
-                        Contact: {supplier.contact_person}
+                        {t("Contact:")}: {supplier.contact_person}
                       </div>
                     )}
                   </div>
@@ -1356,7 +1411,7 @@ export default function ManageProducts() {
                           name: e.target.value,
                         })
                       }
-                      placeholder="Supplier name"
+                      placeholder={t("Supplier name")}
                       disabled={loading}
                     />
                     <input
@@ -1368,7 +1423,7 @@ export default function ManageProducts() {
                           contact_person: e.target.value,
                         })
                       }
-                      placeholder="Contact person"
+                      placeholder={t("Contact person")}
                       disabled={loading}
                     />
                     <input
@@ -1380,7 +1435,7 @@ export default function ManageProducts() {
                           phone: e.target.value,
                         })
                       }
-                      placeholder="Phone number"
+                      placeholder={t("Phone number")}
                       disabled={loading}
                     />
                     <input
@@ -1392,7 +1447,7 @@ export default function ManageProducts() {
                           email: e.target.value,
                         })
                       }
-                      placeholder="Email"
+                      placeholder={t("Email")}
                       disabled={loading}
                     />
                     <div className="item-actions">
@@ -1404,7 +1459,7 @@ export default function ManageProducts() {
                         disabled={loading}
                       >
                         <Save size={16} />
-                        {loading ? "Saving..." : "Save"}
+                        {loading ? t("Saving...") : t("Save")}
                       </button>
                       <button
                         className="action-button"
@@ -1412,7 +1467,7 @@ export default function ManageProducts() {
                         disabled={loading}
                       >
                         <X size={16} />
-                        Cancel
+                        {t("Cancel")}
                       </button>
                     </div>
                   </div>
@@ -1441,14 +1496,16 @@ export default function ManageProducts() {
 
                     <div className="item-details">
                       <div className="detail-row">
-                        <span className="detail-label">Products Supplied:</span>
+                        <span className="detail-label">
+                          {t("Products Supplied:")}:
+                        </span>
                         <span className="detail-value">
                           {
                             products.filter(
                               (p) => p.supplier_id === supplier.id
                             ).length
                           }{" "}
-                          items
+                          {t("items")}
                         </span>
                       </div>
                     </div>
@@ -1460,7 +1517,7 @@ export default function ManageProducts() {
                         disabled={loading}
                       >
                         <Edit2 size={16} />
-                        Edit
+                        {t("Edit")}
                       </button>
                       <button
                         className="action-button danger"
@@ -1468,7 +1525,7 @@ export default function ManageProducts() {
                         disabled={loading}
                       >
                         <Trash2 size={16} />
-                        Remove
+                        {t("Remove")}
                       </button>
                     </div>
                   </>
@@ -1480,51 +1537,12 @@ export default function ManageProducts() {
           {suppliers.length === 0 && (
             <div className="empty-state">
               <Truck size={48} />
-              <h3>No suppliers yet</h3>
-              <p>Add your first supplier to get started</p>
+              <h3>{t("No suppliers yet")}</h3>
+              <p>{t("Add your first supplier to get started")}</p>
             </div>
           )}
         </>
       )}
     </div>
   );
-
-  // Helper function for updating suppliers
-  const updateSupplier = async (id, updatedSupplier) => {
-    if (!updatedSupplier.name.trim()) {
-      setError("Supplier name is required");
-      return;
-    }
-
-    setLoading(true);
-    setError("");
-
-    try {
-      const res = await fetch(`/api/suppliers/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: updatedSupplier.name.trim(),
-          contact_person: updatedSupplier.contact_person?.trim() || "",
-          phone: updatedSupplier.phone?.trim() || "",
-          email: updatedSupplier.email?.trim() || "",
-          address: updatedSupplier.address?.trim() || "",
-          notes: updatedSupplier.notes?.trim() || "",
-        }),
-      });
-
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.error || "Failed to update supplier");
-      }
-
-      setEditingSupplier(null);
-      fetchSuppliers();
-    } catch (err) {
-      console.error("Error updating supplier:", err);
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
 }

@@ -21,9 +21,11 @@ import {
 } from "lucide-react";
 import CustomerForm from "../components/CustomerForm";
 import BookingForm from "../components/BookingForm";
+import { useLanguage } from "../../context/LanguageContext";
 import "../styles/ManageCustomers.css";
 
 export default function ManageCustomers() {
+  const { t, isRTL } = useLanguage();
   const [customers, setCustomers] = useState([]);
   const [barbers, setBarbers] = useState([]);
   const [editingCustomer, setEditingCustomer] = useState(null);
@@ -142,7 +144,7 @@ export default function ManageCustomers() {
   };
 
   const handleDeleteCustomer = async (id) => {
-    if (!confirm("Are you sure you want to delete this customer?")) return;
+    if (!confirm(t("deleteCustomerConfirm"))) return;
 
     setLoading(true);
     setError("");
@@ -204,11 +206,11 @@ export default function ManageCustomers() {
 
   const getBarberName = (barberId) => {
     const barber = barbers.find((b) => b.id === barberId);
-    return barber ? barber.name : "No preference";
+    return barber ? barber.name : t("noPreference");
   };
 
   return (
-    <div className="manage-customers-page">
+    <div className={`manage-customers-page ${isRTL ? "rtl" : "ltr"}`}>
       {error && (
         <div className="error-message">
           {error}
@@ -221,16 +223,16 @@ export default function ManageCustomers() {
         <div className="header-left">
           <h1>
             <Users size={24} />
-            Customer Management
+            {t("customerManagement")}
           </h1>
-          <p className="subtext">Manage your customers and their preferences</p>
+          <p className="subtext">{t("manageCustomersSubtext")}</p>
         </div>
         <button
           className="btn-primary"
           onClick={() => setShowAddCustomer(true)}
         >
           <UserPlus size={16} />
-          Add Customer
+          {t("addCustomer")}
         </button>
       </div>
 
@@ -243,7 +245,7 @@ export default function ManageCustomers() {
             </div>
             <div className="stat-content">
               <h3>{stats.summary.total_customers}</h3>
-              <p>Total Customers</p>
+              <p>{t("totalCustomers")}</p>
             </div>
           </div>
           <div className="stat-card">
@@ -252,7 +254,7 @@ export default function ManageCustomers() {
             </div>
             <div className="stat-content">
               <h3>{stats.summary.active_customers}</h3>
-              <p>Active Customers</p>
+              <p>{t("activeCustomers")}</p>
             </div>
           </div>
           <div className="stat-card">
@@ -261,7 +263,7 @@ export default function ManageCustomers() {
             </div>
             <div className="stat-content">
               <h3>{stats.summary.avg_customer_spend?.toFixed(0)} EGP</h3>
-              <p>Avg. Customer Spend</p>
+              <p>{t("avgCustomerSpend")}</p>
             </div>
           </div>
           <div className="stat-card">
@@ -270,7 +272,7 @@ export default function ManageCustomers() {
             </div>
             <div className="stat-content">
               <h3>{stats.summary.customers_with_preferences}</h3>
-              <p>With Preferences</p>
+              <p>{t("withPreferences")}</p>
             </div>
           </div>
         </div>
@@ -283,7 +285,7 @@ export default function ManageCustomers() {
             <Search size={16} />
             <input
               type="text"
-              placeholder="Search customers by name or mobile..."
+              placeholder={t("searchCustomers")}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -298,12 +300,12 @@ export default function ManageCustomers() {
               setSortOrder(order);
             }}
           >
-            <option value="name-ASC">Name (A-Z)</option>
-            <option value="name-DESC">Name (Z-A)</option>
-            <option value="total_visits-DESC">Most Visits</option>
-            <option value="total_spent-DESC">Highest Spender</option>
-            <option value="created_at-DESC">Newest First</option>
-            <option value="last_visit-DESC">Recent Visit</option>
+            <option value="name-ASC">{t("nameAZ")}</option>
+            <option value="name-DESC">{t("nameZA")}</option>
+            <option value="total_visits-DESC">{t("mostVisits")}</option>
+            <option value="total_spent-DESC">{t("highestSpender")}</option>
+            <option value="created_at-DESC">{t("newestFirst")}</option>
+            <option value="last_visit-DESC">{t("recentVisit")}</option>
           </select>
         </div>
       </div>
@@ -333,21 +335,21 @@ export default function ManageCustomers() {
                 <button
                   className="action-btn"
                   onClick={() => handleViewCustomer(customer)}
-                  title="View Details"
+                  title={t("viewDetails")}
                 >
                   <Eye size={14} />
                 </button>
                 <button
                   className="action-btn"
                   onClick={() => setEditingCustomer(customer)}
-                  title="Edit Customer"
+                  title={t("editCustomer")}
                 >
                   <Edit2 size={14} />
                 </button>
                 <button
                   className="action-btn danger"
                   onClick={() => handleDeleteCustomer(customer.id)}
-                  title="Delete Customer"
+                  title={t("deleteCustomer")}
                 >
                   <Trash2 size={14} />
                 </button>
@@ -358,14 +360,18 @@ export default function ManageCustomers() {
               {customer.preferred_barber_name && (
                 <div className="customer-preference">
                   <Star size={14} />
-                  <span>Prefers: {customer.preferred_barber_name}</span>
+                  <span>
+                    {t("prefers")}: {customer.preferred_barber_name}
+                  </span>
                 </div>
               )}
 
               <div className="customer-stats">
                 <div className="stat-item">
                   <Clock size={14} />
-                  <span>{customer.total_visits} visits</span>
+                  <span>
+                    {customer.total_visits} {t("visits")}
+                  </span>
                 </div>
                 <div className="stat-item">
                   <DollarSign size={14} />
@@ -376,7 +382,8 @@ export default function ManageCustomers() {
               {customer.service_preferences && (
                 <div className="customer-notes">
                   <p>
-                    <strong>Preferences:</strong> {customer.service_preferences}
+                    <strong>{t("preferences")}:</strong>{" "}
+                    {customer.service_preferences}
                   </p>
                 </div>
               )}
@@ -384,7 +391,7 @@ export default function ManageCustomers() {
               {customer.notes && (
                 <div className="customer-notes">
                   <p>
-                    <strong>Notes:</strong> {customer.notes}
+                    <strong>{t("notes")}:</strong> {customer.notes}
                   </p>
                 </div>
               )}
@@ -396,11 +403,11 @@ export default function ManageCustomers() {
                 onClick={() => handleCreateBooking(customer)}
               >
                 <Calendar size={14} />
-                Book Appointment
+                {t("bookAppointment")}
               </button>
               {customer.last_visit && (
                 <span className="last-visit">
-                  Last visit:{" "}
+                  {t("lastVisit")}:{" "}
                   {new Date(customer.last_visit).toLocaleDateString()}
                 </span>
               )}
@@ -412,19 +419,15 @@ export default function ManageCustomers() {
       {customers.length === 0 && !loading && (
         <div className="empty-state">
           <Users size={48} />
-          <h3>No customers found</h3>
-          <p>
-            {searchTerm
-              ? "Try adjusting your search terms"
-              : "Add your first customer to get started"}
-          </p>
+          <h3>{t("noCustomersFound")}</h3>
+          <p>{searchTerm ? t("tryAdjustingSearch") : t("addFirstCustomer")}</p>
           {!searchTerm && (
             <button
               className="btn-primary"
               onClick={() => setShowAddCustomer(true)}
             >
               <UserPlus size={16} />
-              Add First Customer
+              {t("addFirstCustomerBtn")}
             </button>
           )}
         </div>
@@ -435,7 +438,7 @@ export default function ManageCustomers() {
         <div className="modal-overlay">
           <div className="modal-content">
             <div className="modal-header">
-              <h2>Add New Customer</h2>
+              <h2>{t("addNewCustomer")}</h2>
               <button onClick={() => setShowAddCustomer(false)}>
                 <X size={20} />
               </button>
@@ -455,7 +458,7 @@ export default function ManageCustomers() {
         <div className="modal-overlay">
           <div className="modal-content">
             <div className="modal-header">
-              <h2>Edit Customer</h2>
+              <h2>{t("editCustomer")}</h2>
               <button onClick={() => setEditingCustomer(null)}>
                 <X size={20} />
               </button>
@@ -478,7 +481,7 @@ export default function ManageCustomers() {
         <div className="modal-overlay">
           <div className="modal-content large">
             <div className="modal-header">
-              <h2>Customer Details</h2>
+              <h2>{t("customerDetails")}</h2>
               <button onClick={() => setViewingCustomer(null)}>
                 <X size={20} />
               </button>
@@ -493,9 +496,11 @@ export default function ManageCustomers() {
                   <p>{viewingCustomer.mobile}</p>
                   {viewingCustomer.email && <p>{viewingCustomer.email}</p>}
                   <div className="profile-stats">
-                    <span>{viewingCustomer.total_visits} visits</span>
                     <span>
-                      {viewingCustomer.total_spent?.toFixed(0)} EGP spent
+                      {viewingCustomer.total_visits} {t("visits")}
+                    </span>
+                    <span>
+                      {viewingCustomer.total_spent?.toFixed(0)} EGP {t("spent")}
                     </span>
                   </div>
                 </div>
@@ -503,23 +508,25 @@ export default function ManageCustomers() {
 
               {/* Preferences and Notes */}
               <div className="customer-info-section">
-                <h4>Preferences & Notes</h4>
+                <h4>{t("preferencesAndNotes")}</h4>
                 <div className="info-grid">
                   <div className="info-item">
-                    <label>Preferred Barber:</label>
+                    <label>{t("preferredBarber")}:</label>
                     <span>
-                      {viewingCustomer.preferred_barber_name || "No preference"}
+                      {viewingCustomer.preferred_barber_name ||
+                        t("noPreference")}
                     </span>
                   </div>
                   <div className="info-item">
-                    <label>Service Preferences:</label>
+                    <label>{t("servicePreferences")}:</label>
                     <span>
-                      {viewingCustomer.service_preferences || "None specified"}
+                      {viewingCustomer.service_preferences ||
+                        t("noneSpecified")}
                     </span>
                   </div>
                   <div className="info-item">
-                    <label>Notes:</label>
-                    <span>{viewingCustomer.notes || "No notes"}</span>
+                    <label>{t("notes")}:</label>
+                    <span>{viewingCustomer.notes || t("noNotes")}</span>
                   </div>
                 </div>
               </div>
@@ -528,7 +535,7 @@ export default function ManageCustomers() {
               {viewingCustomer.bookings &&
                 viewingCustomer.bookings.length > 0 && (
                   <div className="customer-info-section">
-                    <h4>Recent Bookings</h4>
+                    <h4>{t("recentBookings")}</h4>
                     <div className="bookings-list">
                       {viewingCustomer.bookings.slice(0, 5).map((booking) => (
                         <div key={booking.id} className="booking-item">
@@ -560,7 +567,7 @@ export default function ManageCustomers() {
               {viewingCustomer.transactions &&
                 viewingCustomer.transactions.length > 0 && (
                   <div className="customer-info-section">
-                    <h4>Recent Transactions</h4>
+                    <h4>{t("recentTransactions")}</h4>
                     <div className="transactions-list">
                       {viewingCustomer.transactions
                         .slice(0, 5)
@@ -600,7 +607,9 @@ export default function ManageCustomers() {
         <div className="modal-overlay">
           <div className="modal-content">
             <div className="modal-header">
-              <h2>Book Appointment for {selectedCustomer.name}</h2>
+              <h2>
+                {t("bookAppointmentFor")} {selectedCustomer.name}
+              </h2>
               <button onClick={() => setShowBookingForm(false)}>
                 <X size={20} />
               </button>

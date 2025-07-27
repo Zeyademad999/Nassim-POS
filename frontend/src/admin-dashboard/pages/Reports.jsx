@@ -38,6 +38,7 @@ import {
   X,
   Receipt,
 } from "lucide-react";
+import { useLanguage } from "../../context/LanguageContext";
 import "../styles/Reports.css";
 
 ChartJS.register(
@@ -53,6 +54,8 @@ ChartJS.register(
 );
 
 export default function Reports({ user }) {
+  const { t, isRTL } = useLanguage();
+
   const [reportData, setReportData] = useState(null);
   const [selectedPeriod, setSelectedPeriod] = useState("7days");
   const [startDate, setStartDate] = useState("");
@@ -77,11 +80,11 @@ export default function Reports({ user }) {
   });
 
   const periodOptions = [
-    { value: "today", label: "Today" },
-    { value: "7days", label: "Last 7 Days" },
-    { value: "30days", label: "Last 30 Days" },
-    { value: "3months", label: "Last 3 Months" },
-    { value: "custom", label: "Custom Range" },
+    { value: "today", label: t("Today") },
+    { value: "7days", label: t("Last 7 Days") },
+    { value: "30days", label: t("Last 30 Days") },
+    { value: "3months", label: t("Last 3 Months") },
+    { value: "custom", label: t("Custom Range") },
   ];
 
   const fetchReports = async () => {
@@ -158,6 +161,7 @@ export default function Reports({ user }) {
       console.error("Failed to fetch transactions:", err);
     }
   };
+
   // Real-time data refresh when filters change
   useEffect(() => {
     fetchReports();
@@ -180,7 +184,7 @@ export default function Reports({ user }) {
       );
 
       if (!response.ok) {
-        throw new Error("Export failed");
+        throw new Error(t("Export failed"));
       }
 
       const blob = await response.blob();
@@ -197,7 +201,7 @@ export default function Reports({ user }) {
       document.body.removeChild(a);
     } catch (err) {
       console.error("PDF export failed:", err);
-      alert("Failed to export PDF. Please try again.");
+      alert(t("Failed to export PDF. Please try again."));
     } finally {
       setExportLoading((prev) => ({ ...prev, pdf: false }));
     }
@@ -219,7 +223,7 @@ export default function Reports({ user }) {
       );
 
       if (!response.ok) {
-        throw new Error("Export failed");
+        throw new Error(t("Export failed"));
       }
 
       const blob = await response.blob();
@@ -236,7 +240,7 @@ export default function Reports({ user }) {
       document.body.removeChild(a);
     } catch (err) {
       console.error("Excel export failed:", err);
-      alert("Failed to export Excel. Please try again.");
+      alert(t("Failed to export Excel. Please try again."));
     } finally {
       setExportLoading((prev) => ({ ...prev, excel: false }));
     }
@@ -268,18 +272,20 @@ export default function Reports({ user }) {
         fetchTransactions();
         fetchReports(); // Refresh reports to reflect changes
       } else {
-        throw new Error("Failed to update transaction");
+        throw new Error(t("Failed to update transaction"));
       }
     } catch (err) {
       console.error("Failed to update transaction:", err);
-      alert("Failed to update transaction. Please try again.");
+      alert(t("Failed to update transaction. Please try again."));
     }
   };
 
   const handleDeleteTransaction = async (transactionId) => {
     if (
       !confirm(
-        "Are you sure you want to delete this transaction? This action cannot be undone."
+        t(
+          "Are you sure you want to delete this transaction? This action cannot be undone."
+        )
       )
     ) {
       return;
@@ -294,11 +300,11 @@ export default function Reports({ user }) {
         fetchTransactions();
         fetchReports(); // Refresh reports to reflect changes
       } else {
-        throw new Error("Failed to delete transaction");
+        throw new Error(t("Failed to delete transaction"));
       }
     } catch (err) {
       console.error("Failed to delete transaction:", err);
-      alert("Failed to delete transaction. Please try again.");
+      alert(t("Failed to delete transaction. Please try again."));
     }
   };
 
@@ -328,11 +334,11 @@ export default function Reports({ user }) {
         fetchTransactions();
         fetchReports(); // Refresh reports to reflect changes
       } else {
-        throw new Error("Failed to add transaction");
+        throw new Error(t("Failed to add transaction"));
       }
     } catch (err) {
       console.error("Failed to add transaction:", err);
-      alert("Failed to add transaction. Please try again.");
+      alert(t("Failed to add transaction. Please try again."));
     }
   };
 
@@ -340,7 +346,7 @@ export default function Reports({ user }) {
     return (
       <div className="reports-loading">
         <div className="loading-spinner"></div>
-        <p>Loading comprehensive reports...</p>
+        <p>{t("Loading comprehensive reports...")}</p>
       </div>
     );
   }
@@ -353,7 +359,7 @@ export default function Reports({ user }) {
       ) || [],
     datasets: [
       {
-        label: "Daily Revenue",
+        label: t("Daily Revenue"),
         data: reportData.revenueByDay?.map((d) => d.revenue) || [],
         borderColor: "#2563eb",
         backgroundColor: "rgba(37, 99, 235, 0.1)",
@@ -391,14 +397,14 @@ export default function Reports({ user }) {
     labels: reportData.barberPerformance?.map((b) => b.name) || [],
     datasets: [
       {
-        label: "Revenue (EGP)",
+        label: t("Revenue") + ` (${t("currency")})`,
         data: reportData.barberPerformance?.map((b) => b.revenue) || [],
         backgroundColor: "#059669",
         borderRadius: 6,
         yAxisID: "y",
       },
       {
-        label: "Transactions",
+        label: t("Transactions"),
         data: reportData.barberPerformance?.map((b) => b.count) || [],
         backgroundColor: "#dc2626",
         borderRadius: 6,
@@ -412,14 +418,14 @@ export default function Reports({ user }) {
     labels: reportData.productSales?.map((p) => p.name) || [],
     datasets: [
       {
-        label: "Revenue (EGP)",
+        label: t("Revenue") + ` (${t("currency")})`,
         data: reportData.productSales?.map((p) => p.revenue) || [],
         backgroundColor: "#2563eb",
         borderRadius: 6,
         yAxisID: "y",
       },
       {
-        label: "Units Sold",
+        label: t("Units Sold"),
         data: reportData.productSales?.map((p) => p.quantity) || [],
         backgroundColor: "#059669",
         borderRadius: 6,
@@ -429,7 +435,7 @@ export default function Reports({ user }) {
   };
 
   const paymentMethodData = {
-    labels: reportData.paymentMethods?.map((p) => p.method) || [],
+    labels: reportData.paymentMethods?.map((p) => t(p.method)) || [],
     datasets: [
       {
         data: reportData.paymentMethods?.map((p) => p.amount) || [],
@@ -450,21 +456,21 @@ export default function Reports({ user }) {
       y: {
         type: "linear",
         display: true,
-        position: "left",
+        position: isRTL ? "right" : "left",
         beginAtZero: true,
         title: {
           display: true,
-          text: "Revenue (EGP)",
+          text: t("Revenue") + ` (${t("currency")})`,
         },
       },
       y1: {
         type: "linear",
         display: true,
-        position: "right",
+        position: isRTL ? "left" : "right",
         beginAtZero: true,
         title: {
           display: true,
-          text: "Count",
+          text: t("Count"),
         },
         grid: {
           drawOnChartArea: false,
@@ -474,12 +480,12 @@ export default function Reports({ user }) {
   };
 
   return (
-    <div className="enhanced-reports">
+    <div className={`enhanced-reports ${isRTL ? "rtl" : "ltr"}`}>
       {/* Header */}
       <div className="reports-header">
         <h1 className="reports-title">
           <BarChart3 size={36} />
-          Business Intelligence
+          {t("Business Intelligence")}
         </h1>
         <div className="header-actions">
           <button
@@ -488,7 +494,7 @@ export default function Reports({ user }) {
             disabled={exportLoading.pdf}
           >
             <Download size={16} />
-            {exportLoading.pdf ? "Exporting..." : "Export PDF"}
+            {exportLoading.pdf ? t("Exporting...") : t("Export PDF")}
           </button>
           <button
             className="action-btn"
@@ -496,7 +502,7 @@ export default function Reports({ user }) {
             disabled={exportLoading.excel}
           >
             <Download size={16} />
-            {exportLoading.excel ? "Exporting..." : "Export Excel"}
+            {exportLoading.excel ? t("Exporting...") : t("Export Excel")}
           </button>
           <button
             className="action-btn primary"
@@ -504,7 +510,7 @@ export default function Reports({ user }) {
             disabled={loading}
           >
             <RefreshCcw size={16} />
-            {loading ? "Loading..." : "Refresh"}
+            {loading ? t("Loading...") : t("Refresh")}
           </button>
         </div>
       </div>
@@ -513,11 +519,11 @@ export default function Reports({ user }) {
       <div className="filters-section">
         <h2 className="filters-title">
           <Calendar size={20} />
-          Report Filters
+          {t("Report Filters")}
         </h2>
         <div className="filters-grid">
           <div className="filter-group">
-            <label className="filter-label">Time Period</label>
+            <label className="filter-label">{t("Time Period")}</label>
             <select
               className="filter-select"
               value={selectedPeriod}
@@ -533,7 +539,7 @@ export default function Reports({ user }) {
           {selectedPeriod === "custom" && (
             <>
               <div className="filter-group">
-                <label className="filter-label">Start Date</label>
+                <label className="filter-label">{t("Start Date")}</label>
                 <input
                   type="date"
                   className="filter-input"
@@ -542,7 +548,7 @@ export default function Reports({ user }) {
                 />
               </div>
               <div className="filter-group">
-                <label className="filter-label">End Date</label>
+                <label className="filter-label">{t("End Date")}</label>
                 <input
                   type="date"
                   className="filter-input"
@@ -556,21 +562,20 @@ export default function Reports({ user }) {
       </div>
 
       {/* Tabs Navigation */}
-      {/* Tabs Navigation */}
       <div className="tabs-navigation">
         <button
           className={`tab-button ${activeTab === "overview" ? "active" : ""}`}
           onClick={() => setActiveTab("overview")}
         >
           <Eye size={16} />
-          Overview
+          {t("Overview")}
         </button>
         <button
           className={`tab-button ${activeTab === "financial" ? "active" : ""}`}
           onClick={() => setActiveTab("financial")}
         >
           <DollarSign size={16} />
-          Financial
+          {t("Financial")}
         </button>
         <button
           className={`tab-button ${
@@ -579,21 +584,21 @@ export default function Reports({ user }) {
           onClick={() => setActiveTab("profit-loss")}
         >
           <BarChart3 size={16} />
-          P&L Report
+          {t("P&L Report")}
         </button>
         <button
           className={`tab-button ${activeTab === "products" ? "active" : ""}`}
           onClick={() => setActiveTab("products")}
         >
           <Package size={16} />
-          Products
+          {t("Products")}
         </button>
         <button
           className={`tab-button ${activeTab === "staff" ? "active" : ""}`}
           onClick={() => setActiveTab("staff")}
         >
           <Users size={16} />
-          Staff Performance
+          {t("Staff Performance")}
         </button>
         <button
           className={`tab-button ${
@@ -602,7 +607,7 @@ export default function Reports({ user }) {
           onClick={() => setActiveTab("transactions")}
         >
           <CreditCard size={16} />
-          Transactions
+          {t("Transactions")}
         </button>
       </div>
 
@@ -614,13 +619,13 @@ export default function Reports({ user }) {
             <div className="metric-card">
               <div className="metric-header">
                 <div className="metric-info">
-                  <h3>Total Revenue</h3>
+                  <h3>{t("Total Revenue")}</h3>
                   <p className="metric-value">
-                    {reportData.totalRevenue?.toFixed(2)} EGP
+                    {reportData.totalRevenue?.toFixed(2)} {t("currency")}
                   </p>
                   <div className="metric-change positive">
                     <TrendingUp size={14} />
-                    {reportData.revenueGrowth || 0}% vs last period
+                    {reportData.revenueGrowth || 0}% {t("vs last period")}
                   </div>
                 </div>
                 <div className="metric-icon revenue">
@@ -632,13 +637,13 @@ export default function Reports({ user }) {
             <div className="metric-card">
               <div className="metric-header">
                 <div className="metric-info">
-                  <h3>Total Transactions</h3>
+                  <h3>{t("Total Transactions")}</h3>
                   <p className="metric-value">
                     {reportData.totalTransactions || 0}
                   </p>
                   <div className="metric-change positive">
                     <TrendingUp size={14} />
-                    {reportData.transactionGrowth || 0}% vs last period
+                    {reportData.transactionGrowth || 0}% {t("vs last period")}
                   </div>
                 </div>
                 <div className="metric-icon transactions">
@@ -650,13 +655,13 @@ export default function Reports({ user }) {
             <div className="metric-card">
               <div className="metric-header">
                 <div className="metric-info">
-                  <h3>Average Order Value</h3>
+                  <h3>{t("Average Order Value")}</h3>
                   <p className="metric-value">
-                    {reportData.averageOrderValue?.toFixed(2)} EGP
+                    {reportData.averageOrderValue?.toFixed(2)} {t("currency")}
                   </p>
                   <div className="metric-change positive">
                     <TrendingUp size={14} />
-                    {reportData.aovGrowth || 0}% vs last period
+                    {reportData.aovGrowth || 0}% {t("vs last period")}
                   </div>
                 </div>
                 <div className="metric-icon aov">
@@ -668,13 +673,14 @@ export default function Reports({ user }) {
             <div className="metric-card">
               <div className="metric-header">
                 <div className="metric-info">
-                  <h3>Top Service</h3>
+                  <h3>{t("Top Service")}</h3>
                   <p className="metric-value top-service-name">
-                    {reportData.topService?.name || "N/A"}
+                    {reportData.topService?.name || t("N/A")}
                   </p>
                   <div className="metric-change positive">
                     <Star size={14} />
-                    {reportData.topService?.revenue?.toFixed(2)} EGP revenue
+                    {reportData.topService?.revenue?.toFixed(2)} {t("currency")}{" "}
+                    {t("revenue")}
                   </div>
                 </div>
                 <div className="metric-icon service">
@@ -689,7 +695,7 @@ export default function Reports({ user }) {
             <div className="chart-header">
               <h2 className="chart-title">
                 <TrendingUp size={20} />
-                Revenue Trend
+                {t("Revenue Trend")}
               </h2>
             </div>
             <div className="chart-container">
@@ -709,7 +715,7 @@ export default function Reports({ user }) {
                         beginAtZero: true,
                         ticks: {
                           callback: function (value) {
-                            return value + " EGP";
+                            return value + " " + t("currency");
                           },
                         },
                       },
@@ -718,7 +724,9 @@ export default function Reports({ user }) {
                 />
               ) : (
                 <div className="empty-state">
-                  <p>No revenue data available for the selected period</p>
+                  <p>
+                    {t("No revenue data available for the selected period")}
+                  </p>
                 </div>
               )}
             </div>
@@ -735,7 +743,7 @@ export default function Reports({ user }) {
                 <div className="chart-header">
                   <h2 className="chart-title">
                     <PieChart size={20} />
-                    Revenue by Service
+                    {t("Revenue by Service")}
                   </h2>
                 </div>
                 <div className="chart-container">
@@ -753,7 +761,11 @@ export default function Reports({ user }) {
                             callbacks: {
                               label: function (context) {
                                 return (
-                                  context.label + ": " + context.parsed + " EGP"
+                                  context.label +
+                                  ": " +
+                                  context.parsed +
+                                  " " +
+                                  t("currency")
                                 );
                               },
                             },
@@ -763,7 +775,7 @@ export default function Reports({ user }) {
                     />
                   ) : (
                     <div className="empty-state">
-                      <p>No service revenue data available</p>
+                      <p>{t("No service revenue data available")}</p>
                     </div>
                   )}
                 </div>
@@ -774,7 +786,7 @@ export default function Reports({ user }) {
               <div className="chart-header">
                 <h2 className="chart-title">
                   <CreditCard size={20} />
-                  Payment Methods
+                  {t("Payment Methods")}
                 </h2>
               </div>
               <div className="chart-container">
@@ -792,7 +804,11 @@ export default function Reports({ user }) {
                           callbacks: {
                             label: function (context) {
                               return (
-                                context.label + ": " + context.parsed + " EGP"
+                                context.label +
+                                ": " +
+                                context.parsed +
+                                " " +
+                                t("currency")
                               );
                             },
                           },
@@ -802,7 +818,7 @@ export default function Reports({ user }) {
                   />
                 ) : (
                   <div className="empty-state">
-                    <p>No payment method data available</p>
+                    <p>{t("No payment method data available")}</p>
                   </div>
                 )}
               </div>
@@ -812,19 +828,21 @@ export default function Reports({ user }) {
           {/* Financial Insights */}
           <div className="insights-grid">
             <div className="insight-card revenue-insight">
-              <h3 className="insight-title"> Revenue Insight</h3>
+              <h3 className="insight-title">{t("Revenue Insight")}</h3>
               <p className="insight-description">
-                {reportData.topService?.name || "Your top service"} generates
-                the highest revenue. Consider promoting similar services to
-                maximize earnings.
+                {reportData.topService?.name || t("Your top service")}{" "}
+                {t(
+                  "generates the highest revenue. Consider promoting similar services to maximize earnings."
+                )}
               </p>
             </div>
             <div className="insight-card payment-insight">
-              <h3 className="insight-title">Payment Trends</h3>
+              <h3 className="insight-title">{t("Payment Trends")}</h3>
               <p className="insight-description">
-                {reportData.paymentMethods?.[0]?.method || "Cash"} is your most
-                popular payment method. Consider offering incentives for digital
-                payments.
+                {t(reportData.paymentMethods?.[0]?.method) || t("Cash")}{" "}
+                {t(
+                  "is your most popular payment method. Consider offering incentives for digital payments."
+                )}
               </p>
             </div>
           </div>
@@ -838,29 +856,29 @@ export default function Reports({ user }) {
           <div className="pl-summary-grid">
             <div className="pl-card income">
               <div className="pl-header">
-                <h3>Total Income</h3>
+                <h3>{t("Total Income")}</h3>
                 <TrendingUp size={24} className="pl-icon" />
               </div>
               <div className="pl-amount positive">
-                {reportData.totalRevenue?.toFixed(2)} EGP
+                {reportData.totalRevenue?.toFixed(2)} {t("currency")}
               </div>
               <div className="pl-breakdown">
                 <div className="pl-item">
-                  <span>Service Revenue:</span>
+                  <span>{t("Service Revenue")}:</span>
                   <span>
                     {reportData.serviceRevenue
                       ?.reduce((sum, s) => sum + (s.revenue || 0), 0)
                       ?.toFixed(2)}{" "}
-                    EGP
+                    {t("currency")}
                   </span>
                 </div>
                 <div className="pl-item">
-                  <span>Product Revenue:</span>
+                  <span>{t("Product Revenue")}:</span>
                   <span>
                     {reportData.productSales
                       ?.reduce((sum, p) => sum + (p.revenue || 0), 0)
                       ?.toFixed(2)}{" "}
-                    EGP
+                    {t("currency")}
                   </span>
                 </div>
               </div>
@@ -868,22 +886,24 @@ export default function Reports({ user }) {
 
             <div className="pl-card expenses">
               <div className="pl-header">
-                <h3>Total Expenses</h3>
+                <h3>{t("Total Expenses")}</h3>
                 <TrendingDown size={24} className="pl-icon" />
               </div>
               <div className="pl-amount negative">
-                {reportData.totalExpenses?.toFixed(2)} EGP
+                {reportData.totalExpenses?.toFixed(2)} {t("currency")}
               </div>
               <div className="pl-breakdown">
                 {reportData.expenseCategories?.map((expense, index) => (
                   <div key={index} className="pl-item">
                     <span>
                       {expense.expense_type === "general"
-                        ? "General"
-                        : "Recurring"}
+                        ? t("General")
+                        : t("Recurring")}
                       :
                     </span>
-                    <span>{expense.amount?.toFixed(2)} EGP</span>
+                    <span>
+                      {expense.amount?.toFixed(2)} {t("currency")}
+                    </span>
                   </div>
                 ))}
               </div>
@@ -891,7 +911,7 @@ export default function Reports({ user }) {
 
             <div className="pl-card profit">
               <div className="pl-header">
-                <h3>Net Profit</h3>
+                <h3>{t("Net Profit")}</h3>
                 <Target size={24} className="pl-icon" />
               </div>
               <div
@@ -899,15 +919,15 @@ export default function Reports({ user }) {
                   reportData.netProfit >= 0 ? "positive" : "negative"
                 }`}
               >
-                {reportData.netProfit?.toFixed(2)} EGP
+                {reportData.netProfit?.toFixed(2)} {t("currency")}
               </div>
               <div className="pl-breakdown">
                 <div className="pl-item">
-                  <span>Profit Margin:</span>
+                  <span>{t("Profit Margin")}:</span>
                   <span>{reportData.profitMargin?.toFixed(1)}%</span>
                 </div>
                 <div className="pl-item">
-                  <span>Expense Ratio:</span>
+                  <span>{t("Expense Ratio")}:</span>
                   <span>
                     {reportData.totalRevenue > 0
                       ? (
@@ -925,12 +945,12 @@ export default function Reports({ user }) {
           {/* Detailed P&L Statement */}
           <div className="pl-statement">
             <div className="statement-header">
-              <h2>Profit & Loss Statement</h2>
+              <h2>{t("Profit & Loss Statement")}</h2>
               <p>
-                Period:{" "}
+                {t("Period")}:{" "}
                 {selectedPeriod === "custom"
-                  ? `${startDate} to ${endDate}`
-                  : selectedPeriod}
+                  ? `${startDate} ${t("to")} ${endDate}`
+                  : t(selectedPeriod)}
               </p>
             </div>
 
@@ -938,22 +958,24 @@ export default function Reports({ user }) {
               <table>
                 <thead>
                   <tr>
-                    <th>Description</th>
-                    <th>Amount (EGP)</th>
-                    <th>% of Revenue</th>
+                    <th>{t("Description")}</th>
+                    <th>
+                      {t("Amount")} ({t("currency")})
+                    </th>
+                    <th>{t("% of Revenue")}</th>
                   </tr>
                 </thead>
                 <tbody>
                   {/* Income Section */}
                   <tr className="section-header">
                     <td>
-                      <strong>INCOME</strong>
+                      <strong>{t("INCOME")}</strong>
                     </td>
                     <td></td>
                     <td></td>
                   </tr>
                   <tr>
-                    <td className="indent">Service Revenue</td>
+                    <td className="indent">{t("Service Revenue")}</td>
                     <td className="amount positive">
                       {reportData.serviceRevenue
                         ?.reduce((sum, s) => sum + (s.revenue || 0), 0)
@@ -974,7 +996,7 @@ export default function Reports({ user }) {
                     </td>
                   </tr>
                   <tr>
-                    <td className="indent">Product Revenue</td>
+                    <td className="indent">{t("Product Revenue")}</td>
                     <td className="amount positive">
                       {reportData.productSales
                         ?.reduce((sum, p) => sum + (p.revenue || 0), 0)
@@ -996,7 +1018,7 @@ export default function Reports({ user }) {
                   </tr>
                   <tr className="subtotal">
                     <td>
-                      <strong>Total Income</strong>
+                      <strong>{t("Total Income")}</strong>
                     </td>
                     <td className="amount positive">
                       <strong>{reportData.totalRevenue?.toFixed(2)}</strong>
@@ -1009,7 +1031,7 @@ export default function Reports({ user }) {
                   {/* Expenses Section */}
                   <tr className="section-header">
                     <td>
-                      <strong>EXPENSES</strong>
+                      <strong>{t("EXPENSES")}</strong>
                     </td>
                     <td></td>
                     <td></td>
@@ -1018,8 +1040,8 @@ export default function Reports({ user }) {
                     <tr key={index}>
                       <td className="indent">
                         {expense.expense_type === "general"
-                          ? "General Expenses"
-                          : "Recurring Expenses"}
+                          ? t("General Expenses")
+                          : t("Recurring Expenses")}
                       </td>
                       <td className="amount negative">
                         {expense.amount?.toFixed(2)}
@@ -1037,7 +1059,7 @@ export default function Reports({ user }) {
                   ))}
                   <tr className="subtotal">
                     <td>
-                      <strong>Total Expenses</strong>
+                      <strong>{t("Total Expenses")}</strong>
                     </td>
                     <td className="amount negative">
                       <strong>{reportData.totalExpenses?.toFixed(2)}</strong>
@@ -1059,7 +1081,7 @@ export default function Reports({ user }) {
                   {/* Net Profit */}
                   <tr className="total-row">
                     <td>
-                      <strong>NET PROFIT/LOSS</strong>
+                      <strong>{t("NET PROFIT/LOSS")}</strong>
                     </td>
                     <td
                       className={`amount ${
@@ -1087,17 +1109,17 @@ export default function Reports({ user }) {
               <div className="table-header">
                 <h2 className="table-title">
                   <Receipt size={20} />
-                  Recent Expenses
+                  {t("Recent Expenses")}
                 </h2>
               </div>
               <table>
                 <thead>
                   <tr>
-                    <th>Date</th>
-                    <th>Name</th>
-                    <th>Type</th>
-                    <th>Amount</th>
-                    <th>Notes</th>
+                    <th>{t("Date")}</th>
+                    <th>{t("Name")}</th>
+                    <th>{t("Type")}</th>
+                    <th>{t("Amount")}</th>
+                    <th>{t("Notes")}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1114,12 +1136,12 @@ export default function Reports({ user }) {
                             className={`expense-type-badge ${expense.expense_type}`}
                           >
                             {expense.expense_type === "general"
-                              ? "General"
-                              : "Recurring"}
+                              ? t("General")
+                              : t("Recurring")}
                           </span>
                         </td>
                         <td className="amount negative">
-                          {expense.amount?.toFixed(2)} EGP
+                          {expense.amount?.toFixed(2)} {t("currency")}
                         </td>
                         <td>{expense.notes || "-"}</td>
                       </tr>
@@ -1138,7 +1160,7 @@ export default function Reports({ user }) {
             <div className="chart-header">
               <h2 className="chart-title">
                 <Package size={20} />
-                Product Sales Performance - Revenue & Units Sold
+                {t("Product Sales Performance - Revenue & Units Sold")}
               </h2>
             </div>
             <div className="chart-container">
@@ -1146,7 +1168,7 @@ export default function Reports({ user }) {
                 <Bar data={productPerformanceData} options={chartOptions} />
               ) : (
                 <div className="empty-state">
-                  <p>No product sales data available</p>
+                  <p>{t("No product sales data available")}</p>
                 </div>
               )}
             </div>
@@ -1158,16 +1180,16 @@ export default function Reports({ user }) {
               <div className="table-header">
                 <h2 className="table-title">
                   <AlertTriangle size={20} className="warning-icon" />
-                  Low Stock Alert
+                  {t("Low Stock Alert")}
                 </h2>
               </div>
               <table>
                 <thead>
                   <tr>
-                    <th>Product</th>
-                    <th>Current Stock</th>
-                    <th>Reorder Level</th>
-                    <th>Supplier</th>
+                    <th>{t("Product")}</th>
+                    <th>{t("Current Stock")}</th>
+                    <th>{t("Reorder Level")}</th>
+                    <th>{t("Supplier")}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1178,7 +1200,7 @@ export default function Reports({ user }) {
                         {product.stock_quantity}
                       </td>
                       <td>{product.reorder_level}</td>
-                      <td>{product.supplier_name || "No Supplier"}</td>
+                      <td>{product.supplier_name || t("No Supplier")}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -1195,7 +1217,7 @@ export default function Reports({ user }) {
             <div className="chart-header">
               <h2 className="chart-title">
                 <Users size={20} />
-                Barber Performance Analysis - Revenue & Transactions
+                {t("Barber Performance Analysis - Revenue & Transactions")}
               </h2>
             </div>
             <div className="chart-container">
@@ -1203,7 +1225,7 @@ export default function Reports({ user }) {
                 <Bar data={barberPerformanceData} options={chartOptions} />
               ) : (
                 <div className="empty-state">
-                  <p>No barber performance data available</p>
+                  <p>{t("No barber performance data available")}</p>
                 </div>
               )}
             </div>
@@ -1212,16 +1234,16 @@ export default function Reports({ user }) {
           {/* Staff Performance Table */}
           <div className="data-table">
             <div className="table-header">
-              <h2 className="table-title">Detailed Staff Performance</h2>
+              <h2 className="table-title">{t("Detailed Staff Performance")}</h2>
             </div>
             <table>
               <thead>
                 <tr>
-                  <th>Barber</th>
-                  <th>Transactions</th>
-                  <th>Total Revenue</th>
-                  <th>Avg. per Transaction</th>
-                  <th>Performance</th>
+                  <th>{t("Barber")}</th>
+                  <th>{t("Transactions")}</th>
+                  <th>{t("Total Revenue")}</th>
+                  <th>{t("Avg. per Transaction")}</th>
+                  <th>{t("Performance")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -1229,8 +1251,13 @@ export default function Reports({ user }) {
                   <tr key={index}>
                     <td className="barber-name">{barber.name}</td>
                     <td>{barber.count}</td>
-                    <td className="amount">{barber.revenue?.toFixed(2)} EGP</td>
-                    <td>{(barber.revenue / barber.count).toFixed(2)} EGP</td>
+                    <td className="amount">
+                      {barber.revenue?.toFixed(2)} {t("currency")}
+                    </td>
+                    <td>
+                      {(barber.revenue / barber.count).toFixed(2)}{" "}
+                      {t("currency")}
+                    </td>
                     <td>
                       <span
                         className={`performance-badge ${
@@ -1242,10 +1269,10 @@ export default function Reports({ user }) {
                         }`}
                       >
                         {index === 0
-                          ? " Top Performer"
+                          ? t("Top Performer")
                           : index === 1
-                          ? " Good"
-                          : " Average"}
+                          ? t("Good")
+                          : t("Average")}
                       </span>
                     </td>
                   </tr>
@@ -1257,20 +1284,24 @@ export default function Reports({ user }) {
           {/* Staff Insights */}
           <div className="insights-grid">
             <div className="insight-card staff-insight">
-              <h3 className="insight-title"> Top Performer</h3>
+              <h3 className="insight-title">{t("Top Performer")}</h3>
               <p className="insight-description">
-                {reportData.barberPerformance?.[0]?.name || "Your top barber"}{" "}
-                is leading with{" "}
-                {reportData.barberPerformance?.[0]?.revenue?.toFixed(2)} EGP in
-                revenue. Consider recognizing their excellent performance!
+                {reportData.barberPerformance?.[0]?.name ||
+                  t("Your top barber")}{" "}
+                {t("is leading with")}{" "}
+                {reportData.barberPerformance?.[0]?.revenue?.toFixed(2)}{" "}
+                {t("currency")}{" "}
+                {t(
+                  "in revenue. Consider recognizing their excellent performance!"
+                )}
               </p>
             </div>
             <div className="insight-card growth-insight">
-              <h3 className="insight-title">Growth Opportunity</h3>
+              <h3 className="insight-title">{t("Growth Opportunity")}</h3>
               <p className="insight-description">
-                Focus on training and development for lower-performing staff
-                members to boost overall team productivity and customer
-                satisfaction.
+                {t(
+                  "Focus on training and development for lower-performing staff members to boost overall team productivity and customer satisfaction."
+                )}
               </p>
             </div>
           </div>
@@ -1284,25 +1315,25 @@ export default function Reports({ user }) {
             <div className="table-header">
               <h2 className="table-title">
                 <CreditCard size={20} />
-                Transaction Management
+                {t("Transaction Management")}
               </h2>
               <button
                 className="action-btn primary"
                 onClick={() => setShowAddTransaction(true)}
               >
                 <Plus size={16} />
-                Add Transaction
+                {t("Add Transaction")}
               </button>
             </div>
 
             {/* Add Transaction Form */}
             {showAddTransaction && (
               <div className="transaction-form">
-                <h3>Add New Transaction</h3>
+                <h3>{t("Add New Transaction")}</h3>
                 <div className="form-grid">
                   <input
                     type="text"
-                    placeholder="Customer Name"
+                    placeholder={t("Customer Name")}
                     value={newTransaction.customer_name}
                     onChange={(e) =>
                       setNewTransaction({
@@ -1313,7 +1344,7 @@ export default function Reports({ user }) {
                   />
                   <input
                     type="text"
-                    placeholder="Barber Name"
+                    placeholder={t("Barber Name")}
                     value={newTransaction.barber_name}
                     onChange={(e) =>
                       setNewTransaction({
@@ -1324,7 +1355,7 @@ export default function Reports({ user }) {
                   />
                   <input
                     type="number"
-                    placeholder="Total Amount"
+                    placeholder={t("Total Amount")}
                     value={newTransaction.total}
                     onChange={(e) =>
                       setNewTransaction({
@@ -1342,8 +1373,8 @@ export default function Reports({ user }) {
                       })
                     }
                   >
-                    <option value="cash">Cash</option>
-                    <option value="card">Card</option>
+                    <option value="cash">{t("Cash")}</option>
+                    <option value="card">{t("Card")}</option>
                   </select>
                   <input
                     type="date"
@@ -1362,14 +1393,14 @@ export default function Reports({ user }) {
                     onClick={handleAddTransaction}
                   >
                     <Save size={16} />
-                    Save Transaction
+                    {t("Save Transaction")}
                   </button>
                   <button
                     className="action-btn"
                     onClick={() => setShowAddTransaction(false)}
                   >
                     <X size={16} />
-                    Cancel
+                    {t("Cancel")}
                   </button>
                 </div>
               </div>
@@ -1378,12 +1409,12 @@ export default function Reports({ user }) {
             <table>
               <thead>
                 <tr>
-                  <th>Date</th>
-                  <th>Customer</th>
-                  <th>Barber</th>
-                  <th>Payment Method</th>
-                  <th>Total</th>
-                  <th>Actions</th>
+                  <th>{t("Date")}</th>
+                  <th>{t("Customer")}</th>
+                  <th>{t("Barber")}</th>
+                  <th>{t("Payment Method")}</th>
+                  <th>{t("Total")}</th>
+                  <th>{t("Actions")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -1448,14 +1479,14 @@ export default function Reports({ user }) {
                             })
                           }
                         >
-                          <option value="cash">Cash</option>
-                          <option value="card">Card</option>
+                          <option value="cash">{t("Cash")}</option>
+                          <option value="card">{t("Card")}</option>
                         </select>
                       ) : (
                         <span
                           className={`payment-badge ${transaction.payment_method}`}
                         >
-                          {transaction.payment_method?.toUpperCase()}
+                          {t(transaction.payment_method?.toUpperCase())}
                         </span>
                       )}
                     </td>
@@ -1473,7 +1504,7 @@ export default function Reports({ user }) {
                         />
                       ) : (
                         <span className="amount">
-                          {transaction.total?.toFixed(2)} EGP
+                          {transaction.total?.toFixed(2)} {t("currency")}
                         </span>
                       )}
                     </td>
@@ -1526,18 +1557,18 @@ export default function Reports({ user }) {
           <div className="table-header">
             <h2 className="table-title">
               <Clock size={20} />
-              Recent Transactions
+              {t("Recent Transactions")}
             </h2>
           </div>
           <table>
             <thead>
               <tr>
-                <th>Date</th>
-                <th>Customer</th>
-                <th>Barber</th>
-                <th>Services/Products</th>
-                <th>Payment Method</th>
-                <th>Total</th>
+                <th>{t("Date")}</th>
+                <th>{t("Customer")}</th>
+                <th>{t("Barber")}</th>
+                <th>{t("Services/Products")}</th>
+                <th>{t("Payment Method")}</th>
+                <th>{t("Total")}</th>
               </tr>
             </thead>
             <tbody>
@@ -1556,7 +1587,7 @@ export default function Reports({ user }) {
                       <div className="transaction-items">
                         {transaction.items
                           ?.map((item) => item.name)
-                          .join(", ") || "N/A"}
+                          .join(", ") || t("N/A")}
                       </div>
                     </td>
                     <td>
@@ -1567,11 +1598,12 @@ export default function Reports({ user }) {
                             : "card"
                         }`}
                       >
-                        {transaction.payment_method?.toUpperCase() || "CASH"}
+                        {t(transaction.payment_method?.toUpperCase()) ||
+                          t("CASH")}
                       </span>
                     </td>
                     <td className="amount">
-                      {transaction.total?.toFixed(2)} EGP
+                      {transaction.total?.toFixed(2)} {t("currency")}
                     </td>
                   </tr>
                 ))}

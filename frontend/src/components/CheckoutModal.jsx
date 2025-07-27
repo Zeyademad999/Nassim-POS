@@ -11,6 +11,7 @@ import {
   Receipt,
   CheckCircle,
 } from "lucide-react";
+import { useLanguage } from "../context/LanguageContext";
 import "../styles/CheckoutModal.css";
 
 export default function CheckoutModal({
@@ -28,6 +29,8 @@ export default function CheckoutModal({
   onClose,
   onComplete,
 }) {
+  const { t, isRTL } = useLanguage();
+
   const currentDate = new Date();
   const receiptNumber = `NSB-${Date.now()}`;
   const invoiceNumber = `INV-${currentDate.getFullYear()}-${String(
@@ -50,13 +53,13 @@ export default function CheckoutModal({
     // Tagline
     doc.setFontSize(12);
     doc.setFont(undefined, "normal");
-    doc.text("Premium Grooming & Retail Services", 20, 35);
+    doc.text(t("Premium Grooming & Retail Services"), 20, 35);
 
     // Invoice header
     doc.setTextColor(0, 0, 0);
     doc.setFontSize(20);
     doc.setFont(undefined, "bold");
-    doc.text("INVOICE", 150, 55);
+    doc.text(t("INVOICE"), 150, 55);
 
     // Invoice details box
     doc.setDrawColor(229, 231, 235);
@@ -65,11 +68,17 @@ export default function CheckoutModal({
 
     doc.setFontSize(10);
     doc.setFont(undefined, "normal");
-    doc.text(`Invoice #: ${invoiceNumber}`, 142, 68);
-    doc.text(`Receipt #: ${receiptNumber}`, 142, 75);
-    doc.text(`Date: ${currentDate.toLocaleDateString("en-GB")}`, 142, 82);
+    doc.text(`${t("Invoice #")}: ${invoiceNumber}`, 142, 68);
+    doc.text(`${t("Receipt #")}: ${receiptNumber}`, 142, 75);
     doc.text(
-      `Time: ${currentDate.toLocaleTimeString("en-GB", { hour12: false })}`,
+      `${t("Date")}: ${currentDate.toLocaleDateString("en-GB")}`,
+      142,
+      82
+    );
+    doc.text(
+      `${t("Time")}: ${currentDate.toLocaleTimeString("en-GB", {
+        hour12: false,
+      })}`,
       142,
       89
     );
@@ -78,7 +87,7 @@ export default function CheckoutModal({
     let yPos = 55;
     doc.setFontSize(12);
     doc.setFont(undefined, "bold");
-    doc.text("Business Details:", 20, yPos);
+    doc.text(`${t("Business Details")}:`, 20, yPos);
 
     yPos += 8;
     doc.setFont(undefined, "normal");
@@ -95,20 +104,24 @@ export default function CheckoutModal({
     yPos += 15;
     doc.setFont(undefined, "bold");
     doc.setFontSize(12);
-    doc.text("Customer Details:", 20, yPos);
+    doc.text(`${t("Customer Details")}:`, 20, yPos);
 
     yPos += 8;
     doc.setFont(undefined, "normal");
     doc.setFontSize(10);
-    doc.text(`Customer: ${customerName}`, 20, yPos);
+    doc.text(`${t("Customer")}: ${customerName}`, 20, yPos);
     yPos += 5;
     if (barberName && barberName !== "Walk-in") {
-      doc.text(`Barber: ${barberName}`, 20, yPos);
+      doc.text(`${t("Barber")}: ${barberName}`, 20, yPos);
       yPos += 5;
     }
-    doc.text(`Service Date: ${serviceDate}`, 20, yPos);
+    doc.text(`${t("Service Date")}: ${serviceDate}`, 20, yPos);
     yPos += 5;
-    doc.text(`Payment Method: ${paymentMethod.toUpperCase()}`, 20, yPos);
+    doc.text(
+      `${t("Payment Method")}: ${t(paymentMethod.toUpperCase())}`,
+      20,
+      yPos
+    );
 
     // Items table
     yPos += 20;
@@ -118,11 +131,11 @@ export default function CheckoutModal({
     doc.rect(20, yPos - 3, 170, 10, "F");
     doc.setFont(undefined, "bold");
     doc.setFontSize(10);
-    doc.text("Description", 25, yPos + 3);
-    doc.text("Type", 100, yPos + 3);
-    doc.text("Qty", 130, yPos + 3);
-    doc.text("Price", 150, yPos + 3);
-    doc.text("Total", 175, yPos + 3);
+    doc.text(t("Description"), 25, yPos + 3);
+    doc.text(t("Type"), 100, yPos + 3);
+    doc.text(t("Qty"), 130, yPos + 3);
+    doc.text(t("Price"), 150, yPos + 3);
+    doc.text(t("Total"), 175, yPos + 3);
 
     yPos += 12;
     doc.setFont(undefined, "normal");
@@ -135,11 +148,11 @@ export default function CheckoutModal({
       }
 
       doc.text(service.name, 25, yPos);
-      doc.text("Service", 100, yPos);
+      doc.text(t("Service"), 100, yPos);
       doc.text(service.quantity.toString(), 135, yPos);
-      doc.text(`${service.price.toFixed(2)} EGP`, 150, yPos);
+      doc.text(`${service.price.toFixed(2)} ${t("currency")}`, 150, yPos);
       doc.text(
-        `${(service.price * service.quantity).toFixed(2)} EGP`,
+        `${(service.price * service.quantity).toFixed(2)} ${t("currency")}`,
         170,
         yPos
       );
@@ -154,11 +167,11 @@ export default function CheckoutModal({
       }
 
       doc.text(product.name, 25, yPos);
-      doc.text("Product", 100, yPos);
+      doc.text(t("Product"), 100, yPos);
       doc.text(product.quantity.toString(), 135, yPos);
-      doc.text(`${product.price.toFixed(2)} EGP`, 150, yPos);
+      doc.text(`${product.price.toFixed(2)} ${t("currency")}`, 150, yPos);
       doc.text(
-        `${(product.price * product.quantity).toFixed(2)} EGP`,
+        `${(product.price * product.quantity).toFixed(2)} ${t("currency")}`,
         170,
         yPos
       );
@@ -173,20 +186,20 @@ export default function CheckoutModal({
     yPos += 10;
     const totalsStartX = 140;
 
-    doc.text("Subtotal:", totalsStartX, yPos);
-    doc.text(`${subtotal.toFixed(2)} EGP`, 175, yPos);
+    doc.text(`${t("Subtotal")}:`, totalsStartX, yPos);
+    doc.text(`${subtotal.toFixed(2)} ${t("currency")}`, 175, yPos);
     yPos += 7;
 
     if (discountAmount > 0) {
       doc.setTextColor(5, 150, 105); // Green for discount
-      doc.text("Discount:", totalsStartX, yPos);
-      doc.text(`-${discountAmount.toFixed(2)} EGP`, 175, yPos);
+      doc.text(`${t("Discount")}:`, totalsStartX, yPos);
+      doc.text(`-${discountAmount.toFixed(2)} ${t("currency")}`, 175, yPos);
       yPos += 7;
       doc.setTextColor(0, 0, 0);
     }
 
-    doc.text("Tax (8%):", totalsStartX, yPos);
-    doc.text(`${tax.toFixed(2)} EGP`, 175, yPos);
+    doc.text(`${t("Tax")} (8%):`, totalsStartX, yPos);
+    doc.text(`${tax.toFixed(2)} ${t("currency")}`, 175, yPos);
     yPos += 7;
 
     // Total with background
@@ -195,20 +208,24 @@ export default function CheckoutModal({
     doc.setTextColor(255, 255, 255);
     doc.setFont(undefined, "bold");
     doc.setFontSize(12);
-    doc.text("TOTAL:", totalsStartX, yPos + 3);
-    doc.text(`${total.toFixed(2)} EGP`, 175, yPos + 3);
+    doc.text(`${t("TOTAL")}:`, totalsStartX, yPos + 3);
+    doc.text(`${total.toFixed(2)} ${t("currency")}`, 175, yPos + 3);
 
     // Footer
     doc.setTextColor(0, 0, 0);
     doc.setFont(undefined, "normal");
     doc.setFontSize(9);
     yPos += 25;
-    doc.text("Thank you for choosing Nassim Select Barber!", 20, yPos);
+    doc.text(t("Thank you for choosing Nassim Select Barber!"), 20, yPos);
     yPos += 5;
-    doc.text("Follow us on social media @nassimbarber", 20, yPos);
+    doc.text(t("Follow us on social media @nassimbarber"), 20, yPos);
     yPos += 5;
     if (sendInvoice) {
-      doc.text("📧 This invoice has been sent to financial records.", 20, yPos);
+      doc.text(
+        `📧 ${t("This invoice has been sent to financial records.")}`,
+        20,
+        yPos
+      );
     }
 
     // Watermark
@@ -222,56 +239,66 @@ export default function CheckoutModal({
 
   const exportToExcel = () => {
     const sheetData = [
-      ["NASSIM SELECT BARBER - INVOICE"],
-      ["Premium Grooming & Retail Services"],
+      [t("NASSIM SELECT BARBER - INVOICE")],
+      [t("Premium Grooming & Retail Services")],
       [""],
-      [`Invoice #: ${invoiceNumber}`],
-      [`Receipt #: ${receiptNumber}`],
+      [`${t("Invoice #")}: ${invoiceNumber}`],
+      [`${t("Receipt #")}: ${receiptNumber}`],
       [
-        `Date: ${currentDate.toLocaleDateString(
+        `${t("Date")}: ${currentDate.toLocaleDateString(
           "en-GB"
         )} ${currentDate.toLocaleTimeString("en-GB")}`,
       ],
-      [`Service Date: ${serviceDate}`],
-      [`Customer: ${customerName}`],
+      [`${t("Service Date")}: ${serviceDate}`],
+      [`${t("Customer")}: ${customerName}`],
       ...(barberName && barberName !== "Walk-in"
-        ? [[`Barber: ${barberName}`]]
+        ? [[`${t("Barber")}: ${barberName}`]]
         : []),
-      [`Payment Method: ${paymentMethod.toUpperCase()}`],
+      [`${t("Payment Method")}: ${t(paymentMethod.toUpperCase())}`],
       [""],
-      ["SERVICES & PRODUCTS"],
-      ["Description", "Type", "Quantity", "Unit Price (EGP)", "Total (EGP)"],
+      [t("SERVICES & PRODUCTS")],
+      [
+        t("Description"),
+        t("Type"),
+        t("Quantity"),
+        `${t("Unit Price")} (${t("currency")})`,
+        `${t("Total")} (${t("currency")})`,
+      ],
       ...services.map((service) => [
         service.name,
-        "Service",
+        t("Service"),
         service.quantity,
         service.price,
         service.price * service.quantity,
       ]),
       ...products.map((product) => [
         product.name,
-        "Product",
+        t("Product"),
         product.quantity,
         product.price,
         product.price * product.quantity,
       ]),
       [""],
-      ["TOTALS"],
-      ["Subtotal", "", "", "", subtotal],
+      [t("TOTALS")],
+      [t("Subtotal"), "", "", "", subtotal],
       ...(discountAmount > 0
-        ? [["Discount", "", "", "", -discountAmount]]
+        ? [[t("Discount"), "", "", "", -discountAmount]]
         : []),
-      ["Tax (8%)", "", "", "", tax],
-      ["TOTAL", "", "", "", total],
+      [`${t("Tax")} (8%)`, "", "", "", tax],
+      [t("TOTAL"), "", "", "", total],
       [""],
-      [`Invoice Sent to Financial Records: ${sendInvoice ? "YES" : "NO"}`],
+      [
+        `${t("Invoice Sent to Financial Records")}: ${
+          sendInvoice ? t("YES") : t("NO")
+        }`,
+      ],
       [""],
-      ["Thank you for choosing Nassim Select Barber!"],
+      [t("Thank you for choosing Nassim Select Barber!")],
     ];
 
     const worksheet = XLSX.utils.aoa_to_sheet(sheetData);
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Invoice");
+    XLSX.utils.book_append_sheet(workbook, worksheet, t("Invoice"));
     XLSX.writeFile(workbook, `invoice-${invoiceNumber}.xlsx`);
   };
 
@@ -283,7 +310,7 @@ export default function CheckoutModal({
   const totalItems = services.length + products.length;
 
   return (
-    <div className="checkout-modal-overlay">
+    <div className={`checkout-modal-overlay ${isRTL ? "rtl" : "ltr"}`}>
       <style jsx>{`
         .checkout-success-badge {
           background: linear-gradient(45deg, #10b981, #059669);
@@ -446,7 +473,7 @@ export default function CheckoutModal({
 
       <div className="checkout-modal">
         <div className="checkout-header">
-          <h2>Transaction Complete!</h2>
+          <h2>{t("Transaction Complete!")}</h2>
           <button onClick={onClose}>
             <X size={20} />
           </button>
@@ -458,10 +485,10 @@ export default function CheckoutModal({
             <CheckCircle size={24} />
             <div>
               <h3 style={{ margin: 0, fontSize: "16px" }}>
-                Payment Successful
+                {t("Payment Successful")}
               </h3>
               <p style={{ margin: 0, fontSize: "14px", opacity: 0.9 }}>
-                Transaction has been processed
+                {t("Transaction has been processed")}
               </p>
             </div>
           </div>
@@ -469,22 +496,22 @@ export default function CheckoutModal({
           {/* Invoice Details */}
           <div className="invoice-details">
             <div className="invoice-row">
-              <span className="invoice-label">Invoice Number:</span>
+              <span className="invoice-label">{t("Invoice Number")}:</span>
               <span className="invoice-value">{invoiceNumber}</span>
             </div>
             <div className="invoice-row">
-              <span className="invoice-label">Receipt Number:</span>
+              <span className="invoice-label">{t("Receipt Number")}:</span>
               <span className="invoice-value">{receiptNumber}</span>
             </div>
             <div className="invoice-row">
-              <span className="invoice-label">Date & Time:</span>
+              <span className="invoice-label">{t("Date & Time")}:</span>
               <span className="invoice-value">
-                {currentDate.toLocaleDateString("en-GB")} at{" "}
+                {currentDate.toLocaleDateString("en-GB")} {t("at")}{" "}
                 {currentDate.toLocaleTimeString("en-GB")}
               </span>
             </div>
             <div className="invoice-row">
-              <span className="invoice-label">Service Date:</span>
+              <span className="invoice-label">{t("Service Date")}:</span>
               <span className="invoice-value">{serviceDate}</span>
             </div>
           </div>
@@ -494,17 +521,17 @@ export default function CheckoutModal({
             <div className="receipt-meta">
               {customerName && (
                 <p>
-                  <strong>Customer:</strong> {customerName}
+                  <strong>{t("Customer")}:</strong> {customerName}
                 </p>
               )}
               {barberName && barberName !== "Walk-in" && (
                 <p>
-                  <strong>Barber:</strong> {barberName}
+                  <strong>{t("Barber")}:</strong> {barberName}
                 </p>
               )}
               {customerName === "Walk-in" && (
                 <p>
-                  <strong>Service Type:</strong> Walk-in Customer
+                  <strong>{t("Service Type")}:</strong> {t("Walk-in Customer")}
                 </p>
               )}
             </div>
@@ -512,7 +539,9 @@ export default function CheckoutModal({
 
           {/* Items List */}
           <div className="receipt-services">
-            <h4>Items ({totalItems})</h4>
+            <h4>
+              {t("Items")} ({totalItems})
+            </h4>
             <div className="receipt-items">
               {services.map((service) => (
                 <div key={`service-${service.id}`} className="receipt-item">
@@ -521,15 +550,17 @@ export default function CheckoutModal({
                     <div className="item-details">
                       <div className="item-name">{service.name}</div>
                       <div className="item-qty-price">
-                        Qty: {service.quantity} × {service.price.toFixed(2)} EGP
+                        {t("Qty")}: {service.quantity} ×{" "}
+                        {service.price.toFixed(2)} {t("currency")}
                       </div>
                     </div>
                     <span className="item-type-badge service-badge">
-                      Service
+                      {t("Service")}
                     </span>
                   </div>
                   <div className="item-total">
-                    {(service.price * service.quantity).toFixed(2)} EGP
+                    {(service.price * service.quantity).toFixed(2)}{" "}
+                    {t("currency")}
                   </div>
                 </div>
               ))}
@@ -540,15 +571,17 @@ export default function CheckoutModal({
                     <div className="item-details">
                       <div className="item-name">{product.name}</div>
                       <div className="item-qty-price">
-                        Qty: {product.quantity} × {product.price.toFixed(2)} EGP
+                        {t("Qty")}: {product.quantity} ×{" "}
+                        {product.price.toFixed(2)} {t("currency")}
                       </div>
                     </div>
                     <span className="item-type-badge product-badge">
-                      Product
+                      {t("Product")}
                     </span>
                   </div>
                   <div className="item-total">
-                    {(product.price * product.quantity).toFixed(2)} EGP
+                    {(product.price * product.quantity).toFixed(2)}{" "}
+                    {t("currency")}
                   </div>
                 </div>
               ))}
@@ -558,29 +591,39 @@ export default function CheckoutModal({
           {/* Totals */}
           <div className="receipt-totals-enhanced">
             <div className="total-line">
-              <span>Subtotal</span>
-              <span>{subtotal.toFixed(2)} EGP</span>
+              <span>{t("Subtotal")}</span>
+              <span>
+                {subtotal.toFixed(2)} {t("currency")}
+              </span>
             </div>
             {discountAmount > 0 && (
               <div className="total-line discount">
-                <span>Discount Applied</span>
-                <span>-{discountAmount.toFixed(2)} EGP</span>
+                <span>{t("Discount Applied")}</span>
+                <span>
+                  -{discountAmount.toFixed(2)} {t("currency")}
+                </span>
               </div>
             )}
             <div className="total-line">
-              <span>Tax (8%)</span>
-              <span>{tax.toFixed(2)} EGP</span>
+              <span>{t("Tax")} (8%)</span>
+              <span>
+                {tax.toFixed(2)} {t("currency")}
+              </span>
             </div>
             <div className="total-line final">
-              <span>Total Paid</span>
-              <span>{total.toFixed(2)} EGP</span>
+              <span>{t("Total Paid")}</span>
+              <span>
+                {total.toFixed(2)} {t("currency")}
+              </span>
             </div>
           </div>
 
           {/* Payment Method */}
           <div className="payment-info">
             <CreditCard size={16} />
-            <span>Paid via {paymentMethod.toUpperCase()}</span>
+            <span>
+              {t("Paid via")} {t(paymentMethod.toUpperCase())}
+            </span>
           </div>
 
           {/* Invoice Status */}
@@ -588,10 +631,13 @@ export default function CheckoutModal({
             <Receipt size={16} />
             {sendInvoice ? (
               <span>
-                📧 Invoice sent to financial records (visible to finance team)
+                📧{" "}
+                {t(
+                  "Invoice sent to financial records (visible to finance team)"
+                )}
               </span>
             ) : (
-              <span>🔒 Invoice visible to super admin only</span>
+              <span>🔒 {t("Invoice visible to super admin only")}</span>
             )}
           </div>
 
@@ -599,16 +645,16 @@ export default function CheckoutModal({
           <div className="export-buttons">
             <button onClick={exportToPDF} className="pdf-btn">
               <FileText size={18} />
-              Professional PDF Invoice
+              {t("Professional PDF Invoice")}
             </button>
             <button onClick={exportToExcel} className="excel-btn">
               <FileSpreadsheet size={18} />
-              Excel Report
+              {t("Excel Report")}
             </button>
           </div>
 
           <button onClick={handleComplete} className="complete-btn">
-            Complete & New Transaction
+            {t("Complete & New Transaction")}
           </button>
         </div>
       </div>

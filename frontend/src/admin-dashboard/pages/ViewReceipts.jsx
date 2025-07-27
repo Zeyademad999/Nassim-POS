@@ -13,9 +13,12 @@ import {
   X,
 } from "lucide-react";
 import ReceiptModal from "../components/ReceiptModal";
+import { useLanguage } from "../../context/LanguageContext";
 import "../styles/ViewReceipts.css";
 
 export default function ViewReceipts() {
+  const { t, isRTL } = useLanguage();
+
   const [receipts, setReceipts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -57,20 +60,20 @@ export default function ViewReceipts() {
 
     try {
       const res = await fetch("/api/receipts");
-      if (!res.ok) throw new Error("Failed to fetch receipts");
+      if (!res.ok) throw new Error(t("Failed to fetch receipts"));
 
       const data = await res.json();
       const parsedData = data.map((receipt) => ({
         ...receipt,
         services: receipt.services || [],
-        products: receipt.products || [], //
+        products: receipt.products || [],
       }));
 
       setReceipts(parsedData);
       calculateStats(parsedData);
     } catch (err) {
       console.error("Failed to fetch receipts:", err);
-      setError("Failed to load receipts. Please try again.");
+      setError(t("Failed to load receipts. Please try again."));
     } finally {
       setLoading(false);
     }
@@ -176,24 +179,24 @@ export default function ViewReceipts() {
     const filteredData = applyFilters();
     const csvContent = [
       [
-        "Date",
-        "Receipt ID",
-        "Customer",
-        "Barber",
-        "Services",
-        "Products",
-        "Payment",
-        "Total",
+        t("Date"),
+        t("Receipt ID"),
+        t("Customer"),
+        t("Barber"),
+        t("Services"),
+        t("Products"),
+        t("Payment"),
+        t("Total"),
       ].join(","),
       ...filteredData.map((receipt) =>
         [
           new Date(receipt.created_at).toLocaleDateString(),
           receipt.id.substring(0, 8),
-          receipt.customer_name || "Walk-in",
-          receipt.barber_name || "N/A",
-          receipt.services?.map((s) => s.name).join("; ") || "Empty",
-          receipt.products?.map((p) => p.name).join("; ") || "Empty",
-          receipt.payment_method || "cash",
+          receipt.customer_name || t("Walk-in"),
+          receipt.barber_name || t("N/A"),
+          receipt.services?.map((s) => s.name).join("; ") || t("Empty"),
+          receipt.products?.map((p) => p.name).join("; ") || t("Empty"),
+          t(receipt.payment_method || "cash"),
           receipt.total || 0,
         ]
           .map((field) => `"${field}"`)
@@ -224,7 +227,7 @@ export default function ViewReceipts() {
   const filteredReceipts = applyFilters();
 
   return (
-    <div className="receipts-page">
+    <div className={`receipts-page ${isRTL ? "rtl" : "ltr"}`}>
       {error && (
         <div className="error-alert">
           <span>{error}</span>
@@ -237,14 +240,14 @@ export default function ViewReceipts() {
           <div className="header-text">
             <h1>
               <Package size={24} />
-              Receipts Management
+              {t("Receipts Management")}
             </h1>
-            <p>View and manage all transaction receipts</p>
+            <p>{t("View and manage all transaction receipts")}</p>
           </div>
           <div className="header-actions">
             <button className="btn btn-secondary" onClick={exportCSV}>
               <Download size={16} />
-              Export CSV
+              {t("Export CSV")}
             </button>
             <button
               className="btn btn-secondary"
@@ -252,7 +255,7 @@ export default function ViewReceipts() {
               disabled={loading}
             >
               <RefreshCw size={16} />
-              {loading ? "Loading..." : "Refresh"}
+              {loading ? t("Loading...") : t("Refresh")}
             </button>
           </div>
         </div>
@@ -263,28 +266,32 @@ export default function ViewReceipts() {
           <Package size={20} />
           <div className="stat-content">
             <h3>{stats.totalReceipts}</h3>
-            <p>Total Receipts</p>
+            <p>{t("Total Receipts")}</p>
           </div>
         </div>
         <div className="stat-card">
           <DollarSign size={20} />
           <div className="stat-content">
-            <h3>{stats.totalRevenue.toFixed(2)} EGP</h3>
-            <p>Total Revenue</p>
+            <h3>
+              {stats.totalRevenue.toFixed(2)} {t("currency")}
+            </h3>
+            <p>{t("Total Revenue")}</p>
           </div>
         </div>
         <div className="stat-card">
           <Calendar size={20} />
           <div className="stat-content">
-            <h3>{stats.avgReceiptValue.toFixed(2)} EGP</h3>
-            <p>Average Receipt</p>
+            <h3>
+              {stats.avgReceiptValue.toFixed(2)} {t("currency")}
+            </h3>
+            <p>{t("Average Receipt")}</p>
           </div>
         </div>
         <div className="stat-card">
           <Scissors size={20} />
           <div className="stat-content">
-            <h3>{stats.topBarber || "N/A"}</h3>
-            <p>Top Barber</p>
+            <h3>{stats.topBarber || t("N/A")}</h3>
+            <p>{t("Top Barber")}</p>
           </div>
         </div>
       </div>
@@ -295,7 +302,7 @@ export default function ViewReceipts() {
             <Search size={16} />
             <input
               type="text"
-              placeholder="Search receipts..."
+              placeholder={t("Search receipts...")}
               value={filters.searchTerm}
               onChange={(e) =>
                 setFilters({ ...filters, searchTerm: e.target.value })
@@ -308,7 +315,7 @@ export default function ViewReceipts() {
             onChange={(e) =>
               setFilters({ ...filters, startDate: e.target.value })
             }
-            placeholder="From Date"
+            placeholder={t("From Date")}
           />
           <input
             type="date"
@@ -316,13 +323,13 @@ export default function ViewReceipts() {
             onChange={(e) =>
               setFilters({ ...filters, endDate: e.target.value })
             }
-            placeholder="To Date"
+            placeholder={t("To Date")}
           />
         </div>
         <div className="filters-row">
           <input
             type="text"
-            placeholder="Filter by barber"
+            placeholder={t("Filter by barber")}
             value={filters.barberName}
             onChange={(e) =>
               setFilters({ ...filters, barberName: e.target.value })
@@ -334,13 +341,13 @@ export default function ViewReceipts() {
               setFilters({ ...filters, paymentMethod: e.target.value })
             }
           >
-            <option value="all">All Methods</option>
-            <option value="cash">Cash</option>
-            <option value="card">Card</option>
+            <option value="all">{t("All Methods")}</option>
+            <option value="cash">{t("Cash")}</option>
+            <option value="card">{t("Card")}</option>
           </select>
           <input
             type="number"
-            placeholder="Min Amount"
+            placeholder={t("Min Amount")}
             value={filters.minAmount}
             onChange={(e) =>
               setFilters({ ...filters, minAmount: e.target.value })
@@ -348,21 +355,22 @@ export default function ViewReceipts() {
           />
           <input
             type="number"
-            placeholder="Max Amount"
+            placeholder={t("Max Amount")}
             value={filters.maxAmount}
             onChange={(e) =>
               setFilters({ ...filters, maxAmount: e.target.value })
             }
           />
           <button className="btn btn-secondary" onClick={clearFilters}>
-            Clear Filters
+            {t("Clear Filters")}
           </button>
         </div>
       </div>
 
       <div className="results-info">
         <p>
-          Showing {filteredReceipts.length} of {receipts.length} receipts
+          {t("Showing")} {filteredReceipts.length} {t("of")} {receipts.length}{" "}
+          {t("receipts")}
         </p>
       </div>
 
@@ -370,20 +378,20 @@ export default function ViewReceipts() {
         {loading ? (
           <div className="loading-state">
             <div className="spinner"></div>
-            <p>Loading receipts...</p>
+            <p>{t("Loading receipts...")}</p>
           </div>
         ) : filteredReceipts.length === 0 ? (
           <div className="empty-state">
             <Package size={48} />
-            <h3>No receipts found</h3>
+            <h3>{t("No receipts found")}</h3>
             <p>
               {receipts.length === 0
-                ? "No receipts available"
-                : "No receipts match your filters"}
+                ? t("No receipts available")
+                : t("No receipts match your filters")}
             </p>
             {receipts.length > 0 && (
               <button className="btn btn-primary" onClick={clearFilters}>
-                Clear Filters
+                {t("Clear Filters")}
               </button>
             )}
           </div>
@@ -392,14 +400,14 @@ export default function ViewReceipts() {
             <table>
               <thead>
                 <tr>
-                  <th>Date & Time</th>
-                  <th>Receipt ID</th>
-                  <th>Customer</th>
-                  <th>Barber</th>
-                  <th>Items</th>
-                  <th>Payment</th>
-                  <th>Total</th>
-                  <th>Actions</th>
+                  <th>{t("Date & Time")}</th>
+                  <th>{t("Receipt ID")}</th>
+                  <th>{t("Customer")}</th>
+                  <th>{t("Barber")}</th>
+                  <th>{t("Items")}</th>
+                  <th>{t("Payment")}</th>
+                  <th>{t("Total")}</th>
+                  <th>{t("Actions")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -422,32 +430,34 @@ export default function ViewReceipts() {
                     <td>
                       <div className="customer-cell">
                         <User size={14} />
-                        <span>{receipt.customer_name || "Walk-in"}</span>
+                        <span>{receipt.customer_name || t("Walk-in")}</span>
                       </div>
                     </td>
                     <td>
                       <div className="barber-cell">
                         <Scissors size={14} />
-                        <span>{receipt.barber_name || "N/A"}</span>
+                        <span>{receipt.barber_name || t("N/A")}</span>
                       </div>
                     </td>
                     <td>
                       <div className="items-cell">
                         {receipt.services.length > 0 && (
                           <span className="item-count services">
-                            {receipt.services.length} Service
-                            {receipt.services.length > 1 ? "s" : ""}
+                            {receipt.services.length} {t("Service")}
+                            {receipt.services.length > 1 ? t("s") : ""}
                           </span>
                         )}
                         {receipt.products.length > 0 && (
                           <span className="item-count products">
-                            {receipt.products.length} Product
-                            {receipt.products.length > 1 ? "s" : ""}
+                            {receipt.products.length} {t("Product")}
+                            {receipt.products.length > 1 ? t("s") : ""}
                           </span>
                         )}
                         {receipt.services.length === 0 &&
                           receipt.products.length === 0 && (
-                            <span className="item-count empty">Empty</span>
+                            <span className="item-count empty">
+                              {t("Empty")}
+                            </span>
                           )}
                       </div>
                     </td>
@@ -457,20 +467,22 @@ export default function ViewReceipts() {
                           receipt.payment_method || "cash"
                         }`}
                       >
-                        {(receipt.payment_method || "cash").toUpperCase()}
+                        {t((receipt.payment_method || "cash").toUpperCase())}
                       </span>
                     </td>
                     <td>
                       <div className="amount-cell">
                         <DollarSign size={14} />
-                        <span>{(receipt.total || 0).toFixed(2)} EGP</span>
+                        <span>
+                          {(receipt.total || 0).toFixed(2)} {t("currency")}
+                        </span>
                       </div>
                     </td>
                     <td>
                       <button
                         className="action-btn"
                         onClick={() => handleViewReceipt(receipt)}
-                        title="View Receipt"
+                        title={t("View Receipt")}
                       >
                         <Eye size={14} />
                       </button>

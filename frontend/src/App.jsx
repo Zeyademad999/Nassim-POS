@@ -12,7 +12,7 @@ export default function App() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const savedUser = localStorage.getItem("user");
+    const savedUser = sessionStorage.getItem("user");
     if (savedUser) {
       setUser(JSON.parse(savedUser));
     }
@@ -21,12 +21,13 @@ export default function App() {
 
   const handleLogin = (userData) => {
     setUser(userData);
-    localStorage.setItem("user", JSON.stringify(userData));
+    sessionStorage.setItem("user", JSON.stringify(userData));
   };
 
   const handleLogout = () => {
     setUser(null);
-    localStorage.removeItem("user");
+    sessionStorage.removeItem("user");
+    window.location.href = "/";
   };
 
   if (loading) {
@@ -73,7 +74,71 @@ export default function App() {
             path="/reports"
             element={
               user && user.role === "accountant" ? (
-                <Reports user={user} onLogout={handleLogout} />
+                <div style={{ minHeight: "100vh", backgroundColor: "#f9fafb" }}>
+                  {/* Accountant Header */}
+                  <header
+                    style={{
+                      background: "white",
+                      padding: "16px 24px",
+                      borderBottom: "1px solid #e5e7eb",
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                    }}
+                  >
+                    <div>
+                      <h1
+                        style={{
+                          margin: 0,
+                          fontSize: "24px",
+                          fontWeight: "600",
+                        }}
+                      >
+                        Financial Reports
+                      </h1>
+                      <p
+                        style={{
+                          margin: 0,
+                          color: "#6b7280",
+                          fontSize: "14px",
+                        }}
+                      >
+                        Invoice-based financial analysis
+                      </p>
+                    </div>
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "16px",
+                      }}
+                    >
+                      <span style={{ fontSize: "14px", color: "#6b7280" }}>
+                        Welcome, {user.full_name || user.username} (Accountant)
+                      </span>
+                      <button
+                        onClick={handleLogout}
+                        style={{
+                          background: "#ef4444",
+                          color: "white",
+                          border: "none",
+                          padding: "8px 16px",
+                          borderRadius: "6px",
+                          cursor: "pointer",
+                          fontSize: "14px",
+                          fontWeight: "500",
+                        }}
+                      >
+                        Logout
+                      </button>
+                    </div>
+                  </header>
+
+                  {/* Reports Content */}
+                  <div style={{ padding: "24px" }}>
+                    <Reports user={user} />
+                  </div>
+                </div>
               ) : (
                 <Navigate to="/" />
               )

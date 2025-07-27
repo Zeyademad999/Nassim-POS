@@ -14,9 +14,11 @@ import {
   Filter,
   Repeat,
 } from "lucide-react";
+import { useLanguage } from "../../context/LanguageContext";
 import "../styles/ManageExpenses.css";
 
 export default function ManageExpenses() {
+  const { t, isRTL } = useLanguage();
   const [expenses, setExpenses] = useState([]);
   const [editingExpense, setEditingExpense] = useState(null);
   const [showAddExpense, setShowAddExpense] = useState(false);
@@ -35,18 +37,18 @@ export default function ManageExpenses() {
   });
 
   const periodOptions = [
-    { value: "today", label: "Today" },
-    { value: "7days", label: "Last 7 Days" },
-    { value: "30days", label: "Last 30 Days" },
-    { value: "3months", label: "Last 3 Months" },
-    { value: "year", label: "This Year" },
-    { value: "all", label: "All Time" },
+    { value: "today", label: t("Today") },
+    { value: "7days", label: t("Last 7 Days") },
+    { value: "30days", label: t("Last 30 Days") },
+    { value: "3months", label: t("Last 3 Months") },
+    { value: "year", label: t("This Year") },
+    { value: "all", label: t("All Time") },
   ];
 
   const expenseTypes = [
-    { value: "all", label: "All Types" },
-    { value: "general", label: "General Expenses" },
-    { value: "recurring", label: "Recurring Expenses" },
+    { value: "all", label: t("All Types") },
+    { value: "general", label: t("General Expenses") },
+    { value: "recurring", label: t("Recurring Expenses") },
   ];
 
   useEffect(() => {
@@ -69,7 +71,7 @@ export default function ManageExpenses() {
       setExpenses(data.expenses || []);
     } catch (err) {
       console.error("Failed to fetch expenses:", err);
-      setError("Failed to load expenses");
+      setError(t("Failed to load expenses"));
     } finally {
       setLoading(false);
     }
@@ -93,7 +95,7 @@ export default function ManageExpenses() {
       !newExpense.amount ||
       !newExpense.expense_date
     ) {
-      setError("Name, amount, and date are required");
+      setError(t("Name, amount, and date are required"));
       return;
     }
 
@@ -112,7 +114,7 @@ export default function ManageExpenses() {
 
       if (!res.ok) {
         const errorData = await res.json();
-        throw new Error(errorData.error || "Failed to add expense");
+        throw new Error(errorData.error || t("Failed to add expense"));
       }
 
       setShowAddExpense(false);
@@ -139,7 +141,7 @@ export default function ManageExpenses() {
       !expenseData.amount ||
       !expenseData.expense_date
     ) {
-      setError("Name, amount, and date are required");
+      setError(t("Name, amount, and date are required"));
       return;
     }
 
@@ -158,7 +160,7 @@ export default function ManageExpenses() {
 
       if (!res.ok) {
         const errorData = await res.json();
-        throw new Error(errorData.error || "Failed to update expense");
+        throw new Error(errorData.error || t("Failed to update expense"));
       }
 
       setEditingExpense(null);
@@ -173,7 +175,7 @@ export default function ManageExpenses() {
   };
 
   const handleDeleteExpense = async (id) => {
-    if (!confirm("Are you sure you want to delete this expense?")) return;
+    if (!confirm(t("Are you sure you want to delete this expense?"))) return;
 
     setLoading(true);
     setError("");
@@ -185,7 +187,7 @@ export default function ManageExpenses() {
 
       if (!res.ok) {
         const errorData = await res.json();
-        throw new Error(errorData.error || "Failed to delete expense");
+        throw new Error(errorData.error || t("Failed to delete expense"));
       }
 
       fetchExpenses();
@@ -211,15 +213,15 @@ export default function ManageExpenses() {
   const getTypeLabel = (type) => {
     switch (type) {
       case "recurring":
-        return "Recurring";
+        return t("Recurring");
       case "general":
       default:
-        return "General";
+        return t("General");
     }
   };
 
   return (
-    <div className="manage-expenses-page">
+    <div className={`manage-expenses-page ${isRTL ? "rtl" : "ltr"}`}>
       {error && (
         <div className="error-message">
           {error}
@@ -232,13 +234,13 @@ export default function ManageExpenses() {
         <div className="header-left">
           <h1>
             <Receipt size={24} />
-            Expense Tracking
+            {t("Expense Tracking")}
           </h1>
-          <p className="subtext">Track your business expenses</p>
+          <p className="subtext">{t("Track your business expenses")}</p>
         </div>
         <button className="btn-primary" onClick={() => setShowAddExpense(true)}>
           <Plus size={16} />
-          Add Expense
+          {t("Add Expense")}
         </button>
       </div>
 
@@ -251,7 +253,7 @@ export default function ManageExpenses() {
             </div>
             <div className="stat-content">
               <h3>{stats.summary.total_expenses}</h3>
-              <p>Total Expenses</p>
+              <p>{t("Total Expenses")}</p>
             </div>
           </div>
           <div className="stat-card">
@@ -259,8 +261,10 @@ export default function ManageExpenses() {
               <TrendingDown size={20} />
             </div>
             <div className="stat-content">
-              <h3>{stats.summary.total_amount?.toFixed(0)} EGP</h3>
-              <p>Total Amount</p>
+              <h3>
+                {stats.summary.total_amount?.toFixed(0)} {t("currency")}
+              </h3>
+              <p>{t("Total Amount")}</p>
             </div>
           </div>
           <div className="stat-card">
@@ -269,7 +273,7 @@ export default function ManageExpenses() {
             </div>
             <div className="stat-content">
               <h3>{stats.summary.general_amount?.toFixed(0)} EGP</h3>
-              <p>General Expenses</p>
+              <p>{t("General Expenses")}</p>
             </div>
           </div>
           <div className="stat-card">
@@ -278,7 +282,7 @@ export default function ManageExpenses() {
             </div>
             <div className="stat-content">
               <h3>{stats.summary.recurring_amount?.toFixed(0)} EGP</h3>
-              <p>Recurring Expenses</p>
+              <p>{t("Recurring Expenses")}</p>
             </div>
           </div>
         </div>
@@ -287,7 +291,7 @@ export default function ManageExpenses() {
       {/* Filters */}
       <div className="expense-filters">
         <div className="filter-group">
-          <label>Time Period</label>
+          <label>{t("Time Period")}</label>
           <select
             value={selectedPeriod}
             onChange={(e) => setSelectedPeriod(e.target.value)}
@@ -300,7 +304,7 @@ export default function ManageExpenses() {
           </select>
         </div>
         <div className="filter-group">
-          <label>Expense Type</label>
+          <label>{t("Expense Type")}</label>
           <select
             value={selectedType}
             onChange={(e) => setSelectedType(e.target.value)}
@@ -319,42 +323,42 @@ export default function ManageExpenses() {
         {loading ? (
           <div className="loading-state">
             <div className="loading-spinner"></div>
-            <p>Loading expenses...</p>
+            <p>{t("Loading expenses...")}</p>
           </div>
         ) : expenses.length === 0 ? (
           <div className="empty-state">
             <Receipt size={48} />
-            <h3>No expenses found</h3>
+            <h3>{t("No expenses found")}</h3>
             <p>
               {selectedPeriod !== "all" || selectedType !== "all"
-                ? "No expenses match your current filters"
-                : "Start tracking your business expenses"}
+                ? t("No expenses match your current filters")
+                : t("Start tracking your business expenses")}
             </p>
             <button
               className="btn-primary"
               onClick={() => setShowAddExpense(true)}
             >
               <Plus size={16} />
-              Add First Expense
+              {t("Add First Expense")}
             </button>
           </div>
         ) : (
-          <div className="expenses-table">
-            <table>
+          <div className="expenses-table-container">
+            <table className="expenses-table">
               <thead>
                 <tr>
-                  <th>Date</th>
-                  <th>Name</th>
-                  <th>Type</th>
-                  <th>Amount</th>
-                  <th>Notes</th>
-                  <th>Actions</th>
+                  <th className="date-col">{t("Date")}</th>
+                  <th className="name-col">{t("Name")}</th>
+                  <th className="type-col">{t("Type")}</th>
+                  <th className="amount-col">{t("Amount")}</th>
+                  <th className="notes-col">{t("Notes")}</th>
+                  <th className="actions-col">{t("Actions")}</th>
                 </tr>
               </thead>
               <tbody>
                 {expenses.map((expense) => (
                   <tr key={expense.id}>
-                    <td>
+                    <td className="date-col">
                       {editingExpense?.id === expense.id ? (
                         <input
                           type="date"
@@ -377,7 +381,7 @@ export default function ManageExpenses() {
                         </div>
                       )}
                     </td>
-                    <td>
+                    <td className="name-col">
                       {editingExpense?.id === expense.id ? (
                         <input
                           type="text"
@@ -388,13 +392,13 @@ export default function ManageExpenses() {
                               name: e.target.value,
                             })
                           }
-                          placeholder="Expense name"
+                          placeholder={t("Expense name")}
                         />
                       ) : (
                         <span className="expense-name">{expense.name}</span>
                       )}
                     </td>
-                    <td>
+                    <td className="type-col">
                       {editingExpense?.id === expense.id ? (
                         <select
                           value={editingExpense.expense_type}
@@ -405,8 +409,8 @@ export default function ManageExpenses() {
                             })
                           }
                         >
-                          <option value="general">General</option>
-                          <option value="recurring">Recurring</option>
+                          <option value="general">{t("General")}</option>
+                          <option value="recurring">{t("Recurring")}</option>
                         </select>
                       ) : (
                         <div className="expense-type">
@@ -415,7 +419,7 @@ export default function ManageExpenses() {
                         </div>
                       )}
                     </td>
-                    <td>
+                    <td className="amount-col">
                       {editingExpense?.id === expense.id ? (
                         <input
                           type="number"
@@ -427,16 +431,16 @@ export default function ManageExpenses() {
                               amount: e.target.value,
                             })
                           }
-                          placeholder="0.00"
+                          placeholder={t("amountPlaceholder")}
                         />
                       ) : (
                         <span className="expense-amount">
                           <DollarSign size={14} />
-                          {expense.amount?.toFixed(2)} EGP
+                          {expense.amount?.toFixed(2)} {t("currency")}
                         </span>
                       )}
                     </td>
-                    <td>
+                    <td className="notes-col">
                       {editingExpense?.id === expense.id ? (
                         <input
                           type="text"
@@ -447,7 +451,7 @@ export default function ManageExpenses() {
                               notes: e.target.value,
                             })
                           }
-                          placeholder="Optional notes"
+                          placeholder={t("notesPlaceholder")}
                         />
                       ) : (
                         <span className="expense-notes">
@@ -455,7 +459,7 @@ export default function ManageExpenses() {
                         </span>
                       )}
                     </td>
-                    <td>
+                    <td className="actions-col">
                       <div className="expense-actions">
                         {editingExpense?.id === expense.id ? (
                           <>
@@ -465,6 +469,7 @@ export default function ManageExpenses() {
                                 handleUpdateExpense(expense.id, editingExpense)
                               }
                               disabled={loading}
+                              title={t("Save")}
                             >
                               <Save size={14} />
                             </button>
@@ -472,6 +477,7 @@ export default function ManageExpenses() {
                               className="action-btn cancel"
                               onClick={() => setEditingExpense(null)}
                               disabled={loading}
+                              title={t("Cancel")}
                             >
                               <X size={14} />
                             </button>
@@ -482,6 +488,7 @@ export default function ManageExpenses() {
                               className="action-btn edit"
                               onClick={() => setEditingExpense(expense)}
                               disabled={loading}
+                              title={t("Edit")}
                             >
                               <Edit2 size={14} />
                             </button>
@@ -489,6 +496,7 @@ export default function ManageExpenses() {
                               className="action-btn delete"
                               onClick={() => handleDeleteExpense(expense.id)}
                               disabled={loading}
+                              title={t("Delete")}
                             >
                               <Trash2 size={14} />
                             </button>
@@ -509,7 +517,7 @@ export default function ManageExpenses() {
         <div className="modal-overlay">
           <div className="modal-content">
             <div className="modal-header">
-              <h2>Add New Expense</h2>
+              <h2>{t("Add New Expense")}</h2>
               <button onClick={() => setShowAddExpense(false)}>
                 <X size={20} />
               </button>
@@ -517,7 +525,7 @@ export default function ManageExpenses() {
             <div className="expense-form">
               <div className="form-group">
                 <label>
-                  Expense Name <span className="required">*</span>
+                  {t("expenseNameLabel")} <span className="required">*</span>
                 </label>
                 <input
                   type="text"
@@ -525,7 +533,7 @@ export default function ManageExpenses() {
                   onChange={(e) =>
                     setNewExpense({ ...newExpense, name: e.target.value })
                   }
-                  placeholder="Enter expense name"
+                  placeholder={t("expenseNamePlaceholder")}
                   disabled={loading}
                 />
               </div>
@@ -533,7 +541,7 @@ export default function ManageExpenses() {
               <div className="form-grid">
                 <div className="form-group">
                   <label>
-                    Amount (EGP) <span className="required">*</span>
+                    {t("Amount (EGP)")} <span className="required">*</span>
                   </label>
                   <input
                     type="number"
@@ -542,13 +550,13 @@ export default function ManageExpenses() {
                     onChange={(e) =>
                       setNewExpense({ ...newExpense, amount: e.target.value })
                     }
-                    placeholder="0.00"
+                    placeholder={t("amountPlaceholder")}
                     disabled={loading}
                   />
                 </div>
                 <div className="form-group">
                   <label>
-                    Date <span className="required">*</span>
+                    {t("Date")} <span className="required">*</span>
                   </label>
                   <input
                     type="date"
@@ -565,7 +573,7 @@ export default function ManageExpenses() {
               </div>
 
               <div className="form-group">
-                <label>Expense Type</label>
+                <label>{t("Expense Type")}</label>
                 <select
                   value={newExpense.expense_type}
                   onChange={(e) =>
@@ -576,19 +584,19 @@ export default function ManageExpenses() {
                   }
                   disabled={loading}
                 >
-                  <option value="general">General Expense</option>
-                  <option value="recurring">Recurring Expense</option>
+                  <option value="general">{t("General Expense")}</option>
+                  <option value="recurring">{t("Recurring Expense")}</option>
                 </select>
               </div>
 
               <div className="form-group">
-                <label>Notes (Optional)</label>
+                <label>{t("Notes (Optional)")}</label>
                 <textarea
                   value={newExpense.notes}
                   onChange={(e) =>
                     setNewExpense({ ...newExpense, notes: e.target.value })
                   }
-                  placeholder="Add any additional notes..."
+                  placeholder={t("Add any additional notes...")}
                   rows={3}
                   disabled={loading}
                 />
@@ -602,7 +610,7 @@ export default function ManageExpenses() {
                   disabled={loading}
                 >
                   <X size={16} />
-                  Cancel
+                  {t("Cancel")}
                 </button>
                 <button
                   type="button"
@@ -611,7 +619,7 @@ export default function ManageExpenses() {
                   disabled={loading}
                 >
                   <Save size={16} />
-                  {loading ? "Adding..." : "Add Expense"}
+                  {loading ? t("Adding...") : t("Add Expense")}
                 </button>
               </div>
             </div>

@@ -676,3 +676,259 @@
     transform: none;
   }
 }
+
+/* Table Alignment Fixes */
+.expenses-table-container {
+  overflow-x: auto;
+  margin: 20px 0;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: white;
+}
+
+.expenses-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  table-layout: fixed;
+}
+
+.expenses-table th,
+.expenses-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid #e5e7eb;
+  vertical-align: middle;
+  text-align: left;
+}
+
+/* RTL Support */
+.rtl .expenses-table th,
+.rtl .expenses-table td {
+  text-align: right;
+}
+
+/* Specific column widths for proper alignment */
+.date-col {
+  width: 140px;
+  min-width: 140px;
+}
+
+.name-col {
+  width: 200px;
+  min-width: 200px;
+}
+
+.type-col {
+  width: 120px;
+  min-width: 120px;
+}
+
+.amount-col {
+  width: 130px;
+  min-width: 130px;
+  text-align: right;
+}
+
+.rtl .amount-col {
+  text-align: left;
+}
+
+.notes-col {
+  width: 200px;
+  min-width: 150px;
+}
+
+.actions-col {
+  width: 120px;
+  min-width: 120px;
+  text-align: center;
+}
+
+/* Table header styling */
+.expenses-table thead th {
+  background: #f9fafb;
+  font-weight: 600;
+  color: #374151;
+  border-bottom: 2px solid #e5e7eb;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+/* Table row styling */
+.expenses-table tbody tr:hover {
+  background: #f9fafb;
+}
+
+.expenses-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Content alignment within cells */
+.expense-date {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.expense-amount {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  justify-content: flex-end;
+}
+
+.rtl .expense-amount {
+  justify-content: flex-start;
+}
+
+.expense-type {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.expense-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: center;
+}
+
+/* Input field styling in edit mode */
+.expenses-table input,
+.expenses-table select {
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+.expenses-table input:focus,
+.expenses-table select:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 1px #3b82f6;
+}
+
+/* Action buttons */
+.action-btn {
+  padding: 6px 8px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  background: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.action-btn:hover {
+  background: #f3f4f6;
+}
+
+.action-btn.save {
+  background: #10b981;
+  color: white;
+  border-color: #10b981;
+}
+
+.action-btn.save:hover {
+  background: #059669;
+}
+
+.action-btn.delete {
+  background: #ef4444;
+  color: white;
+  border-color: #ef4444;
+}
+
+.action-btn.delete:hover {
+  background: #dc2626;
+}
+
+.action-btn.edit {
+  background: #3b82f6;
+  color: white;
+  border-color: #3b82f6;
+}
+
+.action-btn.edit:hover {
+  background: #2563eb;
+}
+
+.action-btn.cancel {
+  background: #6b7280;
+  color: white;
+  border-color: #6b7280;
+}
+
+.action-btn.cancel:hover {
+  background: #4b5563;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .expenses-table-container {
+    font-size: 14px;
+  }
+
+  .expenses-table th,
+  .expenses-table td {
+    padding: 8px 12px;
+  }
+
+  .date-col {
+    width: 120px;
+    min-width: 120px;
+  }
+
+  .name-col {
+    width: 150px;
+    min-width: 150px;
+  }
+
+  .type-col {
+    width: 100px;
+    min-width: 100px;
+  }
+
+  .amount-col {
+    width: 110px;
+    min-width: 110px;
+  }
+
+  .notes-col {
+    width: 130px;
+    min-width: 130px;
+  }
+
+  .actions-col {
+    width: 100px;
+    min-width: 100px;
+  }
+}
+
+@media (max-width: 480px) {
+  .expenses-table-container {
+    font-size: 12px;
+  }
+
+  .expenses-table th,
+  .expenses-table td {
+    padding: 6px 8px;
+  }
+
+  .expense-actions {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .action-btn {
+    padding: 4px 6px;
+    font-size: 12px;
+  }
+}

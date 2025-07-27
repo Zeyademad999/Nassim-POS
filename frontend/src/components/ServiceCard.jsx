@@ -19,7 +19,7 @@ const ServiceCard = ({ service }) => {
     <div className="service-card" onClick={handleAddService}>
       <div className="service-card-inner">
         <h3 className="service-name">{service.name}</h3>
-        <p className="service-price">${service.price.toFixed(2)}</p>
+        <p className="service-price">{service.price.toFixed(2)} EGP</p>
         <div className="hover-line"></div>
       </div>
       <button className="service-btn">Add to Bill</button>

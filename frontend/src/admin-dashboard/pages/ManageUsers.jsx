@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { UserPlus, Edit, Trash2, Eye, EyeOff } from "lucide-react";
+import { useLanguage } from "../../context/LanguageContext";
 import "../styles/ManageUsers.css";
 
 export default function ManageUsers() {
+  const { t, isRTL } = useLanguage();
   const [users, setUsers] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
@@ -25,7 +27,7 @@ export default function ManageUsers() {
       const data = await response.json();
       setUsers(data);
     } catch (error) {
-      console.error("Error fetching users:", error);
+      console.error(t("Error fetching users"), error);
     }
   };
 
@@ -52,11 +54,11 @@ export default function ManageUsers() {
         setShowModal(false);
       } else {
         const error = await response.json();
-        alert(error.message || "Failed to save user");
+        alert(error.message || t("Failed to save user"));
       }
     } catch (error) {
-      console.error("Error saving user:", error);
-      alert("Failed to save user");
+      console.error(t("Error saving user"), error);
+      alert(t("Failed to save user"));
     }
   };
 
@@ -74,11 +76,11 @@ export default function ManageUsers() {
 
   const handleDelete = async (userId, username) => {
     if (username === "admin") {
-      alert("Cannot delete the main admin user");
+      alert(t("Cannot delete the main admin user"));
       return;
     }
 
-    if (window.confirm("Are you sure you want to delete this user?")) {
+    if (window.confirm(t("Are you sure you want to delete this user?"))) {
       try {
         const response = await fetch(`/api/auth/users/${userId}`, {
           method: "DELETE",
@@ -87,11 +89,11 @@ export default function ManageUsers() {
         if (response.ok) {
           fetchUsers();
         } else {
-          alert("Failed to delete user");
+          alert(t("Failed to delete user"));
         }
       } catch (error) {
-        console.error("Error deleting user:", error);
-        alert("Failed to delete user");
+        console.error(t("Error deleting user"), error);
+        alert(t("Failed to delete user"));
       }
     }
   };
@@ -121,9 +123,9 @@ export default function ManageUsers() {
   };
 
   return (
-    <div className="manage-users">
+    <div className={`manage-users ${isRTL ? "rtl" : "ltr"}`}>
       <div className="page-header">
-        <h1>User Management</h1>
+        <h1>{t("User Management")}</h1>
         <button
           className="btn btn-primary"
           onClick={() => {
@@ -132,33 +134,33 @@ export default function ManageUsers() {
           }}
         >
           <UserPlus size={20} />
-          Add New User
+          {t("Add New User")}
         </button>
       </div>
 
-      <div className="users-table">
-        <table>
+      <div className="users-table-container">
+        <table className="users-table">
           <thead>
             <tr>
-              <th>Username</th>
-              <th>Full Name</th>
-              <th>Role</th>
-              <th>Status</th>
-              <th>Created</th>
-              <th>Actions</th>
+              <th className="username-col">{t("Username")}</th>
+              <th className="fullname-col">{t("Full Name")}</th>
+              <th className="role-col">{t("Role")}</th>
+              <th className="status-col">{t("Status")}</th>
+              <th className="created-col">{t("Created")}</th>
+              <th className="actions-col">{t("Actions")}</th>
             </tr>
           </thead>
           <tbody>
             {users.map((user) => (
               <tr key={user.id}>
-                <td>{user.username}</td>
-                <td>{user.full_name || "-"}</td>
-                <td>
+                <td className="username-col">{user.username}</td>
+                <td className="fullname-col">{user.full_name || "-"}</td>
+                <td className="role-col">
                   <span className={`badge ${getRoleBadgeColor(user.role)}`}>
-                    {user.role}
+                    {t(user.role)}
                   </span>
                 </td>
-                <td>
+                <td className="status-col">
                   <span
                     className={`badge ${
                       user.is_active
@@ -166,15 +168,18 @@ export default function ManageUsers() {
                         : "bg-red-100 text-red-800"
                     }`}
                   >
-                    {user.is_active ? "Active" : "Inactive"}
+                    {user.is_active ? t("Active") : t("Inactive")}
                   </span>
                 </td>
-                <td>{new Date(user.created_at).toLocaleDateString()}</td>
-                <td>
+                <td className="created-col">
+                  {new Date(user.created_at).toLocaleDateString()}
+                </td>
+                <td className="actions-col">
                   <div className="actions">
                     <button
                       className="btn btn-sm btn-secondary"
                       onClick={() => handleEdit(user)}
+                      title={t("Edit")}
                     >
                       <Edit size={16} />
                     </button>
@@ -182,6 +187,7 @@ export default function ManageUsers() {
                       <button
                         className="btn btn-sm btn-danger"
                         onClick={() => handleDelete(user.id, user.username)}
+                        title={t("Delete")}
                       >
                         <Trash2 size={16} />
                       </button>
@@ -199,7 +205,7 @@ export default function ManageUsers() {
         <div className="modal-overlay">
           <div className="modal">
             <div className="modal-header">
-              <h2>{editingUser ? "Edit User" : "Add New User"}</h2>
+              <h2>{editingUser ? t("Edit User") : t("Add New User")}</h2>
               <button
                 className="modal-close"
                 onClick={() => setShowModal(false)}
@@ -210,7 +216,7 @@ export default function ManageUsers() {
 
             <form onSubmit={handleSubmit}>
               <div className="form-group">
-                <label>Username</label>
+                <label>{t("Username")}</label>
                 <input
                   type="text"
                   value={formData.username}
@@ -222,7 +228,7 @@ export default function ManageUsers() {
               </div>
 
               <div className="form-group">
-                <label>Full Name</label>
+                <label>{t("Full Name")}</label>
                 <input
                   type="text"
                   value={formData.full_name}
@@ -234,7 +240,8 @@ export default function ManageUsers() {
 
               <div className="form-group">
                 <label>
-                  Password {editingUser && "(leave blank to keep current)"}
+                  {t("Password")}{" "}
+                  {editingUser && t("(leave blank to keep current)")}
                 </label>
                 <div className="password-input">
                   <input
@@ -256,7 +263,7 @@ export default function ManageUsers() {
               </div>
 
               <div className="form-group">
-                <label>Role</label>
+                <label>{t("Role")}</label>
                 <select
                   value={formData.role}
                   onChange={(e) =>
@@ -264,9 +271,9 @@ export default function ManageUsers() {
                   }
                   required
                 >
-                  <option value="cashier">Cashier</option>
-                  <option value="accountant">Accountant</option>
-                  <option value="admin">Admin</option>
+                  <option value="cashier">{t("Cashier")}</option>
+                  <option value="accountant">{t("Accountant")}</option>
+                  <option value="admin">{t("Admin")}</option>
                 </select>
               </div>
 
@@ -279,16 +286,16 @@ export default function ManageUsers() {
                       setFormData({ ...formData, is_active: e.target.checked })
                     }
                   />
-                  Active User
+                  {t("Active User")}
                 </label>
               </div>
 
               <div className="modal-actions">
                 <button type="button" onClick={() => setShowModal(false)}>
-                  Cancel
+                  {t("Cancel")}
                 </button>
                 <button type="submit" className="btn btn-primary">
-                  {editingUser ? "Update User" : "Create User"}
+                  {editingUser ? t("Update User") : t("Create User")}
                 </button>
               </div>
             </form>

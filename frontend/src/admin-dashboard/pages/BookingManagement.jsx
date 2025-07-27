@@ -21,9 +21,11 @@ import {
   X, // Add this
 } from "lucide-react";
 import BookingForm from "../components/BookingForm";
+import { useLanguage } from "../../context/LanguageContext";
 import "../styles/BookingManagement.css";
 
 export default function BookingManagement() {
+  const { t, isRTL } = useLanguage();
   const [bookings, setBookings] = useState([]);
   const [customers, setCustomers] = useState([]);
   const [barbers, setBarbers] = useState([]);
@@ -158,7 +160,7 @@ export default function BookingManagement() {
   };
 
   const handleDeleteBooking = async (bookingId) => {
-    if (!confirm("Are you sure you want to delete this booking?")) return;
+    if (!confirm(t("deleteBookingConfirm"))) return;
 
     try {
       const res = await fetch(`/api/bookings/${bookingId}`, {
@@ -179,8 +181,7 @@ export default function BookingManagement() {
   };
 
   const handleCompleteBooking = async (bookingId) => {
-    if (!confirm("Mark this booking as completed and create a transaction?"))
-      return;
+    if (!confirm(t("completeBookingConfirm"))) return;
 
     try {
       const res = await fetch(`/api/bookings/${bookingId}/complete`, {
@@ -196,7 +197,7 @@ export default function BookingManagement() {
 
       fetchBookings();
       fetchStats();
-      alert("Booking completed and transaction created successfully!");
+      alert(t("bookingCompletedSuccess"));
     } catch (err) {
       console.error("Error completing booking:", err);
       setError(err.message);
@@ -221,8 +222,18 @@ export default function BookingManagement() {
     });
   };
 
+  const getLocalizedStatus = (status) => {
+    const statusMap = {
+      scheduled: t("scheduled"),
+      confirmed: t("confirmed"),
+      completed: t("completed"),
+      cancelled: t("cancelled"),
+    };
+    return statusMap[status] || status;
+  };
+
   return (
-    <div className="booking-management-page">
+    <div className={`booking-management-page ${isRTL ? "rtl" : "ltr"}`}>
       {error && (
         <div className="error-message">
           {error}
@@ -235,9 +246,9 @@ export default function BookingManagement() {
         <div className="header-left">
           <h1>
             <Calendar size={24} />
-            Booking Management
+            {t("bookingManagement")}
           </h1>
-          <p className="subtext">Manage appointments and schedules</p>
+          <p className="subtext">{t("manageAppointmentsSubtext")}</p>
         </div>
         <div className="header-actions">
           <button
@@ -246,14 +257,14 @@ export default function BookingManagement() {
             disabled={loading}
           >
             <RefreshCcw size={16} />
-            Refresh
+            {t("refresh")}
           </button>
           <button
             className="btn-primary"
             onClick={() => setShowAddBooking(true)}
           >
             <Plus size={16} />
-            New Booking
+            {t("newBooking")}
           </button>
         </div>
       </div>
@@ -267,7 +278,7 @@ export default function BookingManagement() {
             </div>
             <div className="stat-content">
               <h3>{stats.total_bookings}</h3>
-              <p>Total Bookings</p>
+              <p>{t("totalBookings")}</p>
             </div>
           </div>
           <div className="stat-card">
@@ -276,7 +287,7 @@ export default function BookingManagement() {
             </div>
             <div className="stat-content">
               <h3>{stats.scheduled}</h3>
-              <p>Scheduled</p>
+              <p>{t("scheduled")}</p>
             </div>
           </div>
           <div className="stat-card">
@@ -285,7 +296,7 @@ export default function BookingManagement() {
             </div>
             <div className="stat-content">
               <h3>{stats.confirmed}</h3>
-              <p>Confirmed</p>
+              <p>{t("confirmed")}</p>
             </div>
           </div>
           <div className="stat-card">
@@ -294,7 +305,7 @@ export default function BookingManagement() {
             </div>
             <div className="stat-content">
               <h3>{stats.total_estimated_revenue?.toFixed(0)} EGP</h3>
-              <p>Est. Revenue</p>
+              <p>{t("estRevenue")}</p>
             </div>
           </div>
         </div>
@@ -303,7 +314,7 @@ export default function BookingManagement() {
       {/* Filters */}
       <div className="booking-filters">
         <div className="filter-group">
-          <label>Date</label>
+          <label>{t("date")}</label>
           <input
             type="date"
             value={selectedDate}
@@ -311,12 +322,12 @@ export default function BookingManagement() {
           />
         </div>
         <div className="filter-group">
-          <label>Barber</label>
+          <label>{t("barber")}</label>
           <select
             value={selectedBarber}
             onChange={(e) => setSelectedBarber(e.target.value)}
           >
-            <option value="">All Barbers</option>
+            <option value="">{t("allBarbers")}</option>
             {barbers.map((barber) => (
               <option key={barber.id} value={barber.id}>
                 {barber.name}
@@ -325,16 +336,16 @@ export default function BookingManagement() {
           </select>
         </div>
         <div className="filter-group">
-          <label>Status</label>
+          <label>{t("status")}</label>
           <select
             value={selectedStatus}
             onChange={(e) => setSelectedStatus(e.target.value)}
           >
-            <option value="all">All Status</option>
-            <option value="scheduled">Scheduled</option>
-            <option value="confirmed">Confirmed</option>
-            <option value="completed">Completed</option>
-            <option value="cancelled">Cancelled</option>
+            <option value="all">{t("allStatus")}</option>
+            <option value="scheduled">{t("scheduled")}</option>
+            <option value="confirmed">{t("confirmed")}</option>
+            <option value="completed">{t("completed")}</option>
+            <option value="cancelled">{t("cancelled")}</option>
           </select>
         </div>
       </div>
@@ -344,23 +355,23 @@ export default function BookingManagement() {
         {loading ? (
           <div className="loading-state">
             <div className="loading-spinner"></div>
-            <p>Loading bookings...</p>
+            <p>{t("loadingBookings")}</p>
           </div>
         ) : bookings.length === 0 ? (
           <div className="empty-state">
             <Calendar size={48} />
-            <h3>No bookings found</h3>
+            <h3>{t("noBookingsFound")}</h3>
             <p>
               {selectedDate || selectedBarber || selectedStatus !== "all"
-                ? "No bookings match your current filters"
-                : "No bookings scheduled for today"}
+                ? t("noBookingsMatch")
+                : t("noBookingsToday")}
             </p>
             <button
               className="btn-primary"
               onClick={() => setShowAddBooking(true)}
             >
               <Plus size={16} />
-              Create First Booking
+              {t("createFirstBooking")}
             </button>
           </div>
         ) : (
@@ -385,7 +396,7 @@ export default function BookingManagement() {
                       }}
                     >
                       <StatusIcon size={14} />
-                      <span>{booking.status}</span>
+                      <span>{getLocalizedStatus(booking.status)}</span>
                     </div>
                   </div>
 
@@ -409,7 +420,7 @@ export default function BookingManagement() {
 
                   {booking.services && booking.services.length > 0 && (
                     <div className="booking-services">
-                      <h5>Services:</h5>
+                      <h5>{t("services")}:</h5>
                       <div className="services-list">
                         {booking.services.map((service, index) => (
                           <span key={index} className="service-tag">
@@ -423,7 +434,9 @@ export default function BookingManagement() {
                   {booking.estimated_cost && (
                     <div className="booking-cost">
                       <DollarSign size={16} />
-                      <span>Est. Cost: {booking.estimated_cost} EGP</span>
+                      <span>
+                        {t("estCost")}: {booking.estimated_cost} EGP
+                      </span>
                     </div>
                   )}
 
@@ -441,7 +454,7 @@ export default function BookingManagement() {
                         onClick={() =>
                           handleStatusUpdate(booking.id, "confirmed")
                         }
-                        title="Confirm Booking"
+                        title={t("confirmBooking")}
                       >
                         <CheckCircle size={14} />
                       </button>
@@ -452,10 +465,10 @@ export default function BookingManagement() {
                       <button
                         className="action-btn complete"
                         onClick={() => handleCompleteBooking(booking.id)}
-                        title="Complete Booking"
+                        title={t("completeBooking")}
                       >
                         <CheckCircle size={14} />
-                        Complete
+                        {t("complete")}
                       </button>
                     )}
 
@@ -465,7 +478,7 @@ export default function BookingManagement() {
                         onClick={() =>
                           handleStatusUpdate(booking.id, "cancelled")
                         }
-                        title="Cancel Booking"
+                        title={t("cancelBooking")}
                       >
                         <XCircle size={14} />
                       </button>
@@ -474,7 +487,7 @@ export default function BookingManagement() {
                     <button
                       className="action-btn edit"
                       onClick={() => setEditingBooking(booking)}
-                      title="Edit Booking"
+                      title={t("editBooking")}
                     >
                       <Edit2 size={14} />
                     </button>
@@ -482,7 +495,7 @@ export default function BookingManagement() {
                     <button
                       className="action-btn delete"
                       onClick={() => handleDeleteBooking(booking.id)}
-                      title="Delete Booking"
+                      title={t("deleteBooking")}
                     >
                       <Trash2 size={14} />
                     </button>
@@ -499,32 +512,28 @@ export default function BookingManagement() {
         <div className="modal-overlay">
           <div className="modal-content">
             <div className="modal-header">
-              <h2>Create New Booking</h2>
+              <h2>{t("createNewBooking")}</h2>
               <button onClick={() => setShowAddBooking(false)}>
                 <X size={20} />
               </button>
             </div>
             <div className="modal-body">
-              <p>
-                Please select a customer from the Customer Management page to
-                create a booking.
-              </p>
+              <p>{t("selectCustomerMessage")}</p>
               <div className="modal-actions">
                 <button
                   className="btn-secondary"
                   onClick={() => setShowAddBooking(false)}
                 >
-                  Cancel
+                  {t("cancel")}
                 </button>
                 <button
                   className="btn-primary"
                   onClick={() => {
                     setShowAddBooking(false);
-
                     window.location.href = "/admin/customers";
                   }}
                 >
-                  Go to Customers
+                  {t("goToCustomers")}
                 </button>
               </div>
             </div>
