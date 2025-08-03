@@ -18,11 +18,13 @@ import {
   DollarSign,
   FileText,
   RefreshCcw,
-  X, // Add this
+  X,
 } from "lucide-react";
 import BookingForm from "../components/BookingForm";
 import { useLanguage } from "../../context/LanguageContext";
 import "../styles/BookingManagement.css";
+import CustomerBookingForm from "../components/CustomerBookingForm";
+import EditBookingForm from "../components/EditBookingForm";
 
 export default function BookingManagement() {
   const { t, isRTL } = useLanguage();
@@ -31,9 +33,10 @@ export default function BookingManagement() {
   const [barbers, setBarbers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [selectedDate, setSelectedDate] = useState(
-    new Date().toISOString().split("T")[0]
-  );
+
+  // 🔧 FIX: Default to empty string to show all bookings
+  const [selectedDate, setSelectedDate] = useState("");
+
   const [selectedBarber, setSelectedBarber] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("all");
   const [showAddBooking, setShowAddBooking] = useState(false);
@@ -55,26 +58,58 @@ export default function BookingManagement() {
     fetchBarbers();
     fetchStats();
   }, [selectedDate, selectedBarber, selectedStatus]);
+
   // Check for new bookings every 30 seconds
   useEffect(() => {
     const interval = setInterval(checkForNewBookings, 1200000);
     return () => clearInterval(interval);
   }, []);
 
+  useEffect(() => {
+    console.log("🔍 BookingManagement Debug Info:");
+    console.log("- Selected Date:", selectedDate);
+    console.log("- Selected Barber:", selectedBarber);
+    console.log("- Selected Status:", selectedStatus);
+    console.log("- Bookings Count:", bookings.length);
+    console.log("- Customers Count:", customers.length);
+    console.log("- Barbers Count:", barbers.length);
+  }, [
+    selectedDate,
+    selectedBarber,
+    selectedStatus,
+    bookings,
+    customers,
+    barbers,
+  ]);
+
   const fetchBookings = async () => {
+    console.log("📡 Fetching bookings with filters:", {
+      selectedDate,
+      selectedBarber,
+      selectedStatus,
+    });
+
     setLoading(true);
     try {
       const params = new URLSearchParams();
+      // 🔧 FIX: Only add date filter if a specific date is selected
       if (selectedDate) params.append("date", selectedDate);
       if (selectedBarber) params.append("barber_id", selectedBarber);
       if (selectedStatus !== "all") params.append("status", selectedStatus);
 
-      const res = await fetch(`/api/bookings?${params}`);
+      const url = `/api/bookings?${params}`;
+      console.log("📤 Fetching URL:", url);
+
+      const res = await fetch(url);
       if (!res.ok) throw new Error("Failed to fetch bookings");
+
       const data = await res.json();
+      console.log("📦 Fetched bookings:", data);
+      console.log("📊 Number of bookings:", data.length);
+
       setBookings(data);
     } catch (err) {
-      console.error("Failed to fetch bookings:", err);
+      console.error("❌ Failed to fetch bookings:", err);
       setError("Failed to load bookings");
     } finally {
       setLoading(false);
@@ -104,12 +139,28 @@ export default function BookingManagement() {
 
   const fetchCustomers = async () => {
     try {
+      console.log("👥 Fetching customers...");
       const res = await fetch("/api/customers");
       if (!res.ok) throw new Error("Failed to fetch customers");
       const data = await res.json();
-      setCustomers(data.customers || []);
+
+      console.log("👥 Customers response:", data);
+
+      // Handle different response structures
+      let customersArray = [];
+      if (Array.isArray(data)) {
+        customersArray = data;
+      } else if (data.customers && Array.isArray(data.customers)) {
+        customersArray = data.customers;
+      } else if (data.data && Array.isArray(data.data)) {
+        customersArray = data.data;
+      }
+
+      console.log("👥 Setting customers:", customersArray);
+      setCustomers(customersArray);
     } catch (err) {
-      console.error("Failed to fetch customers:", err);
+      console.error("❌ Failed to fetch customers:", err);
+      setCustomers([]);
     }
   };
 
@@ -204,8 +255,37 @@ export default function BookingManagement() {
     }
   };
 
-  const handleBookingCreated = () => {
+  // 🔧 FIX: Enhanced booking creation handler
+  const handleBookingCreated = async (createdBooking) => {
+    console.log("🎯 Booking creation callback triggered:", createdBooking);
+
     setShowAddBooking(false);
+
+    // 🔧 FIX: Auto-switch to the booking's date to show it immediately
+    if (createdBooking && createdBooking.booking_date) {
+      console.log(
+        "📅 Setting date filter to show new booking:",
+        createdBooking.booking_date
+      );
+      setSelectedDate(createdBooking.booking_date);
+    }
+
+    // Force refresh bookings
+    console.log("🔄 Refreshing bookings and stats...");
+    await Promise.all([fetchBookings(), fetchStats()]);
+
+    console.log("✅ Bookings refreshed");
+
+    // Enhanced success message
+    if (createdBooking) {
+      alert(
+        `✅ Booking created successfully!\n\nCustomer: ${createdBooking.customer_name}\nDate: ${createdBooking.booking_date}\nTime: ${createdBooking.booking_time}\n\n📅 Showing bookings for ${createdBooking.booking_date}`
+      );
+    }
+  };
+
+  const handleBookingUpdated = () => {
+    setEditingBooking(null);
     fetchBookings();
     fetchStats();
   };
@@ -230,6 +310,14 @@ export default function BookingManagement() {
       cancelled: t("cancelled"),
     };
     return statusMap[status] || status;
+  };
+
+  // 🔧 FIX: Helper functions for quick date switching
+  const getToday = () => new Date().toISOString().split("T")[0];
+  const getTomorrow = () => {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    return tomorrow.toISOString().split("T")[0];
   };
 
   return (
@@ -311,16 +399,57 @@ export default function BookingManagement() {
         </div>
       )}
 
-      {/* Filters */}
+      {/* 🔧 FIX: Enhanced Filters with Quick Date Buttons */}
       <div className="booking-filters">
+        {/* Quick Date Buttons */}
         <div className="filter-group">
-          <label>{t("date")}</label>
+          <label>{t("quickFilters") || "Quick Filters"}</label>
+          <div className="quick-date-buttons">
+            <button
+              className={`quick-btn ${selectedDate === "" ? "active" : ""}`}
+              onClick={() => setSelectedDate("")}
+            >
+              All Dates ({bookings.length})
+            </button>
+            <button
+              className={`quick-btn ${
+                selectedDate === getToday() ? "active" : ""
+              }`}
+              onClick={() => setSelectedDate(getToday())}
+            >
+              Today
+            </button>
+            <button
+              className={`quick-btn ${
+                selectedDate === getTomorrow() ? "active" : ""
+              }`}
+              onClick={() => setSelectedDate(getTomorrow())}
+            >
+              Tomorrow
+            </button>
+          </div>
+        </div>
+
+        {/* Date Picker */}
+        <div className="filter-group">
+          <label>{t("date") || "Specific Date"}</label>
           <input
             type="date"
             value={selectedDate}
             onChange={(e) => setSelectedDate(e.target.value)}
+            placeholder="Select specific date"
           />
+          {selectedDate && (
+            <button
+              className="clear-date-btn"
+              onClick={() => setSelectedDate("")}
+              title="Clear date filter"
+            >
+              <X size={14} />
+            </button>
+          )}
         </div>
+
         <div className="filter-group">
           <label>{t("barber")}</label>
           <select
@@ -335,6 +464,7 @@ export default function BookingManagement() {
             ))}
           </select>
         </div>
+
         <div className="filter-group">
           <label>{t("status")}</label>
           <select
@@ -350,6 +480,18 @@ export default function BookingManagement() {
         </div>
       </div>
 
+      {/* Current Filter Display */}
+      <div className="active-filters">
+        <span className="filter-label">Showing:</span>
+        <span className="filter-value">
+          {selectedDate ? `Bookings for ${selectedDate}` : "All bookings"}
+          {selectedBarber &&
+            ` • Barber: ${barbers.find((b) => b.id === selectedBarber)?.name}`}
+          {selectedStatus !== "all" && ` • Status: ${selectedStatus}`}
+        </span>
+        <span className="results-count">({bookings.length} results)</span>
+      </div>
+
       {/* Bookings List */}
       <div className="bookings-container">
         {loading ? (
@@ -363,16 +505,32 @@ export default function BookingManagement() {
             <h3>{t("noBookingsFound")}</h3>
             <p>
               {selectedDate || selectedBarber || selectedStatus !== "all"
-                ? t("noBookingsMatch")
-                : t("noBookingsToday")}
+                ? t("noBookingsMatch") ||
+                  "No bookings match your filters. Try clearing some filters."
+                : t("noBookingsToday") || "No bookings found."}
             </p>
-            <button
-              className="btn-primary"
-              onClick={() => setShowAddBooking(true)}
-            >
-              <Plus size={16} />
-              {t("createFirstBooking")}
-            </button>
+            {/* Quick actions for empty state */}
+            <div className="empty-state-actions">
+              <button
+                className="btn-primary"
+                onClick={() => setShowAddBooking(true)}
+              >
+                <Plus size={16} />
+                {t("createFirstBooking") || "Create New Booking"}
+              </button>
+              {(selectedDate || selectedBarber || selectedStatus !== "all") && (
+                <button
+                  className="btn-secondary"
+                  onClick={() => {
+                    setSelectedDate("");
+                    setSelectedBarber("");
+                    setSelectedStatus("all");
+                  }}
+                >
+                  Clear All Filters
+                </button>
+              )}
+            </div>
           </div>
         ) : (
           <div className="bookings-grid">
@@ -383,10 +541,16 @@ export default function BookingManagement() {
 
               return (
                 <div key={booking.id} className="booking-card">
+                  {/* Add booking date to card header */}
                   <div className="booking-header">
-                    <div className="booking-time">
-                      <Clock size={16} />
-                      <span>{formatTime(booking.booking_time)}</span>
+                    <div className="booking-date-time">
+                      <div className="booking-date">
+                        {new Date(booking.booking_date).toLocaleDateString()}
+                      </div>
+                      <div className="booking-time">
+                        <Clock size={16} />
+                        <span>{formatTime(booking.booking_time)}</span>
+                      </div>
                     </div>
                     <div
                       className="booking-status"
@@ -510,32 +674,71 @@ export default function BookingManagement() {
       {/* Add Booking Modal */}
       {showAddBooking && (
         <div className="modal-overlay">
-          <div className="modal-content">
+          <div className="modal-content booking-modal">
             <div className="modal-header">
               <h2>{t("createNewBooking")}</h2>
-              <button onClick={() => setShowAddBooking(false)}>
+              <button
+                className="close-btn"
+                onClick={() => setShowAddBooking(false)}
+              >
                 <X size={20} />
               </button>
             </div>
             <div className="modal-body">
-              <p>{t("selectCustomerMessage")}</p>
-              <div className="modal-actions">
-                <button
-                  className="btn-secondary"
-                  onClick={() => setShowAddBooking(false)}
-                >
-                  {t("cancel")}
-                </button>
-                <button
-                  className="btn-primary"
-                  onClick={() => {
-                    setShowAddBooking(false);
-                    window.location.href = "/admin/customers";
-                  }}
-                >
-                  {t("goToCustomers")}
-                </button>
-              </div>
+              {customers.length === 0 ? (
+                <>
+                  <p>{t("selectCustomerMessage")}</p>
+                  <div className="modal-actions">
+                    <button
+                      className="btn-secondary"
+                      onClick={() => setShowAddBooking(false)}
+                    >
+                      {t("cancel")}
+                    </button>
+                    <button
+                      className="btn-primary"
+                      onClick={() => {
+                        setShowAddBooking(false);
+                        window.location.href = "/admin/customers";
+                      }}
+                    >
+                      {t("goToCustomers")}
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <CustomerBookingForm
+                  customers={customers}
+                  barbers={barbers}
+                  onSubmit={handleBookingCreated}
+                  onCancel={() => setShowAddBooking(false)}
+                />
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Booking Modal */}
+      {editingBooking && (
+        <div className="modal-overlay">
+          <div className="modal-content booking-modal">
+            <div className="modal-header">
+              <h2>Edit Booking</h2>
+              <button
+                className="close-btn"
+                onClick={() => setEditingBooking(null)}
+              >
+                <X size={20} />
+              </button>
+            </div>
+            <div className="modal-body">
+              <EditBookingForm
+                booking={editingBooking}
+                barbers={barbers}
+                onSubmit={handleBookingUpdated}
+                onCancel={() => setEditingBooking(null)}
+              />
             </div>
           </div>
         </div>

@@ -27,6 +27,11 @@ export default function ManageProducts() {
   const [editingProduct, setEditingProduct] = useState(null);
   const [editingSupplier, setEditingSupplier] = useState(null);
   const [showSupplierForm, setShowSupplierForm] = useState(false);
+  const [categories, setCategories] = useState([]);
+  const [newCategory, setNewCategory] = useState("");
+  const [editingCategoryId, setEditingCategoryId] = useState(null);
+  const [editingCategoryName, setEditingCategoryName] = useState("");
+  const [showCategoryModal, setShowCategoryModal] = useState(false);
 
   const [newProduct, setNewProduct] = useState({
     name: "",
@@ -56,6 +61,8 @@ export default function ManageProducts() {
       const res = await fetch("/api/products");
       if (!res.ok) throw new Error(t("Failed to load products"));
       const data = await res.json();
+      console.log("📦 Products from backend:", data); // ⬅️ ADD THIS LINE
+
       setProducts(data);
     } catch (err) {
       console.error("Failed to fetch products:", err);
@@ -77,9 +84,64 @@ export default function ManageProducts() {
     }
   };
 
+  const fetchCategories = async () => {
+    try {
+      const res = await fetch("/api/categories");
+      const data = await res.json();
+      setCategories(data);
+    } catch (err) {
+      console.error("Failed to fetch categories:", err);
+    }
+  };
+
+  const addCategory = async () => {
+    if (!newCategory.trim()) return;
+    try {
+      const res = await fetch("/api/categories", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: newCategory.trim() }),
+      });
+      if (res.ok) {
+        setNewCategory("");
+        fetchCategories();
+      }
+    } catch (err) {
+      console.error("Error adding category:", err);
+    }
+  };
+
+  const updateCategory = async (id) => {
+    try {
+      const res = await fetch(`/api/categories/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: editingCategoryName.trim() }),
+      });
+      if (res.ok) {
+        setEditingCategoryId(null);
+        setEditingCategoryName("");
+        fetchCategories();
+      }
+    } catch (err) {
+      console.error("Error updating category:", err);
+    }
+  };
+
+  const deleteCategory = async (id) => {
+    if (!confirm(t("Are you sure you want to delete this category?"))) return;
+    try {
+      await fetch(`/api/categories/${id}`, { method: "DELETE" });
+      fetchCategories();
+    } catch (err) {
+      console.error("Error deleting category:", err);
+    }
+  };
+
   useEffect(() => {
     fetchProducts();
     fetchSuppliers();
+    fetchCategories();
   }, []);
 
   const addProduct = async () => {
@@ -384,6 +446,133 @@ export default function ManageProducts() {
           border-radius: 8px;
           border: 1px solid #e5e7eb;
         }
+        /* Add these CSS updates to your existing styles in ManageProducts.jsx */
+
+        .edit-form {
+          display: flex;
+          flex-direction: column;
+          gap: 16px; /* Increased gap for better spacing */
+          width: 100%;
+          padding: 16px;
+          background: #f8fafc;
+          border-radius: 8px;
+          border: 1px solid #e2e8f0;
+        }
+
+        .edit-form .form-group {
+          display: flex;
+          flex-direction: column;
+          gap: 6px;
+        }
+
+        .edit-form .form-label {
+          font-size: 13px;
+          font-weight: 600;
+          color: #374151;
+          margin-bottom: 4px;
+        }
+
+        .edit-form input,
+        .edit-form select,
+        .edit-form textarea {
+          width: 100%;
+          padding: 10px 12px;
+          font-size: 14px;
+          border: 1px solid #d1d5db;
+          border-radius: 6px;
+          background-color: #ffffff;
+          box-sizing: border-box;
+          transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .edit-form input:focus,
+        .edit-form select:focus,
+        .edit-form textarea:focus {
+          outline: none;
+          border-color: #2563eb;
+          box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .edit-form input:disabled,
+        .edit-form select:disabled,
+        .edit-form textarea:disabled {
+          background-color: #f3f4f6;
+          color: #6b7280;
+          cursor: not-allowed;
+        }
+
+        .edit-form .item-actions {
+          display: flex;
+          gap: 8px;
+          margin-top: 8px;
+          padding-top: 12px;
+          border-top: 1px solid #e5e7eb;
+        }
+
+        .edit-form .action-button {
+          flex: 1;
+          padding: 10px 16px;
+          border: 1px solid #e5e7eb;
+          border-radius: 6px;
+          background: white;
+          cursor: pointer;
+          font-size: 14px;
+          font-weight: 500;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          transition: all 0.2s ease;
+        }
+
+        .edit-form .action-button.primary {
+          background-color: #2563eb;
+          color: white;
+          border-color: #2563eb;
+        }
+
+        .edit-form .action-button.primary:hover:not(:disabled) {
+          background-color: #1d4ed8;
+          border-color: #1d4ed8;
+        }
+
+        .edit-form .action-button:not(.primary) {
+          background-color: #f8fafc;
+          color: #374151;
+          border-color: #d1d5db;
+        }
+
+        .edit-form .action-button:not(.primary):hover:not(:disabled) {
+          background-color: #f1f5f9;
+          border-color: #94a3b8;
+        }
+
+        .edit-form .action-button:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+        }
+
+        /* Enhanced form field styling for better UX */
+        .edit-form input[type="number"] {
+          text-align: right;
+        }
+
+        .edit-form textarea {
+          resize: vertical;
+          min-height: 80px;
+          font-family: inherit;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 480px) {
+          .edit-form .item-actions {
+            flex-direction: column;
+          }
+
+          .edit-form .action-button {
+            width: 100%;
+          }
+        }
 
         .tab-button {
           padding: 8px 16px;
@@ -558,6 +747,14 @@ export default function ManageProducts() {
           flex-direction: column;
           gap: 16px;
           position: relative;
+        }
+        .category-badge {
+          font-size: 12px;
+          color: #6b7280;
+          background: #f3f4f6;
+          padding: 4px 8px;
+          border-radius: 4px;
+          display: inline-block;
         }
 
         .item-header {
@@ -832,6 +1029,13 @@ export default function ManageProducts() {
                   {t("Quick Add Supplier")}
                 </button>
               )}
+              <button
+                className="form-button secondary"
+                onClick={() => setShowCategoryModal(true)}
+              >
+                <Package size={16} />
+                {t("Manage Categories")}
+              </button>
             </div>
             <p className="subtext">
               {t("Add a new retail product to your inventory")}
@@ -1008,16 +1212,21 @@ export default function ManageProducts() {
               </div>
               <div className="form-group">
                 <label className="form-label">{t("Category")}</label>
-                <input
-                  className="form-input"
-                  type="text"
+                <select
+                  className="form-select"
                   value={newProduct.category}
                   onChange={(e) =>
                     setNewProduct({ ...newProduct, category: e.target.value })
                   }
-                  placeholder={t("e.g., Hair Care, Styling")}
-                  disabled={loading}
-                />
+                >
+                  <option value="">{t("Select Category (Optional)")}</option>
+
+                  {categories.map((cat) => (
+                    <option key={cat.id} value={cat.name}>
+                      {cat.name}
+                    </option>
+                  ))}
+                </select>
               </div>
               <div className="form-group">
                 <label className="form-label">{t("Supplier")}</label>
@@ -1064,81 +1273,176 @@ export default function ManageProducts() {
                   </div>
                   <div className="item-info">
                     <div className="item-name">{product.name}</div>
-                    {product.category && (
-                      <div className="category-badge">{product.category}</div>
+                    {product.category_name && (
+                      <div className="category-badge">
+                        {product.category_name}
+                      </div>
                     )}
                   </div>
                 </div>
 
                 {editingProduct?.id === product.id ? (
                   <div className="edit-form">
-                    <input
-                      type="text"
-                      value={editingProduct.name}
-                      onChange={(e) =>
-                        setEditingProduct({
-                          ...editingProduct,
-                          name: e.target.value,
-                        })
-                      }
-                      placeholder={t("Product name")}
-                      disabled={loading}
-                    />
-                    <input
-                      type="number"
-                      step="0.01"
-                      value={editingProduct.price}
-                      onChange={(e) =>
-                        setEditingProduct({
-                          ...editingProduct,
-                          price: e.target.value,
-                        })
-                      }
-                      placeholder={t("Selling price")}
-                      disabled={loading}
-                    />
-                    <input
-                      type="number"
-                      step="0.01"
-                      value={editingProduct.cost_price || ""}
-                      onChange={(e) =>
-                        setEditingProduct({
-                          ...editingProduct,
-                          cost_price: e.target.value,
-                        })
-                      }
-                      placeholder={t("Cost price")}
-                      disabled={loading}
-                    />
-                    <input
-                      type="number"
-                      value={editingProduct.stock_quantity}
-                      onChange={(e) =>
-                        setEditingProduct({
-                          ...editingProduct,
-                          stock_quantity: e.target.value,
-                        })
-                      }
-                      placeholder={t("Stock quantity")}
-                      disabled={loading}
-                    />
-                    <select
-                      value={editingProduct.supplier_id || ""}
-                      onChange={(e) =>
-                        setEditingProduct({
-                          ...editingProduct,
-                          supplier_id: e.target.value,
-                        })
-                      }
-                      disabled={loading}
-                    >
-                      <option value="">{t("Select Supplier")}</option>
-                      {suppliers.map((supplier) => (
-                        <option key={supplier.id} value={supplier.id}>
-                          {supplier.name}
+                    <div className="form-group">
+                      <label className="form-label">
+                        {t("Product Name")} *
+                      </label>
+                      <input
+                        type="text"
+                        className="form-input"
+                        value={editingProduct.name}
+                        onChange={(e) =>
+                          setEditingProduct({
+                            ...editingProduct,
+                            name: e.target.value,
+                          })
+                        }
+                        placeholder={t("Product name")}
+                        disabled={loading}
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label className="form-label">
+                        {t("Selling Price (EGP)")} *
+                      </label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        className="form-input"
+                        value={editingProduct.price}
+                        onChange={(e) =>
+                          setEditingProduct({
+                            ...editingProduct,
+                            price: e.target.value,
+                          })
+                        }
+                        placeholder={t("Selling price")}
+                        disabled={loading}
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label className="form-label">
+                        {t("Cost Price (EGP)")}
+                      </label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        className="form-input"
+                        value={editingProduct.cost_price || ""}
+                        onChange={(e) =>
+                          setEditingProduct({
+                            ...editingProduct,
+                            cost_price: e.target.value,
+                          })
+                        }
+                        placeholder={t("Cost price")}
+                        disabled={loading}
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label className="form-label">
+                        {t("Stock Quantity")} *
+                      </label>
+                      <input
+                        type="number"
+                        className="form-input"
+                        value={editingProduct.stock_quantity}
+                        onChange={(e) =>
+                          setEditingProduct({
+                            ...editingProduct,
+                            stock_quantity: e.target.value,
+                          })
+                        }
+                        placeholder={t("Stock quantity")}
+                        disabled={loading}
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label className="form-label">{t("Reorder Level")}</label>
+                      <input
+                        type="number"
+                        className="form-input"
+                        value={editingProduct.reorder_level || ""}
+                        onChange={(e) =>
+                          setEditingProduct({
+                            ...editingProduct,
+                            reorder_level: e.target.value,
+                          })
+                        }
+                        placeholder={t("Reorder level")}
+                        disabled={loading}
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label className="form-label">{t("Category")}</label>
+                      <select
+                        className="form-select"
+                        value={editingProduct.category || ""}
+                        onChange={(e) =>
+                          setEditingProduct({
+                            ...editingProduct,
+                            category: e.target.value,
+                          })
+                        }
+                        disabled={loading}
+                      >
+                        <option value="">
+                          {t("Select Category (Optional)")}
                         </option>
-                      ))}
-                    </select>
+                        {categories.map((cat) => (
+                          <option key={cat.id} value={cat.name}>
+                            {cat.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="form-group">
+                      <label className="form-label">{t("Supplier")}</label>
+                      <select
+                        className="form-select"
+                        value={editingProduct.supplier_id || ""}
+                        onChange={(e) =>
+                          setEditingProduct({
+                            ...editingProduct,
+                            supplier_id: e.target.value,
+                          })
+                        }
+                        disabled={loading}
+                      >
+                        <option value="">
+                          {t("Select Supplier (Optional)")}
+                        </option>
+                        {suppliers.map((supplier) => (
+                          <option key={supplier.id} value={supplier.id}>
+                            {supplier.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="form-group">
+                      <label className="form-label">{t("Description")}</label>
+                      <textarea
+                        className="form-textarea"
+                        rows="3"
+                        value={editingProduct.description || ""}
+                        onChange={(e) =>
+                          setEditingProduct({
+                            ...editingProduct,
+                            description: e.target.value,
+                          })
+                        }
+                        placeholder={t("Product description (optional)")}
+                        disabled={loading}
+                      />
+                    </div>
+
                     <div className="item-actions">
                       <button
                         className="action-button primary"
@@ -1542,6 +1846,101 @@ export default function ManageProducts() {
             </div>
           )}
         </>
+      )}
+
+      {showCategoryModal && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100vw",
+            height: "100vh",
+            background: "rgba(0,0,0,0.3)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 1000,
+          }}
+          onClick={() => setShowCategoryModal(false)}
+        >
+          <div
+            style={{
+              background: "#fff",
+              padding: "30px",
+              width: "400px",
+              borderRadius: "12px",
+              boxShadow: "0 10px 30px rgba(0,0,0,0.2)",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 style={{ marginBottom: "16px" }}>{t("Manage Categories")}</h3>
+
+            <div style={{ marginBottom: "12px", display: "flex", gap: "8px" }}>
+              <input
+                className="form-input"
+                placeholder={t("New category name")}
+                value={newCategory}
+                onChange={(e) => setNewCategory(e.target.value)}
+              />
+              <button className="form-button" onClick={addCategory}>
+                {t("Add")}
+              </button>
+            </div>
+
+            <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
+              {categories.map((cat) => (
+                <li
+                  key={cat.id}
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    padding: "6px 0",
+                    borderBottom: "1px solid #eee",
+                  }}
+                >
+                  {editingCategoryId === cat.id ? (
+                    <>
+                      <input
+                        className="form-input"
+                        value={editingCategoryName}
+                        onChange={(e) => setEditingCategoryName(e.target.value)}
+                      />
+                      <button
+                        className="form-button"
+                        onClick={() => updateCategory(cat.id)}
+                      >
+                        {t("Save")}
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <span>{cat.name}</span>
+                      <div style={{ display: "flex", gap: "8px" }}>
+                        <button
+                          className="action-button"
+                          onClick={() => {
+                            setEditingCategoryId(cat.id);
+                            setEditingCategoryName(cat.name);
+                          }}
+                        >
+                          {t("Edit")}
+                        </button>
+                        <button
+                          className="action-button danger"
+                          onClick={() => deleteCategory(cat.id)}
+                        >
+                          {t("Delete")}
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
       )}
     </div>
   );

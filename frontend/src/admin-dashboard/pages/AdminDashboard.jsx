@@ -17,18 +17,7 @@ export default function AdminDashboard({ user, onLogout }) {
       <Sidebar user={user} onLogout={onLogout} />
       <div className="admin-content">
         {/* Language Toggle Button */}
-        <div className="language-toggle-container">
-          <button
-            className="language-toggle-btn"
-            onClick={toggleLanguage}
-            title={
-              language === "en" ? "Switch to Arabic" : "التبديل إلى الإنجليزية"
-            }
-          >
-            <Languages size={16} />
-            <span>{language === "en" ? "ع" : "EN"}</span>
-          </button>
-        </div>
+       
         <Outlet /> {/* This will render the active nested route's element */}
       </div>
     </div>

@@ -1,408 +1,547 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
-  Save,
-  X,
   Calendar,
   Clock,
   User,
-  Scissors,
-  DollarSign,
-  FileText,
+  AlertCircle,
+  CheckCircle,
+  Info,
 } from "lucide-react";
+import "../styles/BookingForm.css";
 
 export default function BookingForm({
-  customer,
   onSubmit,
+  editingBooking = null,
   onCancel,
-  barbers = [],
 }) {
-  const [formData, setFormData] = useState({
-    barber_id: customer?.preferred_barber_id || "",
+  const [barbers, setBarbers] = useState([]);
+  const [customers, setCustomers] = useState([]);
+  const [services, setServices] = useState([]);
+  const [slotsData, setSlotsData] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const [booking, setBooking] = useState({
+    customer_id: "",
+    barber_id: "",
+    service_ids: [],
     booking_date: "",
     booking_time: "",
-    service_ids: [],
     duration_minutes: 60,
+    notes: "",
+    estimated_cost: 0,
   });
 
-  const [services, setServices] = useState([]);
-  const [availableSlots, setAvailableSlots] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [errors, setErrors] = useState({});
-  const [checkingAvailability, setCheckingAvailability] = useState(false);
-
-  // Fetch services on component mount
   useEffect(() => {
-    fetchServices();
-    // Set default date to tomorrow
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    setFormData((prev) => ({
-      ...prev,
-      booking_date: tomorrow.toISOString().split("T")[0],
-    }));
-  }, []);
-
-  // Check availability when barber or date changes
-  useEffect(() => {
-    if (formData.barber_id && formData.booking_date) {
-      checkAvailability();
+    fetchInitialData();
+    if (editingBooking) {
+      setBooking({
+        customer_id: editingBooking.customer_id || "",
+        barber_id: editingBooking.barber_id || "",
+        service_ids: editingBooking.service_ids
+          ? editingBooking.service_ids.split(",")
+          : [],
+        booking_date: editingBooking.booking_date || "",
+        booking_time: editingBooking.booking_time || "",
+        duration_minutes: editingBooking.duration_minutes || 60,
+        notes: editingBooking.notes || "",
+        estimated_cost: editingBooking.estimated_cost || 0,
+      });
     }
-  }, [formData.barber_id, formData.booking_date]);
+  }, [editingBooking]);
 
-  // Calculate estimated cost when services change
+  useEffect(() => {
+    if (booking.barber_id && booking.booking_date) {
+      fetchSlotsData();
+    } else {
+      setSlotsData(null);
+    }
+  }, [booking.barber_id, booking.booking_date]);
+
   useEffect(() => {
     calculateEstimatedCost();
-  }, [formData.service_ids, services]);
+  }, [booking.service_ids, services]);
 
-  const fetchServices = async () => {
+  const fetchInitialData = async () => {
     try {
-      const res = await fetch("/api/services");
-      if (!res.ok) throw new Error("Failed to fetch services");
-      const data = await res.json();
-      setServices(data);
+      const [barbersRes, customersRes, servicesRes] = await Promise.all([
+        fetch("/api/barbers"),
+        fetch("/api/customers"),
+        fetch("/api/services"),
+      ]);
+
+      // Handle barbers response
+      if (barbersRes.ok) {
+        const barbersData = await barbersRes.json();
+        console.log("Barbers data:", barbersData);
+        setBarbers(Array.isArray(barbersData) ? barbersData : []);
+      } else {
+        console.error("Failed to fetch barbers");
+        setBarbers([]);
+      }
+
+      // Handle customers response with detailed logging
+      if (customersRes.ok) {
+        const customersData = await customersRes.json();
+        console.log("Customers data in BookingForm:", customersData);
+        console.log("Customers data type:", typeof customersData);
+        console.log("Is customers array?", Array.isArray(customersData));
+
+        // Handle different possible response structures
+        let customersArray = [];
+
+        if (Array.isArray(customersData)) {
+          customersArray = customersData;
+        } else if (
+          customersData &&
+          customersData.customers &&
+          Array.isArray(customersData.customers)
+        ) {
+          customersArray = customersData.customers;
+        } else if (
+          customersData &&
+          customersData.data &&
+          Array.isArray(customersData.data)
+        ) {
+          customersArray = customersData.data;
+        } else {
+          console.warn(
+            "Unexpected customers response structure:",
+            customersData
+          );
+          customersArray = [];
+        }
+
+        console.log("Final customers array:", customersArray);
+        setCustomers(customersArray);
+      } else {
+        console.error("Failed to fetch customers");
+        setCustomers([]);
+      }
+
+      // Handle services response
+      if (servicesRes.ok) {
+        const servicesData = await servicesRes.json();
+        console.log("Services data:", servicesData);
+        setServices(Array.isArray(servicesData) ? servicesData : []);
+      } else {
+        console.error("Failed to fetch services");
+        setServices([]);
+      }
     } catch (err) {
-      console.error("Failed to fetch services:", err);
+      console.error("Failed to fetch initial data:", err);
+      setError("Failed to load form data");
+      // Ensure all states are arrays even on error
+      setCustomers([]);
+      setBarbers([]);
+      setServices([]);
     }
   };
 
-  const checkAvailability = async () => {
-    if (!formData.barber_id || !formData.booking_date) return;
-
-    setCheckingAvailability(true);
+  const fetchSlotsData = async () => {
     try {
+      setLoading(true);
+      setError("");
+
+      const duration = Math.max(booking.duration_minutes, 30); // Minimum 30 minutes
       const res = await fetch(
-        `/api/bookings/availability/${formData.barber_id}/${formData.booking_date}`
+        `/api/barber-schedule/${booking.barber_id}/slots/${booking.booking_date}?duration=${duration}`
       );
-      if (!res.ok) throw new Error("Failed to check availability");
-      const data = await res.json();
-      setAvailableSlots(data.availableSlots);
 
-      // Clear selected time if it's no longer available
-      if (!data.availableSlots.includes(formData.booking_time)) {
-        setFormData((prev) => ({ ...prev, booking_time: "" }));
-      }
-    } catch (err) {
-      console.error("Failed to check availability:", err);
-      setAvailableSlots([]);
-    } finally {
-      setCheckingAvailability(false);
-    }
-  };
+      if (res.ok) {
+        const data = await res.json();
+        setSlotsData(data);
 
-  const calculateEstimatedCost = () => {
-    const totalCost = formData.service_ids.reduce((total, serviceId) => {
-      const service = services.find((s) => s.id === serviceId);
-      return total + (service ? service.price : 0);
-    }, 0);
-
-    setFormData((prev) => ({ ...prev, estimated_cost: totalCost }));
-  };
-
-  const validateForm = () => {
-    const newErrors = {};
-
-    if (!formData.barber_id) {
-      newErrors.barber_id = "Please select a barber";
-    }
-
-    if (!formData.booking_date) {
-      newErrors.booking_date = "Please select a date";
-    } else {
-      const selectedDate = new Date(formData.booking_date);
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      if (selectedDate < today) {
-        newErrors.booking_date = "Cannot book appointments in the past";
-      }
-    }
-
-    if (!formData.booking_time) {
-      newErrors.booking_time = "Please select a time";
-    }
-
-    if (formData.service_ids.length === 0) {
-      newErrors.service_ids = "Please select at least one service";
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!validateForm()) return;
-
-    setLoading(true);
-    try {
-      const res = await fetch("/api/bookings", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          customer_id: customer.id,
-          ...formData,
-        }),
-      });
-
-      if (!res.ok) {
+        if (!data.success) {
+          setError(data.error || "Failed to fetch availability");
+        }
+      } else {
         const errorData = await res.json();
-        throw new Error(errorData.error || "Failed to create booking");
+        setError(errorData.error || "Failed to fetch availability");
+        setSlotsData(null);
       }
-
-      onSubmit();
     } catch (err) {
-      console.error("Error creating booking:", err);
-      setErrors({ submit: err.message });
+      console.error("Failed to fetch slots data:", err);
+      setError("Failed to check availability");
+      setSlotsData(null);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleInputChange = (field, value) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-    if (errors[field]) {
-      setErrors((prev) => ({ ...prev, [field]: null }));
+  const calculateEstimatedCost = () => {
+    const totalCost = booking.service_ids.reduce((sum, serviceId) => {
+      const service = services.find((s) => s.id === serviceId);
+      return sum + (service ? service.price : 0);
+    }, 0);
+    setBooking((prev) => ({ ...prev, estimated_cost: totalCost }));
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    if (
+      !booking.customer_id ||
+      !booking.barber_id ||
+      !booking.booking_date ||
+      !booking.booking_time
+    ) {
+      setError("Please fill in all required fields");
+      return;
     }
+
+    if (booking.service_ids.length === 0) {
+      setError("Please select at least one service");
+      return;
+    }
+
+    if (slotsData && !slotsData.isWorkingDay) {
+      setError("Selected barber is not working on this date");
+      return;
+    }
+
+    // Check if selected time is available
+    if (slotsData && slotsData.availableSlots) {
+      const isTimeAvailable = slotsData.availableSlots.some(
+        (slot) => slot.time === booking.booking_time
+      );
+
+      if (!isTimeAvailable) {
+        setError("Selected time slot is not available");
+        return;
+      }
+    }
+
+    onSubmit({
+      ...booking,
+      service_ids: booking.service_ids.join(","),
+    });
   };
 
-  const handleServiceToggle = (serviceId) => {
-    setFormData((prev) => ({
-      ...prev,
-      service_ids: prev.service_ids.includes(serviceId)
-        ? prev.service_ids.filter((id) => id !== serviceId)
-        : [...prev.service_ids, serviceId],
-    }));
-  };
+  const getAvailabilityStatus = () => {
+    if (!slotsData) return null;
 
-  const getSelectedBarber = () => {
-    return barbers.find((b) => b.id === formData.barber_id);
+    if (slotsData.isPastDate) {
+      return (
+        <div className="availability-status unavailable">
+          <AlertCircle size={16} />
+          Cannot book appointments for past dates
+        </div>
+      );
+    }
+
+    if (slotsData.timeOff) {
+      return (
+        <div className="availability-status unavailable">
+          <AlertCircle size={16} />
+          Barber is on {slotsData.timeOff.reason.toLowerCase()}
+          {slotsData.timeOff.notes && ` - ${slotsData.timeOff.notes}`}
+        </div>
+      );
+    }
+
+    if (!slotsData.isWorkingDay) {
+      return (
+        <div className="availability-status unavailable">
+          <AlertCircle size={16} />
+          {slotsData.message || "Barber is not working on this day"}
+        </div>
+      );
+    }
+
+    return (
+      <div className="availability-status available">
+        <CheckCircle size={16} />
+        <div className="availability-details">
+          <div>
+            Working hours: {slotsData.schedule.startTime} -{" "}
+            {slotsData.schedule.endTime}
+          </div>
+          {slotsData.schedule.breakStart && slotsData.schedule.breakEnd && (
+            <div>
+              Break: {slotsData.schedule.breakStart} -{" "}
+              {slotsData.schedule.breakEnd}
+            </div>
+          )}
+          <div className="slot-summary">
+            {slotsData.summary.availableCount} available slots,
+            {slotsData.summary.bookedCount} booked
+          </div>
+        </div>
+      </div>
+    );
   };
 
   return (
-    <form onSubmit={handleSubmit} className="booking-form">
-      {errors.submit && <div className="error-message">{errors.submit}</div>}
-
-      {/* Customer Info */}
-      <div className="form-section">
-        <h3>
-          <User size={16} />
-          Customer Information
-        </h3>
-        <div className="customer-info">
-          <p>
-            <strong>Name:</strong> {customer.name}
-          </p>
-          <p>
-            <strong>Mobile:</strong> {customer.mobile}
-          </p>
-          {customer.preferred_barber_name && (
-            <p>
-              <strong>Preferred Barber:</strong>{" "}
-              {customer.preferred_barber_name}
-            </p>
-          )}
-        </div>
-      </div>
-
-      {/* Barber Selection */}
-      <div className="form-section">
-        <h3>
-          <Scissors size={16} />
-          Barber & Schedule
-        </h3>
+    <div className="enhanced-booking-form">
+      <form onSubmit={handleSubmit}>
+        {error && (
+          <div className="error-message">
+            <AlertCircle size={16} />
+            {error}
+            <button type="button" onClick={() => setError("")}>
+              ×
+            </button>
+          </div>
+        )}
 
         <div className="form-grid">
+          {/* Customer Selection */}
           <div className="form-group">
-            <label htmlFor="barber">
-              Select Barber <span className="required">*</span>
+            <label>
+              <User size={16} />
+              Customer *
             </label>
             <select
-              id="barber"
-              value={formData.barber_id}
-              onChange={(e) => handleInputChange("barber_id", e.target.value)}
-              className={errors.barber_id ? "error" : ""}
-              disabled={loading}
+              value={booking.customer_id}
+              onChange={(e) =>
+                setBooking((prev) => ({ ...prev, customer_id: e.target.value }))
+              }
+              required
             >
-              <option value="">Choose a barber</option>
-              {barbers.map((barber) => (
-                <option key={barber.id} value={barber.id}>
-                  {barber.name} - {barber.specialty}
+              <option value="">Select a customer</option>
+              {customers && Array.isArray(customers) && customers.length > 0 ? (
+                customers.map((customer) => (
+                  <option key={customer.id} value={customer.id}>
+                    {customer.name} - {customer.mobile}
+                  </option>
+                ))
+              ) : (
+                <option disabled>
+                  {customers && Array.isArray(customers)
+                    ? "No customers available"
+                    : "Loading customers..."}
                 </option>
-              ))}
+              )}
             </select>
-            {errors.barber_id && (
-              <span className="error-text">{errors.barber_id}</span>
-            )}
           </div>
 
+          {/* Barber Selection */}
           <div className="form-group">
-            <label htmlFor="date">
-              Date <span className="required">*</span>
+            <label>
+              <User size={16} />
+              Barber *
+            </label>
+            <select
+              value={booking.barber_id}
+              onChange={(e) =>
+                setBooking((prev) => ({ ...prev, barber_id: e.target.value }))
+              }
+              required
+            >
+              <option value="">Select a barber</option>
+              {barbers && Array.isArray(barbers) && barbers.length > 0 ? (
+                barbers.map((barber) => (
+                  <option key={barber.id} value={barber.id}>
+                    {barber.name}{" "}
+                    {barber.specialty_names && `- ${barber.specialty_names}`}
+                  </option>
+                ))
+              ) : (
+                <option disabled>
+                  {barbers && Array.isArray(barbers)
+                    ? "No barbers available"
+                    : "Loading barbers..."}
+                </option>
+              )}
+            </select>
+          </div>
+
+          {/* Date Selection */}
+          <div className="form-group">
+            <label>
+              <Calendar size={16} />
+              Date *
             </label>
             <input
-              id="date"
               type="date"
-              value={formData.booking_date}
+              value={booking.booking_date}
               onChange={(e) =>
-                handleInputChange("booking_date", e.target.value)
+                setBooking((prev) => ({
+                  ...prev,
+                  booking_date: e.target.value,
+                }))
               }
               min={new Date().toISOString().split("T")[0]}
-              className={errors.booking_date ? "error" : ""}
-              disabled={loading}
+              required
             />
-            {errors.booking_date && (
-              <span className="error-text">{errors.booking_date}</span>
-            )}
+          </div>
+
+          {/* Duration Selection */}
+          <div className="form-group">
+            <label>Duration (minutes)</label>
+            <select
+              value={booking.duration_minutes}
+              onChange={(e) => {
+                const newDuration = parseInt(e.target.value) || 60;
+                setBooking((prev) => ({
+                  ...prev,
+                  duration_minutes: newDuration,
+                }));
+              }}
+            >
+              <option value="30">30 minutes</option>
+              <option value="60">1 hour</option>
+              <option value="90">1.5 hours</option>
+              <option value="120">2 hours</option>
+              <option value="180">3 hours</option>
+            </select>
           </div>
         </div>
+
+        {/* Availability Status */}
+        {booking.barber_id && booking.booking_date && (
+          <div className="availability-section">
+            {loading ? (
+              <div className="loading-status">
+                <Info size={16} />
+                Checking availability...
+              </div>
+            ) : (
+              getAvailabilityStatus()
+            )}
+          </div>
+        )}
 
         {/* Time Selection */}
         <div className="form-group">
           <label>
-            Available Times <span className="required">*</span>
+            <Clock size={16} />
+            Time *
           </label>
-          {checkingAvailability ? (
-            <div className="loading-message">Checking availability...</div>
-          ) : availableSlots.length > 0 ? (
-            <div className="time-slots">
-              {availableSlots.map((slot) => (
-                <button
-                  key={slot}
-                  type="button"
-                  className={`time-slot ${
-                    formData.booking_time === slot ? "selected" : ""
-                  }`}
-                  onClick={() => handleInputChange("booking_time", slot)}
-                  disabled={loading}
-                >
-                  {slot}
-                </button>
-              ))}
-            </div>
-          ) : formData.barber_id && formData.booking_date ? (
-            <div className="no-slots-message">
-              No available time slots for this barber on the selected date
-            </div>
+          {booking.barber_id && booking.booking_date && slotsData ? (
+            <>
+              {slotsData.success &&
+              slotsData.isWorkingDay &&
+              slotsData.availableSlots.length > 0 ? (
+                <div className="time-slots-container">
+                  <select
+                    value={booking.booking_time}
+                    onChange={(e) =>
+                      setBooking((prev) => ({
+                        ...prev,
+                        booking_time: e.target.value,
+                      }))
+                    }
+                    required
+                  >
+                    <option value="">Select a time</option>
+                    {slotsData.availableSlots.map((slot) => (
+                      <option key={slot.time} value={slot.time}>
+                        {slot.time} ({slot.duration} min slot)
+                      </option>
+                    ))}
+                  </select>
+
+                  {slotsData.bookedSlots.length > 0 && (
+                    <div className="booked-slots-info">
+                      <h4>Already Booked:</h4>
+                      <div className="booked-slots-list">
+                        {slotsData.bookedSlots.map((bookedSlot, index) => (
+                          <div key={index} className="booked-slot">
+                            {bookedSlot.time} -{" "}
+                            {bookedSlot.booking?.customer || "Unknown"}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="no-slots">
+                  {slotsData.message || "No available time slots"}
+                </div>
+              )}
+            </>
           ) : (
-            <div className="select-barber-message">
-              Please select a barber and date to see available times
-            </div>
-          )}
-          {errors.booking_time && (
-            <span className="error-text">{errors.booking_time}</span>
-          )}
-        </div>
-      </div>
-
-      {/* Services Selection */}
-      <div className="form-section">
-        <h3>
-          <Scissors size={16} />
-          Services
-        </h3>
-        <div className="services-grid">
-          {services.map((service) => (
-            <div
-              key={service.id}
-              className={`service-card ${
-                formData.service_ids.includes(service.id) ? "selected" : ""
-              }`}
-              onClick={() => handleServiceToggle(service.id)}
-            >
-              <div className="service-info">
-                <h4>{service.name}</h4>
-                <p className="service-price">{service.price} EGP</p>
-              </div>
-              <input
-                type="checkbox"
-                checked={formData.service_ids.includes(service.id)}
-                onChange={() => handleServiceToggle(service.id)}
-                disabled={loading}
-              />
-            </div>
-          ))}
-        </div>
-        {errors.service_ids && (
-          <span className="error-text">{errors.service_ids}</span>
-        )}
-      </div>
-
-      {/* Duration and Cost */}
-      <div className="form-section">
-        <h3>
-          <Clock size={16} />
-          Duration & Cost
-        </h3>
-
-        <div className="form-grid">
-          <div className="form-group">
-            <label htmlFor="duration">Duration (minutes)</label>
-            <select
-              id="duration"
-              value={formData.duration_minutes}
+            <input
+              type="time"
+              value={booking.booking_time}
               onChange={(e) =>
-                handleInputChange("duration_minutes", parseInt(e.target.value))
+                setBooking((prev) => ({
+                  ...prev,
+                  booking_time: e.target.value,
+                }))
               }
-              disabled={loading}
-            >
-              <option value={30}>30 minutes</option>
-              <option value={60}>1 hour</option>
-              <option value={90}>1.5 hours</option>
-              <option value={120}>2 hours</option>
-            </select>
-          </div>
+              disabled
+              placeholder="Select barber and date first"
+            />
+          )}
+        </div>
 
-          <div className="form-group">
-            <label>
-              <DollarSign size={16} />
-              Estimated Cost
-            </label>
-            <div className="estimated-cost">
-              {formData.estimated_cost.toFixed(2)} EGP
-            </div>
+        {/* Services Selection */}
+        <div className="form-group services-group">
+          <label>Services *</label>
+          <div className="services-grid">
+            {services && Array.isArray(services) && services.length > 0 ? (
+              services.map((service) => (
+                <label key={service.id} className="service-checkbox">
+                  <input
+                    type="checkbox"
+                    checked={booking.service_ids.includes(service.id)}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setBooking((prev) => ({
+                          ...prev,
+                          service_ids: [...prev.service_ids, service.id],
+                        }));
+                      } else {
+                        setBooking((prev) => ({
+                          ...prev,
+                          service_ids: prev.service_ids.filter(
+                            (id) => id !== service.id
+                          ),
+                        }));
+                      }
+                    }}
+                  />
+                  <span className="service-info">
+                    <span className="service-name">{service.name}</span>
+                    <span className="service-price">${service.price}</span>
+                  </span>
+                </label>
+              ))
+            ) : (
+              <div className="no-services">
+                {services && Array.isArray(services)
+                  ? "No services available"
+                  : "Loading services..."}
+              </div>
+            )}
           </div>
         </div>
-      </div>
 
-      {/* Notes */}
-      <div className="form-section">
-        <h3>
-          <FileText size={16} />
-          Additional Notes
-        </h3>
-
+        {/* Estimated Cost Display */}
         <div className="form-group">
-          <label htmlFor="notes">Booking Notes</label>
+          <label>Estimated Cost</label>
+          <div className="estimated-cost">
+            ${booking.estimated_cost.toFixed(2)}
+          </div>
+        </div>
+
+        {/* Notes */}
+        <div className="form-group">
+          <label>Notes</label>
           <textarea
-            id="notes"
-            value={formData.notes}
-            onChange={(e) => handleInputChange("notes", e.target.value)}
-            placeholder="Any special requests or notes for this appointment..."
-            rows={3}
-            disabled={loading}
+            value={booking.notes}
+            onChange={(e) =>
+              setBooking((prev) => ({ ...prev, notes: e.target.value }))
+            }
+            placeholder="Any special requirements or notes..."
+            rows="3"
           />
         </div>
-      </div>
 
-      {/* Form Actions */}
-      <div className="form-actions">
-        <button
-          type="button"
-          onClick={onCancel}
-          className="btn-secondary"
-          disabled={loading}
-        >
-          <X size={16} />
-          Cancel
-        </button>
-        <button
-          type="submit"
-          className="btn-primary"
-          disabled={loading || checkingAvailability}
-        >
-          <Calendar size={16} />
-          {loading ? "Creating Booking..." : "Create Booking"}
-        </button>
-      </div>
-    </form>
+        {/* Form Actions */}
+        <div className="form-actions">
+          <button type="submit" disabled={loading}>
+            {editingBooking ? "Update Booking" : "Create Booking"}
+          </button>
+          <button type="button" onClick={onCancel}>
+            Cancel
+          </button>
+        </div>
+      </form>
+    </div>
   );
 }

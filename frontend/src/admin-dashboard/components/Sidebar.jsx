@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
+import { Languages } from "lucide-react";
+
 import {
   ChevronDown,
   Users,
@@ -20,7 +22,7 @@ import { useLanguage } from "../../context/LanguageContext";
 import "../styles/Sidebar.css";
 
 export default function Sidebar({ user, onLogout }) {
-  const { t, isRTL } = useLanguage();
+  const { t, isRTL, language, toggleLanguage } = useLanguage();
   const [expandedGroup, setExpandedGroup] = useState(null);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const location = useLocation();
@@ -41,6 +43,13 @@ export default function Sidebar({ user, onLogout }) {
 
   const menuItems = [
     {
+      type: "single",
+      title: t("Point of Sale"),
+      path: "/admin-pos",
+      icon: Receipt,
+      external: true, // This indicates it's outside the admin routes
+    },
+    {
       type: "group",
       title: t("Customer Management"),
       icon: Users,
@@ -59,15 +68,15 @@ export default function Sidebar({ user, onLogout }) {
       title: t("Staff Management"),
       icon: UserPlus,
       key: "staff",
-      items: [
-        { title: t("Manage Barbers"), path: "barbers", icon: Scissors },
-        {
-          title: t("Barber Profiles"),
-          path: "barber-profiles",
-          icon: UserPlus,
-        },
-      ],
+      items: [{ title: t("Manage Barbers"), path: "barbers", icon: Scissors }],
     },
+    {
+      path: "/admin/schedule",
+      title: "Schedule Management",
+      icon: Calendar,
+      description: "Manage barber schedules and time off",
+    },
+
     {
       type: "single",
       title: t("Manage Services"),
@@ -115,10 +124,7 @@ export default function Sidebar({ user, onLogout }) {
       {/* Sidebar Header */}
       <div className="sidebar-header">
         <div className="brand">
-          <Home size={24} />
-          {!isCollapsed && (
-            <span className="brand-name">{t("Nassim Admin")}</span>
-          )}
+          {!isCollapsed && <span className="brand-name">Nassim Select</span>}
         </div>
         <button className="sidebar-toggle" onClick={toggleSidebar}>
           {isCollapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
@@ -169,6 +175,21 @@ export default function Sidebar({ user, onLogout }) {
                 </div>
               )}
             </div>
+          ) : // Handle external links vs internal routes
+          item.external ? (
+            <a
+              key={item.path}
+              href={item.path}
+              className="nav-item"
+              title={isCollapsed ? item.title : ""}
+              onClick={(e) => {
+                e.preventDefault();
+                window.location.href = item.path;
+              }}
+            >
+              <item.icon size={20} />
+              {!isCollapsed && <span>{item.title}</span>}
+            </a>
           ) : (
             <NavLink
               key={item.path}
@@ -187,6 +208,19 @@ export default function Sidebar({ user, onLogout }) {
 
       {/* User Section */}
       <div className="sidebar-footer">
+        {/* Language Toggle */}
+        <button
+          className="language-toggle-btn"
+          onClick={toggleLanguage}
+          title={
+            language === "en" ? "Switch to Arabic" : "التبديل إلى الإنجليزية"
+          }
+        >
+          <Languages size={18} />
+          {!isCollapsed && <span>{language === "en" ? "ع" : "EN"}</span>}
+        </button>
+
+        {/* User Info Section */}
         <div className="user-section">
           <div className="user-avatar">
             {(user?.full_name || user?.username || "U").charAt(0).toUpperCase()}
@@ -200,6 +234,8 @@ export default function Sidebar({ user, onLogout }) {
             </div>
           )}
         </div>
+
+        {/* Logout Button */}
         <button
           className="logout-btn"
           onClick={onLogout}

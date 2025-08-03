@@ -15,7 +15,7 @@ export const getAllServices = async (req, res) => {
 
 // POST /api/services
 export const addService = async (req, res) => {
-  const { name, price, icon } = req.body;
+  const { name, price, icon, description } = req.body;
   const db = await dbPromise;
 
   if (!name || !price) {
@@ -25,12 +25,16 @@ export const addService = async (req, res) => {
   try {
     const id = uuidv4();
     await db.run(
-      "INSERT INTO services (id, name, price, icon) VALUES (?, ?, ?, ?)",
-      [id, name, price, icon || ""]
+      "INSERT INTO services (id, name, price, icon, description) VALUES (?, ?, ?, ?, ?)",
+      [id, name, price, icon || "", description || ""]
     );
-    res.status(201).json({ id, name, price, icon });
+
+    // Safely send back what was inserted
+    res
+      .status(201)
+      .json({ id, name, price, icon, description: description || "" });
   } catch (error) {
-    console.error("Error adding service:", error);
+    console.error("Error adding service:", error.message);
     res.status(500).json({ message: "Failed to add service" });
   }
 };
@@ -38,7 +42,7 @@ export const addService = async (req, res) => {
 // PUT /api/services/:id
 export const updateService = async (req, res) => {
   const { id } = req.params;
-  const { name, price, icon } = req.body;
+  const { name, price, icon, description } = req.body;
   const db = await dbPromise;
 
   if (!name || !price) {
@@ -47,8 +51,8 @@ export const updateService = async (req, res) => {
 
   try {
     await db.run(
-      "UPDATE services SET name = ?, price = ?, icon = ? WHERE id = ?",
-      [name, price, icon || "", id]
+      "UPDATE services SET name = ?, price = ?, icon = ?, description = ? WHERE id = ?",
+      [name, price, icon || "", description || "", id]
     );
     res.json({ message: "Service updated" });
   } catch (error) {

@@ -300,3 +300,20 @@
     right: 20px;
   }
 }
+
+.language-toggle-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  color: inherit;
+  padding: 8px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.language-toggle-btn:hover {
+  color: #007bff;
+}

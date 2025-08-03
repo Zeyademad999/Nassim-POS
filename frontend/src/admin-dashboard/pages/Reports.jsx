@@ -37,6 +37,9 @@ import {
   Save,
   X,
   Receipt,
+  FileText, // This is already imported
+  FileSpreadsheet, // Add this one
+  Database, // Add this one
 } from "lucide-react";
 import { useLanguage } from "../../context/LanguageContext";
 import "../styles/Reports.css";
@@ -168,7 +171,8 @@ export default function Reports({ user }) {
     fetchTransactions();
   }, [selectedPeriod, startDate, endDate]);
 
-  const exportToPDF = async () => {
+  // Safe server-side exports
+  const exportToPDF = async (type) => {
     setExportLoading((prev) => ({ ...prev, pdf: true }));
     try {
       const params = new URLSearchParams();
@@ -180,34 +184,29 @@ export default function Reports({ user }) {
       }
 
       const response = await fetch(
-        `/api/reports/export/pdf?${params.toString()}`
+        `/api/export/pdf/${type}?${params.toString()}`
       );
 
-      if (!response.ok) {
-        throw new Error(t("Export failed"));
-      }
+      if (!response.ok) throw new Error("Export failed");
 
       const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.style.display = "none";
-      a.href = url;
-      a.download = `nassim-barber-report-${
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `nassim-${type}-${
         new Date().toISOString().split("T")[0]
       }.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
+      link.click();
+      URL.revokeObjectURL(url);
     } catch (err) {
       console.error("PDF export failed:", err);
-      alert(t("Failed to export PDF. Please try again."));
+      alert(t("PDF export failed. Please try again."));
     } finally {
       setExportLoading((prev) => ({ ...prev, pdf: false }));
     }
   };
 
-  const exportToExcel = async () => {
+  const exportToExcel = async (type) => {
     setExportLoading((prev) => ({ ...prev, excel: true }));
     try {
       const params = new URLSearchParams();
@@ -219,33 +218,91 @@ export default function Reports({ user }) {
       }
 
       const response = await fetch(
-        `/api/reports/export/excel?${params.toString()}`
+        `/api/export/excel/${type}?${params.toString()}`
       );
 
-      if (!response.ok) {
-        throw new Error(t("Export failed"));
-      }
+      if (!response.ok) throw new Error("Export failed");
 
       const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.style.display = "none";
-      a.href = url;
-      a.download = `nassim-barber-report-${
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `nassim-${type}-${
         new Date().toISOString().split("T")[0]
       }.xlsx`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
+      link.click();
+      URL.revokeObjectURL(url);
     } catch (err) {
       console.error("Excel export failed:", err);
-      alert(t("Failed to export Excel. Please try again."));
+      alert(t("Excel export failed. Please try again."));
     } finally {
       setExportLoading((prev) => ({ ...prev, excel: false }));
     }
   };
 
+  const exportToCSV = async (type) => {
+    try {
+      const params = new URLSearchParams();
+      if (selectedPeriod === "custom" && startDate && endDate) {
+        params.append("startDate", startDate);
+        params.append("endDate", endDate);
+      } else {
+        params.append("period", selectedPeriod);
+      }
+
+      const response = await fetch(
+        `/api/export/csv/${type}?${params.toString()}`
+      );
+
+      if (!response.ok) throw new Error("Export failed");
+
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `nassim-${type}-${
+        new Date().toISOString().split("T")[0]
+      }.csv`;
+      link.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("CSV export failed:", err);
+      alert(t("CSV export failed. Please try again."));
+    }
+  };
+
+  // Updated ExportButtons component with proper icons
+  const ExportButtons = ({ tabName, disabled = false }) => (
+    <div className="export-buttons-group">
+      <button
+        className="export-btn pdf-btn"
+        onClick={() => exportToPDF(tabName)}
+        disabled={disabled || exportLoading.pdf}
+        title={t("Export to PDF")}
+      >
+        <FileText size={14} />
+        {exportLoading.pdf ? t("Exporting...") : "PDF"}
+      </button>
+      <button
+        className="export-btn excel-btn"
+        onClick={() => exportToExcel(tabName)}
+        disabled={disabled || exportLoading.excel}
+        title={t("Export to Excel")}
+      >
+        <FileSpreadsheet size={14} />
+        {exportLoading.excel ? t("Exporting...") : "Excel"}
+      </button>
+      <button
+        className="export-btn csv-btn"
+        onClick={() => exportToCSV(tabName)}
+        disabled={disabled}
+        title={t("Export to CSV")}
+      >
+        <Database size={14} />
+        CSV
+      </button>
+    </div>
+  );
   // Transaction Management Functions
   const handleEditTransaction = (transaction) => {
     setEditingTransaction({
@@ -945,13 +1002,91 @@ export default function Reports({ user }) {
           {/* Detailed P&L Statement */}
           <div className="pl-statement">
             <div className="statement-header">
-              <h2>{t("Profit & Loss Statement")}</h2>
-              <p>
-                {t("Period")}:{" "}
-                {selectedPeriod === "custom"
-                  ? `${startDate} ${t("to")} ${endDate}`
-                  : t(selectedPeriod)}
-              </p>
+              <div>
+                <h2>{t("Profit & Loss Statement")}</h2>
+                <p>
+                  {t("Period")}:{" "}
+                  {selectedPeriod === "custom"
+                    ? `${startDate} ${t("to")} ${endDate}`
+                    : t(selectedPeriod)}
+                </p>
+              </div>
+              <ExportButtons
+                tabName="profit-loss"
+                data={[
+                  {
+                    description: t("Service Revenue"),
+                    amount: reportData.serviceRevenue
+                      ?.reduce((sum, s) => sum + (s.revenue || 0), 0)
+                      ?.toFixed(2),
+                    percentage:
+                      reportData.totalRevenue > 0
+                        ? (
+                            (reportData.serviceRevenue?.reduce(
+                              (sum, s) => sum + (s.revenue || 0),
+                              0
+                            ) /
+                              reportData.totalRevenue) *
+                            100
+                          ).toFixed(1)
+                        : 0,
+                  },
+                  {
+                    description: t("Product Revenue"),
+                    amount: reportData.productSales
+                      ?.reduce((sum, p) => sum + (p.revenue || 0), 0)
+                      ?.toFixed(2),
+                    percentage:
+                      reportData.totalRevenue > 0
+                        ? (
+                            (reportData.productSales?.reduce(
+                              (sum, p) => sum + (p.revenue || 0),
+                              0
+                            ) /
+                              reportData.totalRevenue) *
+                            100
+                          ).toFixed(1)
+                        : 0,
+                  },
+                  {
+                    description: t("Total Income"),
+                    amount: reportData.totalRevenue?.toFixed(2),
+                    percentage: "100.0",
+                  },
+                  ...(reportData.expenseCategories?.map((expense) => ({
+                    description:
+                      expense.expense_type === "general"
+                        ? t("General Expenses")
+                        : t("Recurring Expenses"),
+                    amount: expense.amount?.toFixed(2),
+                    percentage:
+                      reportData.totalRevenue > 0
+                        ? (
+                            (expense.amount / reportData.totalRevenue) *
+                            100
+                          ).toFixed(1)
+                        : 0,
+                  })) || []),
+                  {
+                    description: t("Total Expenses"),
+                    amount: reportData.totalExpenses?.toFixed(2),
+                    percentage:
+                      reportData.totalRevenue > 0
+                        ? (
+                            (reportData.totalExpenses /
+                              reportData.totalRevenue) *
+                            100
+                          ).toFixed(1)
+                        : 0,
+                  },
+                  {
+                    description: t("NET PROFIT/LOSS"),
+                    amount: reportData.netProfit?.toFixed(2),
+                    percentage: reportData.profitMargin?.toFixed(1),
+                  },
+                ]}
+                headers={[t("Description"), t("Amount"), t("% of Revenue")]}
+              />
             </div>
 
             <div className="statement-table">
@@ -1111,6 +1246,7 @@ export default function Reports({ user }) {
                   <Receipt size={20} />
                   {t("Recent Expenses")}
                 </h2>
+                <ExportButtons tabName="expenses" />
               </div>
               <table>
                 <thead>
@@ -1182,6 +1318,7 @@ export default function Reports({ user }) {
                   <AlertTriangle size={20} className="warning-icon" />
                   {t("Low Stock Alert")}
                 </h2>
+                <ExportButtons tabName="low-stock" />
               </div>
               <table>
                 <thead>
@@ -1235,6 +1372,7 @@ export default function Reports({ user }) {
           <div className="data-table">
             <div className="table-header">
               <h2 className="table-title">{t("Detailed Staff Performance")}</h2>
+              <ExportButtons tabName="staff-performance" />
             </div>
             <table>
               <thead>
@@ -1559,6 +1697,7 @@ export default function Reports({ user }) {
               <Clock size={20} />
               {t("Recent Transactions")}
             </h2>
+            <ExportButtons tabName="recent-transactions" />
           </div>
           <table>
             <thead>

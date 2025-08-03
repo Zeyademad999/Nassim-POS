@@ -98,3 +98,376 @@
   min-width: 180px;
   height: 2%;
 }
+
+.customer-type-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.customer-type-tab {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid #e5e7eb;
+  background: white;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.customer-type-tab.active {
+  background: #3b82f6;
+  color: white;
+  border-color: #3b82f6;
+}
+
+.customer-type-tab:hover:not(.active) {
+  background: #f3f4f6;
+}
+
+.walk-in-display {
+  padding: 12px;
+  background: #f0fdf4;
+  border: 1px solid #22c55e;
+  border-radius: 6px;
+  color: #15803d;
+  font-weight: 500;
+  text-align: center;
+}
+
+.customer-search-container {
+  position: relative;
+}
+
+.customer-search-input {
+  width: 100%;
+}
+
+.customer-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.customer-option {
+  padding: 12px;
+  cursor: pointer;
+  border-bottom: 1px solid #f3f4f6;
+  transition: background 0.2s ease;
+}
+
+.customer-option:hover {
+  background: #f8fafc;
+}
+
+.customer-option:last-child {
+  border-bottom: none;
+}
+
+.customer-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.customer-name {
+  font-weight: 500;
+  color: #111827;
+}
+
+.customer-mobile {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.customer-visits {
+  font-size: 11px;
+  color: #059669;
+  font-weight: 500;
+}
+
+.dropdown-more {
+  padding: 8px 12px;
+  text-align: center;
+  font-size: 12px;
+  color: #6b7280;
+  font-style: italic;
+  border-top: 1px solid #f3f4f6;
+}
+
+.no-results {
+  padding: 12px;
+  text-align: center;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+/* Close dropdown when clicking outside */
+.customer-search-container.open .customer-dropdown {
+  display: block;
+}
+
+.new-customer-inputs {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.new-customer-inputs .pos-input {
+  font-size: 14px;
+  padding: 10px 12px;
+}
+
+/* Add these enhanced styles to your POS.css */
+
+/* Customer Search Container */
+.customer-search-container {
+  position: relative;
+  width: 100%;
+}
+
+.customer-search-input {
+  width: 100% !important;
+  padding: 12px 16px !important;
+  border: 2px solid #e5e7eb !important;
+  border-radius: 8px !important;
+  font-size: 14px !important;
+  transition: all 0.2s ease !important;
+  background: white !important;
+}
+
+.customer-search-input:focus {
+  border-color: #3b82f6 !important;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+  outline: none !important;
+}
+
+.customer-search-input::placeholder {
+  color: #9ca3af;
+}
+
+/* Customer Dropdown */
+.customer-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  max-height: 300px;
+  overflow-y: auto;
+  margin-top: 4px;
+}
+
+.customer-option {
+  padding: 12px 16px;
+  cursor: pointer;
+  border-bottom: 1px solid #f3f4f6;
+  transition: background-color 0.2s ease;
+}
+
+.customer-option:hover {
+  background: #f8fafc;
+}
+
+.customer-option:last-child {
+  border-bottom: none;
+}
+
+.customer-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.customer-name {
+  font-weight: 600;
+  color: #1f2937;
+  font-size: 14px;
+}
+
+.customer-mobile {
+  color: #6b7280;
+  font-size: 13px;
+}
+
+.customer-visits {
+  color: #059669;
+  font-size: 11px;
+  font-weight: 500;
+  margin-top: 2px;
+}
+
+.dropdown-more {
+  padding: 8px 16px;
+  color: #6b7280;
+  font-size: 12px;
+  text-align: center;
+  border-top: 1px solid #f3f4f6;
+  background: #f9fafb;
+  font-style: italic;
+}
+
+.no-results {
+  padding: 12px 16px;
+  color: #6b7280;
+  font-size: 13px;
+  text-align: center;
+  font-style: italic;
+}
+
+/* Customer Type Tabs */
+.customer-type-tabs {
+  display: flex;
+  gap: 4px;
+  background: #f8fafc;
+  padding: 4px;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  margin-bottom: 8px;
+}
+
+.customer-type-tab {
+  flex: 1;
+  padding: 8px 12px;
+  border: none;
+  background: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  color: #6b7280;
+  transition: all 0.2s ease;
+  text-align: center;
+}
+
+.customer-type-tab:hover {
+  background: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+}
+
+.customer-type-tab.active {
+  background: #3b82f6;
+  color: white;
+  font-weight: 600;
+}
+
+/* Walk-in Display */
+.walk-in-display {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 16px;
+  background: #f0fdf4;
+  border: 2px solid #22c55e;
+  border-radius: 8px;
+  color: #15803d;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+/* New Customer Inputs */
+.new-customer-inputs {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.new-customer-inputs .pos-input {
+  margin: 0 !important;
+}
+
+/* Enhanced Input Styles */
+.customer-input-group .pos-input {
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  background: white;
+}
+
+.customer-input-group .pos-input:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  outline: none;
+}
+
+/* Loading State */
+.customer-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  color: #6b7280;
+  font-size: 13px;
+}
+
+/* Error State */
+.customer-error {
+  padding: 12px 16px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  color: #dc2626;
+  font-size: 13px;
+  margin-top: 8px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .customer-type-tabs {
+    flex-direction: column;
+  }
+
+  .customer-type-tab {
+    text-align: center;
+  }
+
+  .customer-dropdown {
+    max-height: 200px;
+  }
+}
+
+/* Enhanced search hint */
+.search-hint {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #9ca3af;
+  font-size: 12px;
+  pointer-events: none;
+}
+
+/* Customer count indicator */
+.customer-count-indicator {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: #3b82f6;
+  color: white;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: bold;
+}

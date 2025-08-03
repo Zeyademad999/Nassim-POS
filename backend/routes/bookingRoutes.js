@@ -494,34 +494,45 @@ router.post("/ecommerce", async (req, res) => {
 
 // Add these new routes to your existing bookingRoutes.js
 
-// GET working hours configuration for ecommerce website
-router.get("/working-hours", async (req, res) => {
+// In your booking fetch route, make sure you're including services
+router.get("/", async (req, res) => {
   try {
-    // You can store this in database or return fixed hours
-    const workingHours = {
-      start: "09:00",
-      end: "18:00",
-      interval: 30, // 30 minutes slots
-      days: [
-        "monday",
-        "tuesday",
-        "wednesday",
-        "thursday",
-        "friday",
-        "saturday",
-      ], // closed sundays
-      breaks: [
-        { start: "13:00", end: "14:00" }, // lunch break
-      ],
-    };
+    const db = await dbPromise;
+    const bookings = await db.all(`
+      SELECT b.*, 
+             c.name as customer_name, 
+             c.mobile as customer_mobile,
+             br.name as barber_name
+      FROM bookings b
+      LEFT JOIN customers c ON b.customer_id = c.id
+      LEFT JOIN barbers br ON b.barber_id = br.id
+      ORDER BY b.booking_date DESC, b.booking_time DESC
+    `);
 
-    res.json({
-      success: true,
-      workingHours,
-    });
+    // For each booking, fetch its services if service_ids exist
+    const bookingsWithServices = await Promise.all(
+      bookings.map(async (booking) => {
+        if (booking.service_ids) {
+          const serviceIds = booking.service_ids
+            .split(",")
+            .filter((id) => id.trim());
+          if (serviceIds.length > 0) {
+            const placeholders = serviceIds.map(() => "?").join(",");
+            const services = await db.all(
+              `SELECT id, name, price FROM services WHERE id IN (${placeholders})`,
+              serviceIds
+            );
+            booking.services = services;
+          }
+        }
+        return booking;
+      })
+    );
+
+    res.json(bookingsWithServices);
   } catch (err) {
-    console.error("Failed to fetch working hours:", err);
-    res.status(500).json({ error: "Failed to fetch working hours" });
+    console.error("❌ Error fetching bookings:", err);
+    res.status(500).json({ error: "Failed to fetch bookings" });
   }
 });
 
@@ -689,7 +700,6 @@ router.get("/ecommerce/availability/:barber_id", async (req, res) => {
     res.status(500).json({ error: "Failed to fetch availability" });
   }
 });
-
 
 // PUT update booking
 router.put("/:id", async (req, res) => {

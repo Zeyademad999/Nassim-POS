@@ -10,6 +10,7 @@ import {
   Wrench,
   Receipt,
   CheckCircle,
+  Printer, // Add this line
 } from "lucide-react";
 import { useLanguage } from "../context/LanguageContext";
 import "../styles/CheckoutModal.css";
@@ -32,6 +33,11 @@ export default function CheckoutModal({
   const { t, isRTL } = useLanguage();
 
   const currentDate = new Date();
+  const cairoDate = new Date(
+    currentDate.toLocaleString("en-US", {
+      timeZone: "Africa/Cairo",
+    })
+  );
   const receiptNumber = `NSB-${Date.now()}`;
   const invoiceNumber = `INV-${currentDate.getFullYear()}-${String(
     currentDate.getMonth() + 1
@@ -94,11 +100,15 @@ export default function CheckoutModal({
     doc.setFontSize(10);
     doc.text("Nassim Select Barber Shop", 20, yPos);
     yPos += 5;
-    doc.text("123 Main Street, Tanta, Gharbia", 20, yPos);
+    doc.text(
+      "The Fount Mall,Abdallah Ibn Salamah,First New Cairo, Egypt",
+      20,
+      yPos
+    );
     yPos += 5;
-    doc.text("Phone: +20 40 123 4567", 20, yPos);
+    doc.text("Phone: +20 100 016 6364", 20, yPos);
     yPos += 5;
-    doc.text("Email: info@nassimbarber.com", 20, yPos);
+    doc.text("Email: lebanon_nassim@hotmail.com", 20, yPos);
 
     // Customer details
     yPos += 15;
@@ -300,6 +310,147 @@ export default function CheckoutModal({
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, t("Invoice"));
     XLSX.writeFile(workbook, `invoice-${invoiceNumber}.xlsx`);
+  };
+
+  const printInvoice = () => {
+    const printContent = `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <title>Invoice - ${invoiceNumber}</title>
+        <style>
+          @page { size: A4; margin: 0.5in; }
+          body { font-family: Arial; font-size: 12px; color: #333; }
+          .header { background: #111827; color: white; padding: 20px; text-align: center; }
+          .company-name { font-size: 24px; font-weight: bold; }
+          .invoice-details { margin: 20px 0; }
+          .details-row { display: flex; justify-content: space-between; margin: 8px 0; }
+          .items-table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+          .items-table th, .items-table td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+          .items-table th { background: #f5f5f5; }
+          .totals { margin-top: 20px; text-align: right; }
+          .total-row { margin: 5px 0; }
+          .final-total { font-size: 18px; font-weight: bold; border-top: 2px solid #333; padding-top: 10px; }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <div class="company-name">NASSIM SELECT BARBER</div>
+          <div>${t("Premium Grooming & Retail Services")}</div>
+        </div>
+        
+        <div class="invoice-details">
+          <div class="details-row"><strong>${t(
+            "Invoice #"
+          )}:</strong> ${invoiceNumber}</div>
+          <div class="details-row"><strong>${t(
+            "Receipt #"
+          )}:</strong> ${receiptNumber}</div>
+          <div class="details-row"><strong>${t(
+            "Date"
+          )}:</strong> ${currentDate.toLocaleDateString()}</div>
+          <div class="details-row"><strong>${t(
+            "Customer"
+          )}:</strong> ${customerName}</div>
+          ${
+            barberName && barberName !== "Walk-in"
+              ? `<div class="details-row"><strong>${t(
+                  "Barber"
+                )}:</strong> ${barberName}</div>`
+              : ""
+          }
+          <div class="details-row"><strong>${t("Payment Method")}:</strong> ${t(
+      paymentMethod.toUpperCase()
+    )}</div>
+        </div>
+
+        <table class="items-table">
+          <thead>
+            <tr>
+              <th>${t("Description")}</th>
+              <th>${t("Type")}</th>
+              <th>${t("Qty")}</th>
+              <th>${t("Price")}</th>
+              <th>${t("Total")}</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${services
+              .map(
+                (service) => `
+              <tr>
+                <td>${service.name}</td>
+                <td>${t("Service")}</td>
+                <td>${service.quantity}</td>
+                <td>${service.price.toFixed(2)} ${t("currency")}</td>
+                <td>${(service.price * service.quantity).toFixed(2)} ${t(
+                  "currency"
+                )}</td>
+              </tr>
+            `
+              )
+              .join("")}
+            ${products
+              .map(
+                (product) => `
+              <tr>
+                <td>${product.name}</td>
+                <td>${t("Product")}</td>
+                <td>${product.quantity}</td>
+                <td>${product.price.toFixed(2)} ${t("currency")}</td>
+                <td>${(product.price * product.quantity).toFixed(2)} ${t(
+                  "currency"
+                )}</td>
+              </tr>
+            `
+              )
+              .join("")}
+          </tbody>
+        </table>
+
+        <div class="totals">
+          <div class="total-row">${t("Subtotal")}: ${subtotal.toFixed(2)} ${t(
+      "currency"
+    )}</div>
+          ${
+            discountAmount > 0
+              ? `<div class="total-row" style="color: #059669;">${t(
+                  "Discount"
+                )}: -${discountAmount.toFixed(2)} ${t("currency")}</div>`
+              : ""
+          }
+          <div class="total-row">${t("Tax")} (8%): ${tax.toFixed(2)} ${t(
+      "currency"
+    )}</div>
+          <div class="final-total">${t("TOTAL")}: ${total.toFixed(2)} ${t(
+      "currency"
+    )}</div>
+        </div>
+
+        <div style="margin-top: 30px; text-align: center; font-size: 11px; color: #666;">
+          <p>${t("Thank you for choosing Nassim Select Barber!")}</p>
+          ${
+            sendInvoice
+              ? `<p>📧 ${t(
+                  "This invoice has been sent to financial records."
+                )}</p>`
+              : ""
+          }
+        </div>
+      </body>
+    </html>
+  `;
+
+    const printWindow = window.open("", "_blank");
+    printWindow.document.write(printContent);
+    printWindow.document.close();
+    printWindow.focus();
+
+    // Print after content loads
+    setTimeout(() => {
+      printWindow.print();
+      printWindow.close();
+    }, 250);
   };
 
   const handleComplete = () => {
@@ -630,22 +781,21 @@ export default function CheckoutModal({
           <div className="invoice-status">
             <Receipt size={16} />
             {sendInvoice ? (
-              <span>
-                📧{" "}
-                {t(
-                  "Invoice sent to financial records (visible to finance team)"
-                )}
-              </span>
+              <span>🔒 {t("Invoice sent")}</span>
             ) : (
-              <span>🔒 {t("Invoice visible to super admin only")}</span>
+              <span>🔒 {t("Invoice sent")}</span>
             )}
           </div>
 
           {/* Export Buttons */}
           <div className="export-buttons">
+            <button onClick={printInvoice} className="print-btn">
+              <Printer size={18} />
+              {t("Print Invoice")}
+            </button>
             <button onClick={exportToPDF} className="pdf-btn">
               <FileText size={18} />
-              {t("Professional PDF Invoice")}
+              {t("Download PDF")}
             </button>
             <button onClick={exportToExcel} className="excel-btn">
               <FileSpreadsheet size={18} />

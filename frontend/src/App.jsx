@@ -7,7 +7,15 @@ import Reports from "../src/admin-dashboard/pages/Reports";
 import { POSProvider } from "./context/POSContext";
 import { LanguageProvider } from "./context/LanguageContext";
 
+import "./App.css"; // Import global styles
 export default function App() {
+  const originalToLocaleString = Date.prototype.toLocaleString;
+  Date.prototype.toLocaleString = function (locales, options) {
+    return originalToLocaleString.call(this, locales, {
+      ...options,
+      timeZone: options?.timeZone || "Africa/Cairo",
+    });
+  };
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -156,9 +164,34 @@ export default function App() {
               )
             }
           />
+          <Route
+            path="/admin-pos"
+            element={
+              user && user.role === "admin" ? (
+                <POS onLogout={handleLogout} />
+              ) : (
+                <Navigate to="/" />
+              )
+            }
+          />
 
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
+        {/* Footer */}
+        {/* <footer className="app-footer">
+          © 2025 Nassim Select. All Rights Reserved. Powered by{" "}
+          <a
+            href="https://flokisystems.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              color: "#60a5fa",
+              textDecoration: "none",
+            }}
+          >
+            Floki Systems
+          </a>
+        </footer> */}
       </POSProvider>
     </LanguageProvider>
   );

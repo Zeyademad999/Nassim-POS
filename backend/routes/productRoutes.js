@@ -10,14 +10,18 @@ router.get("/", async (req, res) => {
     console.log("📥 GET /api/products - Fetching all products");
     const db = await dbPromise;
     const products = await db.all(`
-      SELECT 
-        p.*,
-        s.name as supplier_name,
-        s.contact_person as supplier_contact
-      FROM products p
-      LEFT JOIN suppliers s ON p.supplier_id = s.id
-      ORDER BY p.name ASC
-    `);
+  SELECT 
+    p.*,
+    s.name AS supplier_name,
+    s.contact_person AS supplier_contact,
+    c.name AS category_name
+  FROM products p
+  LEFT JOIN suppliers s ON p.supplier_id = s.id
+LEFT JOIN categories c ON p.category = c.name
+
+  ORDER BY p.name ASC
+`);
+
     console.log("✅ Found products:", products.length);
     res.json(products);
   } catch (err) {

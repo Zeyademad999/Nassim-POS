@@ -115,3 +115,25 @@ input[type="number"]::-webkit-outer-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
+
+.description-textarea {
+  width: 100%;
+  padding: 10px 14px;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-family: inherit;
+  box-sizing: border-box;
+  transition: border-color 0.2s ease-in-out;
+  min-height: 70px;
+  max-height: 120px;
+  resize: vertical;
+}
+
+.description-textarea:focus {
+  border-color: #333;
+  outline: none;
+}
+
+
+

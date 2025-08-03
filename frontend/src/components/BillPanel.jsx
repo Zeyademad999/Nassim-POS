@@ -37,11 +37,10 @@ const BillPanel = () => {
     discountPercentage,
     setDiscountPercentage,
     actualDiscountAmount,
-    discountedSubtotal,
     tax,
     total,
+    customerMobile,
     customerName,
-    customerId,
     selectedBarber,
     selectedBarberId,
     serviceDate,
@@ -92,10 +91,12 @@ const BillPanel = () => {
     ];
 
     // Enhanced bill data with proper field names matching the API
+    // Enhanced bill data with proper field names matching the API
     const transactionData = {
       customer_name: customerName.trim(),
-      barber_name: customerName === "Walk-in" ? "Walk-in" : selectedBarber,
-      barber_id: customerName === "Walk-in" ? null : selectedBarberId || null,
+      customer_mobile: customerMobile?.trim() || null, // Add this line
+      barber_name: selectedBarber || "No Barber Selected",
+      barber_id: selectedBarberId || null,
       service_date: serviceDate.toISOString().split("T")[0],
       subtotal,
       discount_amount: actualDiscountAmount,
@@ -647,7 +648,7 @@ const BillPanel = () => {
           tax={tax}
           total={total}
           customerName={customerName}
-          barberName={customerName === "Walk-in" ? "Walk-in" : selectedBarber}
+          barberName={selectedBarber || "No Barber Selected"}
           serviceDate={serviceDate.toISOString().split("T")[0]}
           paymentMethod={paymentMethod}
           sendInvoice={sendInvoice}

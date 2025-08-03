@@ -5,7 +5,11 @@ import "../styles/ManageServices.css";
 export default function ManageServices() {
   const [services, setServices] = useState([]);
   const [editing, setEditing] = useState(null);
-  const [newService, setNewService] = useState({ name: "", price: "" });
+  const [newService, setNewService] = useState({
+    name: "",
+    price: "",
+    description: "",
+  });
 
   const fetchServices = async () => {
     const res = await fetch("/api/services");
@@ -34,7 +38,7 @@ export default function ManageServices() {
   };
 
   const handleEdit = (s) => {
-    setEditing(s);
+    setEditing({ ...s });
   };
 
   return (
@@ -82,6 +86,17 @@ export default function ManageServices() {
               + Add Service
             </button>
           </div>
+          <div>
+            <label>Description</label>
+            <textarea
+              className="description-textarea"
+              placeholder="Optional description"
+              value={newService.description}
+              onChange={(e) =>
+                setNewService({ ...newService, description: e.target.value })
+              }
+            />
+          </div>
         </div>
       </div>
 
@@ -92,6 +107,7 @@ export default function ManageServices() {
             <tr>
               <th>Service Name</th>
               <th>Price</th>
+              <th>Description</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -112,6 +128,7 @@ export default function ManageServices() {
                     <strong>{s.name}</strong>
                   )}
                 </td>
+
                 <td>
                   {editing?.id === s.id ? (
                     <input
@@ -129,6 +146,22 @@ export default function ManageServices() {
                     `$${s.price.toFixed(2)}`
                   )}
                 </td>
+
+                <td>
+                  {editing?.id === s.id ? (
+                    <textarea
+                      className="description-textarea"
+                      value={editing.description || ""}
+                      onChange={(e) =>
+                        setEditing({ ...editing, description: e.target.value })
+                      }
+                      rows={2}
+                    />
+                  ) : (
+                    <span>{s.description || "—"}</span>
+                  )}
+                </td>
+
                 <td>
                   {editing?.id === s.id ? (
                     <>

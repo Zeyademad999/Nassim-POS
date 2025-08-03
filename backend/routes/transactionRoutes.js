@@ -3,16 +3,41 @@ import dbPromise from "../utils/db.js";
 
 const router = express.Router();
 
+const getCurrentTaxRate = async (db) => {
+  try {
+    const enabledTaxes = await db.all(`
+      SELECT * FROM tax_settings 
+      WHERE is_enabled = 1 
+      ORDER BY created_at ASC
+    `);
+
+    return enabledTaxes.reduce((sum, tax) => sum + tax.tax_rate, 0);
+  } catch (err) {
+    console.error("Error fetching tax rate:", err);
+    return 8.0; // fallback to default 8%
+  }
+};
+// GET all transactions with filtering and items
 // GET all transactions with filtering and items
 router.get("/", async (req, res) => {
   try {
-    const { period = "30days", startDate, endDate, limit = 100 } = req.query;
+    const {
+      period = "30days",
+      startDate,
+      endDate,
+      limit = 100,
+      customer_id, // Add this parameter
+    } = req.query;
     const db = await dbPromise;
 
     let dateCondition = "";
     let params = [];
 
-    if (period === "custom" && startDate && endDate) {
+    // Handle customer filtering
+    if (customer_id) {
+      dateCondition = `WHERE t.customer_id = ?`;
+      params = [customer_id];
+    } else if (period === "custom" && startDate && endDate) {
       dateCondition = `WHERE DATE(t.created_at) BETWEEN ? AND ?`;
       params = [startDate, endDate];
     } else {
@@ -58,9 +83,30 @@ router.get("/", async (req, res) => {
           [transaction.id]
         );
 
+        // Format items as services and products for receipt compatibility
+        const services = items
+          .filter((item) => item.item_type === "service")
+          .map((item) => ({
+            id: item.service_id,
+            name: item.item_name,
+            price: item.price,
+            quantity: item.quantity,
+          }));
+
+        const products = items
+          .filter((item) => item.item_type === "product")
+          .map((item) => ({
+            id: item.product_id,
+            name: item.item_name,
+            price: item.price,
+            quantity: item.quantity,
+          }));
+
         return {
           ...transaction,
           items: items || [],
+          services,
+          products,
         };
       })
     );
@@ -118,10 +164,13 @@ router.get("/:id", async (req, res) => {
 });
 
 // POST create new transaction
+// POST create new transaction with auto customer registration
 router.post("/", async (req, res) => {
   try {
     const {
       customer_name,
+      customer_mobile,
+      customer_email,
       barber_name,
       barber_id,
       service_date,
@@ -143,16 +192,47 @@ router.post("/", async (req, res) => {
     await db.run("BEGIN TRANSACTION");
 
     try {
+      let customer_id = null;
+
+      // Auto-register customer if mobile provided
+      if (customer_mobile && customer_mobile.trim()) {
+        // Check if customer exists
+        let customer = await db.get(
+          `SELECT id FROM customers WHERE mobile = ?`,
+          [customer_mobile.trim()]
+        );
+
+        if (!customer && customer_name && customer_name.trim()) {
+          // Create new customer
+          customer_id = `cust_${Date.now()}_${Math.random()
+            .toString(36)
+            .substr(2, 9)}`;
+
+          await db.run(
+            `INSERT INTO customers (
+              id, name, mobile, email, total_visits, total_spent, created_at
+            ) VALUES (?, ?, ?, ?, 0, 0, CURRENT_TIMESTAMP)`,
+            [
+              customer_id,
+              customer_name.trim(),
+              customer_mobile.trim(),
+              customer_email?.trim() || null,
+            ]
+          );
+        } else if (customer) {
+          customer_id = customer.id;
+        }
+      }
+
       // Insert main transaction
       await db.run(
-        `
-        INSERT INTO transactions (
-          id, customer_name, barber_name, barber_id, service_date,
+        `INSERT INTO transactions (
+          id, customer_id, customer_name, barber_name, barber_id, service_date,
           subtotal, discount_amount, tax, total, payment_method, send_invoice, created_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
-      `,
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)`,
         [
           transactionId,
+          customer_id,
           customer_name,
           barber_name,
           barber_id,
@@ -172,11 +252,9 @@ router.post("/", async (req, res) => {
           .toString(36)
           .substr(2, 9)}`;
         await db.run(
-          `
-          INSERT INTO transaction_items (
+          `INSERT INTO transaction_items (
             id, transaction_id, item_type, service_id, product_id, item_name, price, quantity
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        `,
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
           [
             itemId,
             transactionId,
@@ -192,18 +270,34 @@ router.post("/", async (req, res) => {
         // Update product stock if it's a product
         if (item.type === "product") {
           await db.run(
-            `
-            UPDATE products 
+            `UPDATE products 
             SET stock_quantity = stock_quantity - ?, updated_at = CURRENT_TIMESTAMP
-            WHERE id = ?
-          `,
+            WHERE id = ?`,
             [item.quantity, item.id]
           );
         }
       }
 
+      // Update customer stats if customer was created/found
+      if (customer_id) {
+        await db.run(
+          `UPDATE customers 
+          SET 
+            total_visits = total_visits + 1,
+            total_spent = total_spent + ?,
+            last_visit = CURRENT_TIMESTAMP,
+            updated_at = CURRENT_TIMESTAMP
+          WHERE id = ?`,
+          [total, customer_id]
+        );
+      }
+
       await db.run("COMMIT");
-      res.json({ success: true, id: transactionId });
+      res.json({
+        success: true,
+        id: transactionId,
+        customer_created: !!customer_id,
+      });
     } catch (err) {
       await db.run("ROLLBACK");
       throw err;

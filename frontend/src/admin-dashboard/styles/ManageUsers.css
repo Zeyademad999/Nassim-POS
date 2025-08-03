@@ -140,9 +140,6 @@
   border-color: #2563eb;
 }
 
-.modal-actions .btn-primary:hover {
-  background: #1d4ed8;
-}
 
 /* Badge Styles */
 .badge {
@@ -198,9 +195,7 @@
   color: white;
 }
 
-.btn-primary:hover {
-  background: #1d4ed8;
-}
+
 
 .btn-secondary {
   background: #6b7280;
@@ -208,7 +203,8 @@
 }
 
 .btn-secondary:hover {
-  background: #4b5563;
+  background: #f3f4f6;
+  color: black;
 }
 
 .btn-danger {
@@ -469,17 +465,15 @@
   color: white;
 }
 
-.btn-primary:hover {
-  background: #2563eb;
-}
+
 
 .btn-secondary {
   background: #6b7280;
   color: white;
 }
-
 .btn-secondary:hover {
-  background: #4b5563;
+  background: #f3f4f6;
+  color: black;
 }
 
 .btn-danger {

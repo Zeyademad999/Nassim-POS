@@ -19,13 +19,22 @@ const initDB = async () => {
 
   // Create services table
   await db.exec(`
-    CREATE TABLE IF NOT EXISTS services (
-      id TEXT PRIMARY KEY,
-      name TEXT NOT NULL,
-      price REAL NOT NULL,
-      icon TEXT
-    )
-  `);
+  CREATE TABLE IF NOT EXISTS services (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    price REAL NOT NULL,
+    icon TEXT,
+    description TEXT
+  )
+`);
+
+  await db.exec(`
+  CREATE TABLE IF NOT EXISTS categories (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL UNIQUE,
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP
+  )
+`);
 
   // ✅ Create suppliers table for vendor management
   await db.exec(`
@@ -87,7 +96,9 @@ const initDB = async () => {
       id TEXT PRIMARY KEY,
       name TEXT NOT NULL,
       mobile TEXT,
-      specialty TEXT
+      specialty_ids TEXT
+
+
     )
   `);
 
@@ -98,6 +109,13 @@ const initDB = async () => {
     // Column already exists, ignore
   }
 
+  try {
+    await db.exec(
+      `ALTER TABLE barbers RENAME COLUMN specialty TO specialty_text_backup`
+    );
+  } catch (err) {
+    // Column doesn't exist or already renamed, ignore
+  }
   try {
     await db.exec(`ALTER TABLE barbers ADD COLUMN specialty TEXT`);
   } catch (err) {
@@ -160,6 +178,30 @@ const initDB = async () => {
       FOREIGN KEY(barber_id) REFERENCES barbers(id)
     )
   `);
+  await db.exec(` CREATE TABLE IF NOT EXISTS barber_schedules (
+  id TEXT PRIMARY KEY,
+  barber_id TEXT NOT NULL,
+  day_of_week INTEGER NOT NULL, -- 0=Sunday, 1=Monday, 2=Tuesday, etc.
+  start_time TEXT NOT NULL, -- Format: "09:00"
+  end_time TEXT NOT NULL, -- Format: "18:00"
+  is_working BOOLEAN DEFAULT 1, -- TRUE if working this day
+  break_start TEXT, -- Optional break time start "13:00"
+  break_end TEXT, -- Optional break time end "14:00"
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY(barber_id) REFERENCES barbers(id) ON DELETE CASCADE
+);  `);
+
+  await db.exec(` CREATE TABLE IF NOT EXISTS barber_time_off (
+  id TEXT PRIMARY KEY,
+  barber_id TEXT NOT NULL,
+  start_date TEXT NOT NULL, -- Format: "2025-08-10"
+  end_date TEXT NOT NULL, -- Format: "2025-08-15"
+  reason TEXT, -- "Vacation", "Sick Leave", "Personal"
+  notes TEXT,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY(barber_id) REFERENCES barbers(id) ON DELETE CASCADE
+); `);
 
   // ✅ Enhanced transactions table with payment info and invoice settings
   await db.exec(`
@@ -351,6 +393,14 @@ const initDB = async () => {
     // Column already exists, ignore
   }
 
+  try {
+    await db.exec(`ALTER TABLE expenses ADD COLUMN recurrence_period INTEGER`);
+  } catch {}
+
+  try {
+    await db.exec(`ALTER TABLE expenses ADD COLUMN next_due_date TEXT`);
+  } catch {}
+
   // Add send_invoice column to existing receipts
   try {
     await db.exec(
@@ -358,6 +408,15 @@ const initDB = async () => {
     );
   } catch (err) {
     // Column already exists, ignore
+  }
+
+  // Add this after the existing ALTER TABLE statements for barbers
+  try {
+    await db.exec(`ALTER TABLE barbers ADD COLUMN specialty_ids TEXT`);
+    console.log("✅ Added specialty_ids column to barbers table");
+  } catch (err) {
+    // Column already exists, ignore
+    console.log("specialty_ids column already exists or error:", err.message);
   }
 
   // ✅ Purchase Orders table for inventory management
@@ -401,12 +460,122 @@ const initDB = async () => {
     )
   `);
 
+  // Add this after your existing table creations
+  // Add this after your existing table creations
+  await db.exec(`
+  CREATE TABLE IF NOT EXISTS expense_categories (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL UNIQUE,
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP
+  )
+`);
+
+  // Add these sections to your existing initDB.js file after your existing table creations:
+
+  // ✅ Tax Settings table to store configurable tax rates
+  await db.exec(`
+  CREATE TABLE IF NOT EXISTS tax_settings (
+    id TEXT PRIMARY KEY,
+    tax_name TEXT NOT NULL,
+    tax_rate REAL NOT NULL DEFAULT 0,
+    is_enabled BOOLEAN DEFAULT 1,
+    description TEXT,
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+  )
+`);
+
+  // ✅ General Settings table for other system configurations
+  await db.exec(`
+  CREATE TABLE IF NOT EXISTS general_settings (
+    id TEXT PRIMARY KEY,
+    setting_key TEXT UNIQUE NOT NULL,
+    setting_value TEXT NOT NULL,
+    setting_type TEXT DEFAULT 'text',
+    description TEXT,
+    category TEXT DEFAULT 'general',
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+  )
+`);
+
+  // Insert default tax setting if it doesn't exist
+  await db.run(`
+  INSERT OR IGNORE INTO tax_settings (id, tax_name, tax_rate, is_enabled, description) 
+  VALUES ('default-tax-1', 'VAT', 8.0, 1, 'Default Value Added Tax')
+`);
+
+  // Insert default general settings
+  await db.run(`
+  INSERT OR IGNORE INTO general_settings (id, setting_key, setting_value, setting_type, description, category) 
+  VALUES ('setting-1', 'business_name', 'Nassim Select Barber', 'text', 'Business name displayed on receipts', 'business')
+`);
+
+  await db.run(`
+  INSERT OR IGNORE INTO general_settings (id, setting_key, setting_value, setting_type, description, category) 
+  VALUES ('setting-2', 'business_address', 'The Fount Mall, Abdallah Ibn Salamah, First New Cairo, Egypt', 'text', 'Business address', 'business')
+`);
+
+  await db.run(`
+  INSERT OR IGNORE INTO general_settings (id, setting_key, setting_value, setting_type, description, category) 
+  VALUES ('setting-3', 'business_phone', '+20 100 016 6364', 'text', 'Business phone number', 'business')
+`);
+
+  await db.run(`
+  INSERT OR IGNORE INTO general_settings (id, setting_key, setting_value, setting_type, description, category) 
+  VALUES ('setting-4', 'business_email', 'lebanon_nassim@hotmail.com', 'text', 'Business email address', 'business')
+`);
+
+  await db.run(`
+  INSERT OR IGNORE INTO general_settings (id, setting_key, setting_value, setting_type, description, category) 
+  VALUES ('setting-5', 'currency_symbol', 'EGP', 'text', 'Currency symbol for display', 'financial')
+`);
+
+  await db.run(`
+  INSERT OR IGNORE INTO general_settings (id, setting_key, setting_value, setting_type, description, category) 
+  VALUES ('setting-6', 'default_tax_enabled', 'true', 'boolean', 'Enable default tax calculation', 'financial')
+`);
+
+  // Add indexes for better performance
+  await db.exec(
+    `CREATE INDEX IF NOT EXISTS idx_tax_settings_enabled ON tax_settings(is_enabled)`
+  );
+  await db.exec(
+    `CREATE INDEX IF NOT EXISTS idx_general_settings_key ON general_settings(setting_key)`
+  );
+  await db.exec(
+    `CREATE INDEX IF NOT EXISTS idx_general_settings_category ON general_settings(category)`
+  );
+
+  console.log("✅ Tax and general settings tables created successfully");
+
+  // Also add the category column to expenses table if it doesn't exist
+  try {
+    await db.exec(`ALTER TABLE expenses ADD COLUMN category TEXT`);
+  } catch (err) {
+    // Column already exists, ignore
+  }
+
   await db.exec(`DROP TABLE IF EXISTS user_roles`);
 
   // ✅ Create indexes for better performance
   await db.exec(
     `CREATE INDEX IF NOT EXISTS idx_expenses_date ON expenses(expense_date)`
   );
+
+  await db.exec(
+    `CREATE INDEX IF NOT EXISTS idx_barber_schedules_barber ON barber_schedules(barber_id)`
+  );
+  await db.exec(`CREATE INDEX IF NOT EXISTS idx_barber_schedules_day ON barber_schedules(day_of_week);
+`);
+  await db.exec(
+    `CREATE INDEX IF NOT EXISTS idx_barber_time_off_barber ON barber_time_off(barber_id);
+`
+  );
+  await db.exec(
+    `CREATE INDEX IF NOT EXISTS idx_barber_time_off_dates ON barber_time_off(start_date, end_date);`
+  );
+
   await db.exec(
     `CREATE INDEX IF NOT EXISTS idx_expenses_type ON expenses(expense_type)`
   );
@@ -434,6 +603,11 @@ const initDB = async () => {
   await db.exec(
     `CREATE INDEX IF NOT EXISTS idx_customer_visits_customer ON customer_visits(customer_id)`
   );
+  try {
+    await db.exec(`ALTER TABLE services ADD COLUMN description TEXT`);
+  } catch (err) {
+    // Column already exists
+  }
 
   console.log(
     "✅ SQLite DB initialized with enhanced inventory management and customer management features"

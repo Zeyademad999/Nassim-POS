@@ -3,6 +3,12 @@ import dbPromise from "../utils/db.js";
 
 const router = express.Router();
 
+const computeNextDueDate = (dateStr, period) => {
+  const d = new Date(dateStr);
+  d.setDate(d.getDate() + parseInt(period));
+  return d.toISOString().split("T")[0];
+};
+
 // GET all expenses with filtering
 router.get("/", async (req, res) => {
   try {
@@ -149,13 +155,13 @@ router.post("/", async (req, res) => {
       expense_date,
       expense_type = "general",
       notes,
+      recurrence_period,
     } = req.body;
 
-    // Validation
     if (!name || !amount || !expense_date) {
-      return res.status(400).json({
-        error: "Name, amount, and date are required",
-      });
+      return res
+        .status(400)
+        .json({ error: "Name, amount, and date are required" });
     }
 
     if (isNaN(amount) || amount <= 0) {
@@ -164,7 +170,6 @@ router.post("/", async (req, res) => {
         .json({ error: "Amount must be a positive number" });
     }
 
-    // Validate date format
     const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
     if (!dateRegex.test(expense_date)) {
       return res
@@ -172,7 +177,6 @@ router.post("/", async (req, res) => {
         .json({ error: "Invalid date format (YYYY-MM-DD)" });
     }
 
-    // Validate expense type
     const validTypes = ["general", "recurring"];
     if (!validTypes.includes(expense_type)) {
       return res.status(400).json({ error: "Invalid expense type" });
@@ -183,11 +187,22 @@ router.post("/", async (req, res) => {
       .toString(36)
       .substr(2, 9)}`;
 
+    const computeNextDueDate = (dateStr, period) => {
+      const d = new Date(dateStr);
+      d.setDate(d.getDate() + parseInt(period));
+      return d.toISOString().split("T")[0];
+    };
+
+    const next_due_date =
+      expense_type === "recurring" && recurrence_period
+        ? computeNextDueDate(expense_date, recurrence_period)
+        : null;
+
     await db.run(
       `
       INSERT INTO expenses (
-        id, name, amount, expense_date, expense_type, notes, created_at
-      ) VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+        id, name, amount, expense_date, expense_type, notes, recurrence_period, next_due_date, created_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
     `,
       [
         expenseId,
@@ -196,14 +211,14 @@ router.post("/", async (req, res) => {
         expense_date,
         expense_type,
         notes?.trim() || null,
+        recurrence_period || null,
+        next_due_date,
       ]
     );
 
-    // Get the created expense
     const newExpense = await db.get(`SELECT * FROM expenses WHERE id = ?`, [
       expenseId,
     ]);
-
     res.status(201).json(newExpense);
   } catch (err) {
     console.error("Failed to create expense:", err);
@@ -215,7 +230,14 @@ router.post("/", async (req, res) => {
 router.put("/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, amount, expense_date, expense_type, notes } = req.body;
+    const {
+      name,
+      amount,
+      expense_date,
+      expense_type = "general",
+      notes,
+      recurrence_period,
+    } = req.body;
 
     // Validation
     if (!name || !amount || !expense_date) {

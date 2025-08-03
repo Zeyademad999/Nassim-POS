@@ -425,10 +425,6 @@
   transition: background-color 0.2s ease;
 }
 
-.btn-primary:hover {
-  background: #2563eb;
-}
-
 .btn-primary:disabled {
   background: #9ca3af;
   cursor: not-allowed;
@@ -451,7 +447,7 @@
 
 .btn-secondary:hover {
   background: #f3f4f6;
-  border-color: #9ca3af;
+  color: black;
 }
 
 /* Modal Styles */
@@ -701,3 +697,203 @@
     transform: none;
   }
 }
+
+
+
+
+
+/* Add these styles to your BookingManagement.css */
+
+/* Quick Date Buttons */
+.quick-date-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+
+.quick-btn {
+  padding: 6px 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  background: white;
+  color: #374151;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 500;
+}
+
+.quick-btn:hover {
+  background: #f3f4f6;
+  border-color: #3b82f6;
+}
+
+.quick-btn.active {
+  background: #3b82f6;
+  color: white;
+  border-color: #3b82f6;
+}
+
+/* Clear Date Button */
+.filter-group {
+  position: relative;
+}
+
+.clear-date-btn {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  margin-top: 12px; /* Account for label */
+}
+
+.clear-date-btn:hover {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+/* Active Filters Display */
+.active-filters {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  font-size: 14px;
+}
+
+.filter-label {
+  font-weight: 600;
+  color: #374151;
+}
+
+.filter-value {
+  color: #6b7280;
+}
+
+.results-count {
+  margin-left: auto;
+  background: #e2e8f0;
+  color: #475569;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* Enhanced Booking Card */
+.booking-date-time {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+.booking-date {
+  font-size: 12px;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.booking-time {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+/* Empty State Actions */
+.empty-state-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .quick-date-buttons {
+    flex-direction: column;
+  }
+  
+  .quick-btn {
+    text-align: center;
+  }
+  
+  .active-filters {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+  
+  .results-count {
+    margin-left: 0;
+    align-self: flex-end;
+  }
+  
+  .booking-filters {
+    flex-direction: column;
+  }
+  
+  .filter-group {
+    margin-bottom: 16px;
+  }
+  
+  .empty-state-actions {
+    flex-direction: column;
+  }
+}
+
+/* Enhanced booking card for better date visibility */
+.booking-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+/* Improved filter section layout */
+.booking-filters {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  margin-bottom: 20px;
+}
+
+.filter-group label {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 6px;
+}
+
+.filter-group input,
+.filter-group select {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  background: white;
+  transition: border-color 0.2s ease;
+}
+

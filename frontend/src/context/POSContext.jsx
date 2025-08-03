@@ -86,6 +86,12 @@ export const POSProvider = ({ children }) => {
 
   const taxRate = 0.08;
 
+  const [customerSearch, setCustomerSearch] = useState("");
+  const [showCustomerDropdown, setShowCustomerDropdown] = useState(false);
+  const [customerMobile, setCustomerMobile] = useState(() => {
+    return localStorage.getItem("customerMobile") || "";
+  });
+
   // LocalStorage sync - Updated to include discount type
   useEffect(() => {
     localStorage.setItem("selectedServices", JSON.stringify(selectedServices));
@@ -95,6 +101,8 @@ export const POSProvider = ({ children }) => {
     localStorage.setItem("selectedBarber", selectedBarber);
     localStorage.setItem("selectedBarberId", selectedBarberId);
     localStorage.setItem("serviceDate", serviceDate.toISOString());
+    localStorage.setItem("customerMobile", customerMobile); // Add this line
+
     localStorage.setItem("discountType", discountType);
     localStorage.setItem("discountAmount", discountAmount.toString());
     localStorage.setItem("discountPercentage", discountPercentage.toString());
@@ -108,6 +116,8 @@ export const POSProvider = ({ children }) => {
     selectedProducts,
     customerName,
     customerId,
+    customerMobile, // Add this line
+
     selectedBarber,
     selectedBarberId,
     serviceDate,
@@ -385,6 +395,7 @@ export const POSProvider = ({ children }) => {
     setDiscountPercentage(0);
     setPaymentMethod("cash");
     setSendInvoice(false);
+    setCustomerMobile("");
 
     localStorage.removeItem("selectedServices");
     localStorage.removeItem("selectedProducts");
@@ -396,6 +407,7 @@ export const POSProvider = ({ children }) => {
     localStorage.removeItem("discountType");
     localStorage.removeItem("discountAmount");
     localStorage.removeItem("discountPercentage");
+    localStorage.removeItem("customerMobile"); // Add this line
   };
 
   // Enhanced Calculations with Discount Types
@@ -440,6 +452,12 @@ export const POSProvider = ({ children }) => {
         addService,
         removeService,
         updateServiceQuantity,
+        searchCustomer: customerSearch,
+        setSearchCustomer: setCustomerSearch,
+        clearCustomerSearch: () => {
+          setCustomerSearch("");
+          setShowCustomerDropdown(false);
+        },
 
         // Products
         selectedProducts,
@@ -480,6 +498,8 @@ export const POSProvider = ({ children }) => {
         setBarberInfo,
         serviceDate,
         setServiceDate,
+        customerMobile,
+        setCustomerMobile,
 
         // Payment & Invoice
         paymentMethod,

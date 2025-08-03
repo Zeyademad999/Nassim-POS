@@ -552,14 +552,14 @@ export const LanguageProvider = ({ children }) => {
       YES: "YES",
       NO: "NO",
       Invoice: "Invoice",
-
+      "Point of Sale": "Point of Sale",
       // Currency
       currency: "EGP",
     },
 
     ar: {
       // Shop & Navigation
-      shopName: "حلاق ناصم",
+      shopName: "صالون نسيم سيليكت",
       pointOfSale: "نظام نقطة البيع",
       logout: "تسجيل خروج",
 
@@ -580,6 +580,7 @@ export const LanguageProvider = ({ children }) => {
       enterCustomerName: "أدخل اسم العميل",
       selectBarber: "اختر الحلاق",
       pleaseEnterCustomer: "يرجى إدخال بيانات العميل والحلاق",
+      "Point of Sale": "نقطة البيع",
 
       // Bill & Cart
       currentBill: "الفاتورة الحالية",

@@ -149,3 +149,28 @@
   border-radius: 10px;
   cursor: pointer;
 }
+
+.print-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: center;
+  padding: 10px;
+  border: none;
+  border-radius: 10px;
+  font-weight: 500;
+  cursor: pointer;
+  background: #6366f1;
+  color: white;
+}
+
+.print-btn:hover {
+  background: #5856eb;
+}
+
+.export-buttons {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+}

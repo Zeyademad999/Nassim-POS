@@ -8,7 +8,7 @@ export default function ManageBarbers() {
   const [newBarber, setNewBarber] = useState({
     name: "",
     mobile: "",
-    specialty: "",
+    specialty_ids: [],
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -28,13 +28,14 @@ export default function ManageBarbers() {
 
   useEffect(() => {
     fetchBarbers();
+    fetchServices();
   }, []);
 
   const addBarber = async () => {
     if (
       !newBarber.name.trim() ||
       !newBarber.mobile.trim() ||
-      !newBarber.specialty.trim()
+      newBarber.specialty_ids.length === 0
     ) {
       setError("All fields are required");
       return;
@@ -50,7 +51,7 @@ export default function ManageBarbers() {
         body: JSON.stringify({
           name: newBarber.name.trim(),
           mobile: newBarber.mobile.trim(),
-          specialty: newBarber.specialty.trim(),
+          specialty_ids: newBarber.specialty_ids.join(","),
         }),
       });
 
@@ -59,7 +60,8 @@ export default function ManageBarbers() {
         throw new Error(errorData.error || "Failed to add barber");
       }
 
-      setNewBarber({ name: "", mobile: "", specialty: "" });
+      setNewBarber({ name: "", mobile: "", specialty_ids: [] });
+
       fetchBarbers();
     } catch (err) {
       console.error("Error adding barber:", err);
@@ -69,11 +71,13 @@ export default function ManageBarbers() {
     }
   };
 
+  // Replace this entire updateBarber function (lines 66-96):
   const updateBarber = async (id, updatedBarber) => {
     if (
       !updatedBarber.name.trim() ||
       !updatedBarber.mobile.trim() ||
-      !updatedBarber.specialty.trim()
+      !updatedBarber.specialty_ids ||
+      updatedBarber.specialty_ids.length === 0
     ) {
       setError("All fields are required");
       return;
@@ -89,7 +93,9 @@ export default function ManageBarbers() {
         body: JSON.stringify({
           name: updatedBarber.name.trim(),
           mobile: updatedBarber.mobile.trim(),
-          specialty: updatedBarber.specialty.trim(),
+          specialty_ids: Array.isArray(updatedBarber.specialty_ids)
+            ? updatedBarber.specialty_ids.join(",")
+            : updatedBarber.specialty_ids,
         }),
       });
 
@@ -130,6 +136,20 @@ export default function ManageBarbers() {
       setError(err.message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const [services, setServices] = useState([]);
+
+  const fetchServices = async () => {
+    try {
+      const res = await fetch("/api/services");
+      if (!res.ok) throw new Error("Failed to fetch services");
+      const data = await res.json();
+      setServices(data);
+    } catch (err) {
+      console.error("Failed to fetch services:", err);
+      setServices([]);
     }
   };
 
@@ -176,15 +196,39 @@ export default function ManageBarbers() {
             }
             disabled={loading}
           />
-          <input
-            type="text"
-            placeholder="Specialty (e.g., Beard Trimming, Hair Styling)"
-            value={newBarber.specialty}
-            onChange={(e) =>
-              setNewBarber({ ...newBarber, specialty: e.target.value })
-            }
-            disabled={loading}
-          />
+          <div className="specialty-selector">
+            <label>Specialties:</label>
+            <div className="services-checkboxes">
+              {services.map((service) => (
+                <label key={service.id} className="service-checkbox">
+                  <input
+                    type="checkbox"
+                    checked={newBarber.specialty_ids.includes(service.id)}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setNewBarber({
+                          ...newBarber,
+                          specialty_ids: [
+                            ...newBarber.specialty_ids,
+                            service.id,
+                          ],
+                        });
+                      } else {
+                        setNewBarber({
+                          ...newBarber,
+                          specialty_ids: newBarber.specialty_ids.filter(
+                            (id) => id !== service.id
+                          ),
+                        });
+                      }
+                    }}
+                    disabled={loading}
+                  />
+                  {service.name}
+                </label>
+              ))}
+            </div>
+          </div>
           <button onClick={addBarber} disabled={loading}>
             <Plus size={16} />
             {loading ? "Adding..." : "Add Barber"}
@@ -250,7 +294,10 @@ export default function ManageBarbers() {
               <>
                 <div className="barber-info">
                   <div className="barber-name">{barber.name}</div>
-                  <div className="barber-specialty">{barber.specialty}</div>
+                  <div className="barber-specialty">
+                    {barber.specialty_names || "No specialties"}
+                  </div>
+
                   <div className="barber-mobile">{barber.mobile}</div>
                 </div>
                 <div className="barber-actions">

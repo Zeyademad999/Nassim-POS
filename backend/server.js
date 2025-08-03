@@ -12,6 +12,11 @@ import customerRoutes from "./routes/customerRoutes.js";
 import bookingRoutes from "./routes/bookingRoutes.js";
 import expenseRoutes from "./routes/expenseRoutes.js"; // ✅ New expense routes
 import authRoutes from "./routes/authRoutes.js";
+import categoryRoutes from "./routes/categoryRoutes.js";
+import expenseCategoryRoutes from "./routes/expenseCategoryRoutes.js";
+import exportRoutes from "./routes/exportRoutes.js";
+import barberScheduleRoutes from "./routes/barberScheduleRoutes.js";
+import settingsRoutes from "./routes/settingsRoutes.js";
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -22,6 +27,7 @@ app.use(express.json());
 
 // Routes
 app.use("/api/services", serviceRoutes);
+app.use("/api/barber-schedule", barberScheduleRoutes);
 app.use("/api/barbers", barberRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/suppliers", supplierRoutes);
@@ -32,6 +38,12 @@ app.use("/api/reports", reportRoutes);
 app.use("/api/transactions", transactionRoutes);
 app.use("/api/receipts", receiptRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api/categories", categoryRoutes);
+app.use("/api/expense-categories", expenseCategoryRoutes);
+app.use("/api/export", exportRoutes);
+
+app.use("/api/settings", settingsRoutes);
+
 // Health check endpoint
 app.get("/api/health", (req, res) => {
   res.json({ status: "OK", message: "Server is running" });

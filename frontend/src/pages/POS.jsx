@@ -32,6 +32,8 @@ const POS = ({ onLogout }) => {
     cardCount,
     resetPaymentTotals,
     generateSettlementReceipt,
+    customerMobile, // Add this
+    setCustomerMobile, // Add this
   } = usePOS();
 
   const { colors } = useTheme();
@@ -42,39 +44,96 @@ const POS = ({ onLogout }) => {
   const [barbers, setBarbers] = useState([]);
   const [customers, setCustomers] = useState([]);
   const [activeTab, setActiveTab] = useState("services");
+  const [customerSearch, setCustomerSearch] = useState("");
+  const [showCustomerDropdown, setShowCustomerDropdown] = useState(false);
+  const [filteredCustomers, setFilteredCustomers] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [serviceRes, productRes, barberRes] = await Promise.all([
-          fetch("http://localhost:5000/api/services"),
-          fetch("http://localhost:5000/api/products"),
-          fetch("http://localhost:5000/api/barbers"),
-        ]);
+        console.log("🔄 Fetching POS data...");
 
-        const servicesData = await serviceRes.json();
-        const productsData = await productRes.json();
-        const barbersData = await barberRes.json();
+        const [serviceRes, productRes, barberRes, customerRes] =
+          await Promise.all([
+            fetch("/api/services"), // Remove localhost:5000 - use relative URLs
+            fetch("/api/products"),
+            fetch("/api/barbers"),
+            fetch("/api/customers"), // This should match your backend route
+          ]);
 
-        // Try to fetch customers, but don't fail if the endpoint doesn't exist
-        let customersData = [];
-        try {
-          const customerRes = await fetch(
-            "http://localhost:5000/api/customers"
-          );
-          if (customerRes.ok) {
-            customersData = await customerRes.json();
-          }
-        } catch (customerErr) {
-          console.warn("Customers endpoint not available:", customerErr);
+        console.log("📊 API Response Status:");
+        console.log("- Services:", serviceRes.status);
+        console.log("- Products:", productRes.status);
+        console.log("- Barbers:", barberRes.status);
+        console.log("- Customers:", customerRes.status);
+
+        // Handle services
+        let servicesData = [];
+        if (serviceRes.ok) {
+          servicesData = await serviceRes.json();
+          console.log("🔧 Services data:", servicesData);
         }
 
-        setServices(servicesData || []);
-        setProducts(productsData || []);
-        setBarbers(barbersData || []);
+        // Handle products
+        let productsData = [];
+        if (productRes.ok) {
+          productsData = await productRes.json();
+          console.log("📦 Products data:", productsData);
+        }
+
+        // Handle barbers
+        let barbersData = [];
+        if (barberRes.ok) {
+          barbersData = await barberRes.json();
+          console.log("💇 Barbers data:", barbersData);
+        }
+
+        // Handle customers with different response structures
+        let customersData = [];
+        if (customerRes.ok) {
+          const customerResponse = await customerRes.json();
+          console.log("👥 Raw customers response:", customerResponse);
+
+          // Handle different possible response structures
+          if (Array.isArray(customerResponse)) {
+            customersData = customerResponse;
+          } else if (
+            customerResponse.customers &&
+            Array.isArray(customerResponse.customers)
+          ) {
+            customersData = customerResponse.customers;
+          } else if (
+            customerResponse.data &&
+            Array.isArray(customerResponse.data)
+          ) {
+            customersData = customerResponse.data;
+          } else {
+            console.warn(
+              "🚨 Unexpected customers response structure:",
+              customerResponse
+            );
+            customersData = [];
+          }
+
+          console.log("👥 Processed customers data:", customersData);
+          console.log("👥 Number of customers:", customersData.length);
+        } else {
+          console.error("❌ Failed to fetch customers:", customerRes.status);
+        }
+
+        // Set all data
+        setServices(Array.isArray(servicesData) ? servicesData : []);
+        setProducts(Array.isArray(productsData) ? productsData : []);
+        setBarbers(Array.isArray(barbersData) ? barbersData : []);
         setCustomers(Array.isArray(customersData) ? customersData : []);
+
+        console.log("✅ Final state:");
+        console.log("- Services count:", servicesData.length);
+        console.log("- Products count:", productsData.length);
+        console.log("- Barbers count:", barbersData.length);
+        console.log("- Customers count:", customersData.length);
       } catch (err) {
-        console.error("Failed to fetch data:", err);
+        console.error("❌ Failed to fetch POS data:", err);
         // Set default empty arrays on error
         setServices([]);
         setProducts([]);
@@ -85,6 +144,35 @@ const POS = ({ onLogout }) => {
 
     fetchData();
   }, []);
+
+  useEffect(() => {
+    console.log("🔍 Customer search triggered:", {
+      searchTerm: customerSearch,
+      customersCount: customers.length,
+    });
+
+    if (customerSearch.trim() && customers.length > 0) {
+      const searchLower = customerSearch.toLowerCase().trim();
+
+      const filtered = customers.filter((customer) => {
+        if (!customer) return false;
+
+        const nameMatch =
+          customer.name && customer.name.toLowerCase().includes(searchLower);
+        const mobileMatch =
+          customer.mobile && customer.mobile.includes(customerSearch.trim());
+
+        return nameMatch || mobileMatch;
+      });
+
+      console.log("🔍 Filtered customers:", filtered);
+      setFilteredCustomers(filtered);
+      setShowCustomerDropdown(true);
+    } else {
+      setFilteredCustomers([]);
+      setShowCustomerDropdown(false);
+    }
+  }, [customerSearch, customers]);
 
   // Handle barber selection - store both ID and name
   const handleBarberChange = (e) => {
@@ -119,6 +207,99 @@ const POS = ({ onLogout }) => {
     } else {
       setCustomerId("");
       setCustomerName("");
+    }
+  };
+
+  const handleCustomerSelect = (customer) => {
+    console.log("👤 Customer selected:", customer);
+
+    if (customer && customer.id) {
+      setCustomerId(customer.id);
+      setCustomerName(customer.name || "");
+      setCustomerMobile(customer.mobile || "");
+      setCustomerSearch(`${customer.name} - ${customer.mobile}`);
+      setShowCustomerDropdown(false);
+    }
+  };
+
+  const handleCustomerSearchChange = (e) => {
+    const value = e.target.value;
+    console.log("🔍 Search input changed:", value);
+
+    setCustomerSearch(value);
+
+    // Clear selection if user is typing and it doesn't match current customer
+    const currentCustomer = customers.find((c) => c.id === customerId);
+    const expectedSearchValue = currentCustomer
+      ? `${currentCustomer.name} - ${currentCustomer.mobile}`
+      : "";
+
+    if (value !== expectedSearchValue) {
+      setCustomerId("");
+      setCustomerName("");
+      setCustomerMobile("");
+    }
+  };
+
+  const handleCustomerTypeSelect = (type) => {
+    console.log("👤 Customer type selected:", type);
+
+    if (type === "walk-in") {
+      setCustomerId("");
+      setCustomerName("Walk-in");
+      setCustomerMobile("");
+      setCustomerSearch("Walk-in Customer");
+      setShowCustomerDropdown(false);
+    } else if (type === "new-customer") {
+      setCustomerId("");
+      setCustomerName("");
+      setCustomerMobile("");
+      setCustomerSearch("");
+      setShowCustomerDropdown(false);
+    } else if (type === "returning-customer") {
+      setCustomerId("");
+      setCustomerName("");
+      setCustomerMobile("");
+      setCustomerSearch("");
+      setShowCustomerDropdown(false);
+
+      setTimeout(() => {
+        const searchInput = document.querySelector(".customer-search-input");
+        if (searchInput) {
+          searchInput.focus();
+        }
+      }, 100);
+    }
+  };
+
+  const refreshCustomers = async () => {
+    try {
+      console.log("🔄 Refreshing customers...");
+      const customerRes = await fetch("/api/customers");
+
+      if (customerRes.ok) {
+        const customerResponse = await customerRes.json();
+
+        let customersData = [];
+        if (Array.isArray(customerResponse)) {
+          customersData = customerResponse;
+        } else if (
+          customerResponse.customers &&
+          Array.isArray(customerResponse.customers)
+        ) {
+          customersData = customerResponse.customers;
+        } else if (
+          customerResponse.data &&
+          Array.isArray(customerResponse.data)
+        ) {
+          customersData = customerResponse.data;
+        }
+
+        setCustomers(customersData);
+        console.log("✅ Customers refreshed:", customersData.length);
+      }
+    } catch (err) {
+      console.error("❌ Failed to refresh customers:", err);
     }
   };
 
@@ -427,33 +608,123 @@ const POS = ({ onLogout }) => {
           <div className="input-row">
             {/* Customer Selection */}
             <div className="customer-input-group">
-              <select
-                value={
-                  customerId ||
-                  (customerName === "Walk-in" ? "walk-in" : "new-customer")
-                }
-                onChange={handleCustomerChange}
-                className="pos-input"
-              >
-                <option value="new-customer">{t("newCustomer")}</option>
-                <option value="walk-in">{t("walkInCustomer")}</option>
-                {Array.isArray(customers) &&
-                  customers.map((customer) => (
-                    <option key={customer.id} value={customer.id}>
-                      {customer.name} - {customer.mobile}
-                    </option>
-                  ))}
-              </select>
+              {/* Customer Type Selection */}
+              <div className="customer-type-tabs">
+                <button
+                  type="button"
+                  className={`customer-type-tab ${
+                    customerName === "Walk-in" ? "active" : ""
+                  }`}
+                  onClick={() => handleCustomerTypeSelect("walk-in")}
+                >
+                  {t("walkInCustomer")}
+                </button>
+                <button
+                  type="button"
+                  className={`customer-type-tab ${
+                    customerId && customerName !== "Walk-in" ? "active" : ""
+                  }`}
+                  onClick={() => handleCustomerTypeSelect("returning-customer")}
+                >
+                  Returning Customer
+                </button>
+                <button
+                  type="button"
+                  className={`customer-type-tab ${
+                    !customerId && customerName !== "Walk-in" && customerName
+                      ? "active"
+                      : ""
+                  }`}
+                  onClick={() => handleCustomerTypeSelect("new-customer")}
+                >
+                  {t("newCustomer")}
+                </button>
+              </div>
 
-              {/* Manual customer name input for new customers */}
-              {!customerId && customerName !== "Walk-in" && (
-                <input
-                  type="text"
-                  placeholder={t("enterCustomerName")}
-                  value={customerName}
-                  onChange={(e) => setCustomerName(e.target.value)}
-                  className="pos-input"
-                />
+              {/* Customer Input/Search */}
+              {customerName === "Walk-in" ? (
+                <div className="walk-in-display">
+                  <span>{t("walkInCustomer")}</span>
+                </div>
+              ) : (
+                <div className="customer-search-container">
+                  <input
+                    type="text"
+                    placeholder={
+                      customerId
+                        ? "Customer selected"
+                        : "Search by name or mobile number..."
+                    }
+                    value={customerSearch}
+                    onChange={handleCustomerSearchChange}
+                    onFocus={() =>
+                      customerSearch && setShowCustomerDropdown(true)
+                    }
+                    className="pos-input customer-search-input"
+                  />
+
+                  {/* Customer Search Dropdown */}
+                  {showCustomerDropdown && filteredCustomers.length > 0 && (
+                    <div className="customer-dropdown">
+                      {filteredCustomers.slice(0, 5).map((customer) => (
+                        <div
+                          key={customer.id}
+                          className="customer-option"
+                          onClick={() => handleCustomerSelect(customer)}
+                        >
+                          <div className="customer-info">
+                            <div className="customer-name">{customer.name}</div>
+                            <div className="customer-mobile">
+                              {customer.mobile}
+                            </div>
+                            {customer.total_visits > 0 && (
+                              <div className="customer-visits">
+                                {customer.total_visits} visits •{" "}
+                                {customer.total_spent} EGP spent
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                      {filteredCustomers.length > 5 && (
+                        <div className="dropdown-more">
+                          +{filteredCustomers.length - 5} more customers
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* No results message */}
+                  {showCustomerDropdown &&
+                    customerSearch &&
+                    filteredCustomers.length === 0 && (
+                      <div className="customer-dropdown">
+                        <div className="no-results">
+                          No customers found. Customer will be created as new.
+                        </div>
+                      </div>
+                    )}
+
+                  {/* Manual customer input for new customers */}
+                  {!customerId && customerName !== "Walk-in" && (
+                    <div className="new-customer-inputs">
+                      <input
+                        type="text"
+                        placeholder={t("enterCustomerName")}
+                        value={customerName}
+                        onChange={(e) => setCustomerName(e.target.value)}
+                        className="pos-input"
+                      />
+                      <input
+                        type="tel"
+                        placeholder={t("Mobile number (required)")}
+                        value={customerMobile}
+                        onChange={(e) => setCustomerMobile(e.target.value)}
+                        className="pos-input"
+                      />
+                    </div>
+                  )}
+                </div>
               )}
             </div>
 
@@ -537,7 +808,7 @@ const POS = ({ onLogout }) => {
         </div>
 
         <div className="pos-right">
-          <BillPanel />
+          <BillPanel />{" "}
         </div>
       </div>
     </div>

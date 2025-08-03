@@ -283,11 +283,9 @@ router.put("/:id", async (req, res) => {
       [mobile, id]
     );
     if (duplicateMobile) {
-      return res
-        .status(400)
-        .json({
-          error: "Another customer with this mobile number already exists",
-        });
+      return res.status(400).json({
+        error: "Another customer with this mobile number already exists",
+      });
     }
 
     await db.run(
@@ -419,6 +417,68 @@ router.post("/:id/update-stats", async (req, res) => {
   } catch (err) {
     console.error("Failed to update customer stats:", err);
     res.status(500).json({ error: "Failed to update customer statistics" });
+  }
+});
+
+// POST create customer from POS
+router.post("/pos-register", async (req, res) => {
+  try {
+    const { name, mobile, email } = req.body;
+
+    // Validation
+    if (!name || !mobile) {
+      return res
+        .status(400)
+        .json({ error: "Name and mobile number are required" });
+    }
+
+    const db = await dbPromise;
+
+    // Check if customer already exists
+    let existingCustomer = await db.get(
+      `SELECT id, name, mobile, email FROM customers WHERE mobile = ?`,
+      [mobile.trim()]
+    );
+
+    if (existingCustomer) {
+      // Update existing customer if needed
+      if (
+        name.trim() !== existingCustomer.name ||
+        (email && email !== existingCustomer.email)
+      ) {
+        await db.run(
+          `UPDATE customers SET name = ?, email = COALESCE(?, email), updated_at = CURRENT_TIMESTAMP WHERE mobile = ?`,
+          [name.trim(), email?.trim(), mobile.trim()]
+        );
+      }
+      return res.json({
+        success: true,
+        customer: existingCustomer,
+        isNew: false,
+      });
+    }
+
+    // Create new customer
+    const customerId = `cust_${Date.now()}_${Math.random()
+      .toString(36)
+      .substr(2, 9)}`;
+
+    await db.run(
+      `INSERT INTO customers (
+        id, name, mobile, email, total_visits, total_spent, created_at
+      ) VALUES (?, ?, ?, ?, 0, 0, CURRENT_TIMESTAMP)`,
+      [customerId, name.trim(), mobile.trim(), email?.trim() || null]
+    );
+
+    const newCustomer = await db.get(
+      `SELECT id, name, mobile, email FROM customers WHERE id = ?`,
+      [customerId]
+    );
+
+    res.json({ success: true, customer: newCustomer, isNew: true });
+  } catch (err) {
+    console.error("Failed to register POS customer:", err);
+    res.status(500).json({ error: "Failed to register customer" });
   }
 });
 

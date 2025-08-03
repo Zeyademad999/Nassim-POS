@@ -1,0 +1,30 @@
+.app-footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #1f2937;
+  color: white;
+  padding: 8px 16px;
+  font-size: 12px;
+  text-align: center;
+  z-index: 999;
+  border-top: 1px solid #374151;
+  transition: left 0.3s ease;
+}
+
+/* Offset footer when admin sidebar is present */
+.admin-layout .app-footer {
+  left: 280px; /* Sidebar width */
+}
+
+/* Adjust for collapsed sidebar */
+.admin-layout.sidebar-collapsed .app-footer {
+  left: 60px; /* Collapsed sidebar width */
+}
+
+/* No offset for other roles */
+.pos-layout .app-footer,
+.reports-layout .app-footer {
+  left: 0;
+}
