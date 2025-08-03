@@ -208,7 +208,7 @@ export default function CheckoutModal({
       doc.setTextColor(0, 0, 0);
     }
 
-    doc.text(`${t("Tax")} (8%):`, totalsStartX, yPos);
+    doc.text(`${t("Tax")} (0%):`, totalsStartX, yPos);
     doc.text(`${tax.toFixed(2)} ${t("currency")}`, 175, yPos);
     yPos += 7;
 
@@ -294,7 +294,7 @@ export default function CheckoutModal({
       ...(discountAmount > 0
         ? [[t("Discount"), "", "", "", -discountAmount]]
         : []),
-      [`${t("Tax")} (8%)`, "", "", "", tax],
+      [`${t("Tax")} (0%)`, "", "", "", tax],
       [t("TOTAL"), "", "", "", total],
       [""],
       [
@@ -419,7 +419,7 @@ export default function CheckoutModal({
                 )}: -${discountAmount.toFixed(2)} ${t("currency")}</div>`
               : ""
           }
-          <div class="total-row">${t("Tax")} (8%): ${tax.toFixed(2)} ${t(
+          <div class="total-row">${t("Tax")} (0%): ${tax.toFixed(2)} ${t(
       "currency"
     )}</div>
           <div class="final-total">${t("TOTAL")}: ${total.toFixed(2)} ${t(
@@ -756,7 +756,7 @@ export default function CheckoutModal({
               </div>
             )}
             <div className="total-line">
-              <span>{t("Tax")} (8%)</span>
+              <span>{t("Tax")} (0%)</span>
               <span>
                 {tax.toFixed(2)} {t("currency")}
               </span>

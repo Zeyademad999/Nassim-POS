@@ -52,7 +52,7 @@ export const LanguageProvider = ({ children }) => {
 
       // Financial
       subtotal: "Subtotal",
-      tax: "Tax (8%)",
+      tax: "Tax (0%)",
       total: "Total",
       checkout: "Checkout",
 
@@ -604,7 +604,7 @@ export const LanguageProvider = ({ children }) => {
 
       // Financial
       subtotal: "المجموع الفرعي",
-      tax: "ضريبة (8%)",
+      tax: "ضريبة (0%)",
       total: "الإجمالي",
       checkout: "إتمام الشراء",
 

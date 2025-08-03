@@ -43,7 +43,7 @@ export default function ReceiptModal({ receipt, onClose }) {
 
   const subtotal = receipt.subtotal || calculateSubtotal();
   const discountAmount = receipt.discount_amount || 0;
-  const taxAmount = receipt.tax || (subtotal - discountAmount) * 0.08;
+  const taxAmount = receipt.tax || (subtotal - discountAmount) * 0; // Assuming 0% tax for now
   const finalTotal = receipt.total || subtotal - discountAmount + taxAmount;
 
   const printReceipt = () => {
@@ -341,7 +341,7 @@ export default function ReceiptModal({ receipt, onClose }) {
         : ""
     }
     <div class="row">
-      <span>Tax (8%):</span>
+      <span>Tax (0%):</span>
       <span>${taxAmount.toFixed(2)} EGP</span>
     </div>
   </div>
@@ -519,7 +519,7 @@ export default function ReceiptModal({ receipt, onClose }) {
                 )}
 
                 <div className="breakdown-row">
-                  <span>Tax (8%)</span>
+                  <span>Tax (0%)</span>
                   <span>{taxAmount.toFixed(2)} EGP</span>
                 </div>
 

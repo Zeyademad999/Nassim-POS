@@ -84,7 +84,7 @@ export const POSProvider = ({ children }) => {
     return stored ? parseInt(stored) : 0;
   });
 
-  const taxRate = 0.08;
+  const taxRate = 0;
 
   const [customerSearch, setCustomerSearch] = useState("");
   const [showCustomerDropdown, setShowCustomerDropdown] = useState(false);

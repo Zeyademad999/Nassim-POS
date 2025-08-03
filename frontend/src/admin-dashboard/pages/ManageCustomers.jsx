@@ -289,7 +289,7 @@ export default function ManageCustomers() {
       services.reduce((sum, s) => sum + s.price * s.quantity, 0) +
       products.reduce((sum, p) => sum + p.price * p.quantity, 0);
     const discountAmount = transaction.discount_amount || 0;
-    const taxAmount = transaction.tax || (subtotal - discountAmount) * 0.08;
+    const taxAmount = transaction.tax || subtotal - discountAmount;
     const finalTotal =
       transaction.total || subtotal - discountAmount + taxAmount;
 
@@ -537,7 +537,7 @@ export default function ManageCustomers() {
         : ""
     }
     <div class="row">
-      <span>Tax (8%):</span>
+      <span>Tax (0%):</span>
       <span>${taxAmount.toFixed(2)} EGP</span>
     </div>
   </div>

@@ -951,7 +951,7 @@ router.post("/:id/complete", async (req, res) => {
         .substr(2, 9)}`;
       const total = actual_total || booking.estimated_cost || 0;
       const subtotal = total + discount_amount;
-      const tax = subtotal * 0.08; // 8% tax
+      const tax = subtotal * 0;
 
       await db.run(
         `
