@@ -317,3 +317,69 @@
 .language-toggle-btn:hover {
   color: #007bff;
 }
+
+/* Add these styles to your Sidebar.css file */
+
+.sidebar {
+  height: 100vh; /* Full viewport height */
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; /* Prevent the entire sidebar from scrolling */
+}
+
+.sidebar-header {
+  flex-shrink: 0; /* Prevent header from shrinking */
+  /* Keep your existing header styles */
+}
+
+.sidebar-nav {
+  flex: 1; /* Take up remaining space */
+  overflow-y: auto; /* Enable vertical scrolling */
+  overflow-x: hidden; /* Hide horizontal scrollbar */
+  padding: 0.5rem 0; /* Add some padding */
+}
+
+/* Custom scrollbar styling (optional) */
+.sidebar-nav::-webkit-scrollbar {
+  width: 4px;
+}
+
+.sidebar-nav::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar-nav::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 2px;
+}
+
+.sidebar-nav::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* For Firefox */
+.sidebar-nav {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}
+
+.sidebar-footer {
+  flex-shrink: 0; /* Prevent footer from shrinking */
+  margin-top: auto; /* Push to bottom */
+  /* Keep your existing footer styles */
+}
+
+/* Ensure nav items have proper spacing when scrolling */
+.nav-item,
+.nav-group {
+  margin-bottom: 0.25rem;
+}
+
+.nav-group-items {
+  margin-bottom: 0.5rem;
+}
+
+/* When sidebar is collapsed, ensure scroll still works */
+.sidebar.collapsed .sidebar-nav {
+  overflow-y: auto;
+}
