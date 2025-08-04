@@ -11,6 +11,12 @@ import {
   CreditCard,
   Banknote,
   Languages,
+  ShoppingCart,
+  Users,
+  Calendar,
+  Scissors,
+  ChevronDown,
+  X,
 } from "lucide-react";
 import "../styles/POS.css";
 
@@ -32,8 +38,8 @@ const POS = ({ onLogout }) => {
     cardCount,
     resetPaymentTotals,
     generateSettlementReceipt,
-    customerMobile, // Add this
-    setCustomerMobile, // Add this
+    customerMobile,
+    setCustomerMobile,
   } = usePOS();
 
   const { colors } = useTheme();
@@ -47,6 +53,7 @@ const POS = ({ onLogout }) => {
   const [customerSearch, setCustomerSearch] = useState("");
   const [showCustomerDropdown, setShowCustomerDropdown] = useState(false);
   const [filteredCustomers, setFilteredCustomers] = useState([]);
+  const [isDetailsExpanded, setIsDetailsExpanded] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -55,10 +62,10 @@ const POS = ({ onLogout }) => {
 
         const [serviceRes, productRes, barberRes, customerRes] =
           await Promise.all([
-            fetch("/api/services"), // Remove localhost:5000 - use relative URLs
+            fetch("/api/services"),
             fetch("/api/products"),
             fetch("/api/barbers"),
-            fetch("/api/customers"), // This should match your backend route
+            fetch("/api/customers"),
           ]);
 
         console.log("📊 API Response Status:");
@@ -320,497 +327,347 @@ const POS = ({ onLogout }) => {
     }
   };
 
+  const toggleDetailsSection = () => {
+    setIsDetailsExpanded(!isDetailsExpanded);
+  };
+
+  const closeDetailsSection = () => {
+    setIsDetailsExpanded(false);
+  };
+
   return (
-    <div className="pos-container" dir={isRTL ? "rtl" : "ltr"}>
-      <style jsx>{`
-        .pos-tabs {
-          display: flex;
-          gap: 16px;
-          margin-bottom: 20px;
-        }
-
-        .pos-tab {
-          padding: 12px 24px;
-          border: 2px solid #e5e7eb;
-          border-radius: 8px;
-          background: white;
-          cursor: pointer;
-          font-weight: 500;
-          transition: all 0.2s ease;
-          display: flex;
-          align-items: center;
-          gap: 8px;
-        }
-
-        .pos-tab.active {
-          border-color: black;
-          background: black;
-          color: white;
-        }
-
-        .pos-tab:hover:not(.active) {
-          border-color: #9ca3af;
-        }
-
-        .customer-input-group {
-          display: flex;
-          flex-direction: column;
-          gap: 8px;
-        }
-
-        .tab-content {
-          min-height: 400px;
-        }
-
-        .payment-tracking-section {
-          background: white;
-          border-radius: 12px;
-          padding: 16px;
-          margin-bottom: 20px;
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-          border: 1px solid #e5e7eb;
-        }
-
-        .payment-labels {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 16px;
-          margin-bottom: 16px;
-        }
-
-        .payment-label {
-          background: #f8fafc;
-          border-radius: 8px;
-          padding: 14px;
-          border: 1px solid #e2e8f0;
-          text-align: center;
-        }
-
-        .payment-label.cash {
-          border-left: 4px solid #059669;
-          height: 52%;
-        }
-
-        .payment-label.card {
-          border-left: 4px solid #2563eb;
-        }
-
-        .payment-label-header {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 6px;
-          margin-bottom: 8px;
-          font-size: 12px;
-          font-weight: 600;
-          color: #6b7280;
-          text-transform: uppercase;
-          letter-spacing: 0.5px;
-        }
-
-        .payment-amount {
-          font-size: 18px;
-          font-weight: 700;
-          color: #111827;
-          margin-bottom: 4px;
-        }
-
-        .payment-count {
-          font-size: 11px;
-          color: #6b7280;
-        }
-
-        .settlement-actions {
-          display: flex;
-          gap: 8px;
-        }
-
-        .settlement-btn {
-          flex: 1;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 6px;
-          padding: 8px 12px;
-          border-radius: 6px;
-          font-size: 12px;
-          font-weight: 500;
-          cursor: pointer;
-          transition: all 0.2s ease;
-          border: none;
-        }
-
-        .settlement-btn.print {
-          background: #2563eb;
-          color: white;
-        }
-
-        .settlement-btn.print:hover {
-          background: #1d4ed8;
-        }
-
-        .settlement-btn.reset {
-          background: #ef4444;
-          color: white;
-        }
-
-        .settlement-btn.reset:hover {
-          background: #dc2626;
-        }
-
-        .total-summary {
-          text-align: center;
-          padding: 10px;
-          background: #f0f9ff;
-          border-radius: 6px;
-          border: 1px solid #0ea5e9;
-          margin-bottom: 12px;
-        }
-
-        .total-summary-text {
-          font-size: 13px;
-          color: #0369a1;
-          font-weight: 600;
-        }
-
-        .language-toggle {
-          position: absolute;
-          top: 40px;
-          right: 980px;
-          ${isRTL ? "left: 16px;" : "right: 130px;"}
-          background: rgba(255, 255, 255, 0.9);
-          border: 1px solid #e5e7eb;
-          border-radius: 8px;
-          padding: 8px 12px;
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-          gap: 6px;
-          font-size: 12px;
-          font-weight: 500;
-          color: #374151;
-          transition: all 0.2s ease;
-          width: 120px;
-        }
-
-        .language-toggle:hover {
-          background: white;
-          border-color: #9ca3af;
-        }
-
-        .pos-header {
-          position: relative;
-        }
-
-        /* RTL specific styles */
-        ${isRTL
-          ? `
-          .payment-label.cash {
-            border-right: 4px solid #059669;
-            border-left: 1px solid #e2e8f0;
-          }
-          
-          .payment-label.card {
-            border-right: 4px solid #2563eb;
-            border-left: 1px solid #e2e8f0;
-          }
-        `
-          : ""}
-      `}</style>
-
-      <header
-        className="pos-header"
-        style={{ backgroundColor: colors.primary }}
-      >
-        <div>
-          <h1 style={{ color: colors.secondary }}>{t("shopName")}</h1>
-          <p style={{ color: colors.secondary, fontSize: "14px" }}>
-            {t("pointOfSale")}
-          </p>
+    <div className="pos-app" dir={isRTL ? "rtl" : "ltr"}>
+      {/* Header */}
+      <header className="pos-header">
+        <div className="header-brand">
+          <div className="brand-info">
+            <h1 className="brand-title">{t("shopName")}</h1>
+            <p className="brand-subtitle">{t("pointOfSale")}</p>
+          </div>
         </div>
 
-        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-          <button className="language-toggle" onClick={toggleLanguage}>
-            <Languages size={14} />
-            {language === "en" ? "العربية" : "English"}
+        <div className="header-controls">
+          <button className="language-switch" onClick={toggleLanguage}>
+            <Languages size={18} />
+            <span>{language === "en" ? "العربية" : "English"}</span>
           </button>
 
-          <button
-            className="logout-btn"
-            onClick={onLogout}
-            style={{
-              background: "#ef4444",
-              color: "white",
-              border: "none",
-              padding: "8px 16px",
-              borderRadius: "6px",
-              cursor: "pointer",
-              fontSize: "14px",
-            }}
-          >
+          <button className="logout-button" onClick={onLogout}>
             {t("logout")}
           </button>
         </div>
       </header>
-      <div className="pos-main">
-        <div className="pos-left">
-          {/* Payment Tracking Section */}
-          <div className="payment-tracking-section">
-            <div className="total-summary">
-              <div className="total-summary-text">
-                {t("total")}: {(cashTotal + cardTotal).toFixed(2)} EGP |{" "}
-                {transactionCount} {t("transactions")}
+
+      {/* Main Content */}
+      <main className="pos-main">
+        {/* Left Panel - Services & Products */}
+        <section className="pos-content">
+          {/* Stats Dashboard */}
+          <div className="stats-dashboard">
+            <div className="stat-card total-stat">
+              <div className="stat-icon">
+                <ShoppingCart size={24} />
+              </div>
+              <div className="stat-content">
+                <h3 className="stat-value">
+                  {(cashTotal + cardTotal).toFixed(2)} EGP
+                </h3>
+                <p className="stat-label">Total Revenue</p>
               </div>
             </div>
 
-            <div className="payment-labels">
-              <div className="payment-label cash">
-                <div className="payment-label-header">
-                  <Banknote size={14} />
-                  {t("cashPayments")}
-                </div>
-                <div className="payment-amount">{cashTotal.toFixed(2)} EGP</div>
-                <div className="payment-count">
-                  {cashCount} {t("transactions")}
-                </div>
+            <div className="stat-card cash-stat">
+              <div className="stat-icon">
+                <Banknote size={24} />
               </div>
-
-              <div className="payment-label card">
-                <div className="payment-label-header">
-                  <CreditCard size={14} />
-                  {t("cardPayments")}
-                </div>
-                <div className="payment-amount">{cardTotal.toFixed(2)} EGP</div>
-                <div className="payment-count">
-                  {cardCount} {t("transactions")}
-                </div>
+              <div className="stat-content">
+                <h3 className="stat-value">{cashTotal.toFixed(2)} EGP</h3>
+                <p className="stat-label">Cash ({cashCount})</p>
               </div>
             </div>
 
-            <div className="settlement-actions">
-              <button
-                className="settlement-btn print"
-                onClick={handlePrintSettlement}
-              >
-                <Printer size={14} />
-                {t("printSettlement")}
-              </button>
-              <button
-                className="settlement-btn reset"
-                onClick={handleResetTotals}
-              >
-                <RotateCcw size={14} />
-                {t("resetTotals")}
-              </button>
+            <div className="stat-card card-stat">
+              <div className="stat-icon">
+                <CreditCard size={24} />
+              </div>
+              <div className="stat-content">
+                <h3 className="stat-value">{cardTotal.toFixed(2)} EGP</h3>
+                <p className="stat-label">Card ({cardCount})</p>
+              </div>
             </div>
           </div>
 
-          <div className="input-row">
-            {/* Customer Selection */}
-            <div className="customer-input-group">
-              {/* Customer Type Selection */}
-              <div className="customer-type-tabs">
-                <button
-                  type="button"
-                  className={`customer-type-tab ${
-                    customerName === "Walk-in" ? "active" : ""
-                  }`}
-                  onClick={() => handleCustomerTypeSelect("walk-in")}
-                >
-                  {t("walkInCustomer")}
-                </button>
-                <button
-                  type="button"
-                  className={`customer-type-tab ${
-                    customerId && customerName !== "Walk-in" ? "active" : ""
-                  }`}
-                  onClick={() => handleCustomerTypeSelect("returning-customer")}
-                >
-                  Returning Customer
-                </button>
-                <button
-                  type="button"
-                  className={`customer-type-tab ${
-                    !customerId && customerName !== "Walk-in" && customerName
-                      ? "active"
-                      : ""
-                  }`}
-                  onClick={() => handleCustomerTypeSelect("new-customer")}
-                >
-                  {t("newCustomer")}
-                </button>
-              </div>
+          {/* Action Buttons */}
+          <div className="action-buttons">
+            <button
+              className="action-btn print-btn"
+              onClick={handlePrintSettlement}
+            >
+              <Printer size={18} />
+              <span>{t("printSettlement")}</span>
+            </button>
 
-              {/* Customer Input/Search */}
-              {customerName === "Walk-in" ? (
-                <div className="walk-in-display">
-                  <span>{t("walkInCustomer")}</span>
+            <button
+              className="action-btn reset-btn"
+              onClick={handleResetTotals}
+            >
+              <RotateCcw size={18} />
+              <span>{t("resetTotals")}</span>
+            </button>
+          </div>
+
+          {/* Collapsible Details Section */}
+          <div className="details-section">
+            <button className="details-toggle" onClick={toggleDetailsSection}>
+              <span>Fill Details</span>
+              <ChevronDown
+                size={18}
+                className={`chevron ${isDetailsExpanded ? "expanded" : ""}`}
+              />
+            </button>
+
+            {isDetailsExpanded && (
+              <div className="details-content">
+                <div className="details-header">
+                  <h3>Customer & Service Details</h3>
+                  <button
+                    className="close-details"
+                    onClick={closeDetailsSection}
+                  >
+                    <X size={18} />
+                  </button>
                 </div>
-              ) : (
-                <div className="customer-search-container">
-                  <input
-                    type="text"
-                    placeholder={
-                      customerId
-                        ? "Customer selected"
-                        : "Search by name or mobile number..."
-                    }
-                    value={customerSearch}
-                    onChange={handleCustomerSearchChange}
-                    onFocus={() =>
-                      customerSearch && setShowCustomerDropdown(true)
-                    }
-                    className="pos-input customer-search-input"
-                  />
 
-                  {/* Customer Search Dropdown */}
-                  {showCustomerDropdown && filteredCustomers.length > 0 && (
-                    <div className="customer-dropdown">
-                      {filteredCustomers.slice(0, 5).map((customer) => (
-                        <div
-                          key={customer.id}
-                          className="customer-option"
-                          onClick={() => handleCustomerSelect(customer)}
+                {/* Customer & Barber Selection */}
+                <div className="selection-panel">
+                  <div className="selection-group">
+                    <label className="selection-label">
+                      <Users size={18} />
+                      <span>Customer</span>
+                    </label>
+
+                    <div className="customer-selection">
+                      <div className="customer-tabs">
+                        <button
+                          className={`customer-tab ${
+                            customerName === "Walk-in" ? "active" : ""
+                          }`}
+                          onClick={() => handleCustomerTypeSelect("walk-in")}
                         >
-                          <div className="customer-info">
-                            <div className="customer-name">{customer.name}</div>
-                            <div className="customer-mobile">
-                              {customer.mobile}
-                            </div>
-                            {customer.total_visits > 0 && (
-                              <div className="customer-visits">
-                                {customer.total_visits} visits •{" "}
-                                {customer.total_spent} EGP spent
+                          Walk-in
+                        </button>
+                        <button
+                          className={`customer-tab ${
+                            customerId && customerName !== "Walk-in"
+                              ? "active"
+                              : ""
+                          }`}
+                          onClick={() =>
+                            handleCustomerTypeSelect("returning-customer")
+                          }
+                        >
+                          Returning
+                        </button>
+                        <button
+                          className={`customer-tab ${
+                            !customerId &&
+                            customerName !== "Walk-in" &&
+                            customerName
+                              ? "active"
+                              : ""
+                          }`}
+                          onClick={() =>
+                            handleCustomerTypeSelect("new-customer")
+                          }
+                        >
+                          New
+                        </button>
+                      </div>
+
+                      {customerName === "Walk-in" ? (
+                        <div className="walk-in-display">
+                          <span>Walk-in Customer</span>
+                        </div>
+                      ) : (
+                        <div className="customer-search-wrapper">
+                          <input
+                            type="text"
+                            placeholder="Search customers by name or mobile..."
+                            value={customerSearch}
+                            onChange={handleCustomerSearchChange}
+                            onFocus={() =>
+                              customerSearch && setShowCustomerDropdown(true)
+                            }
+                            className="customer-search-input"
+                          />
+
+                          {showCustomerDropdown &&
+                            filteredCustomers.length > 0 && (
+                              <div className="customer-dropdown">
+                                {filteredCustomers
+                                  .slice(0, 5)
+                                  .map((customer) => (
+                                    <div
+                                      key={customer.id}
+                                      className="customer-option"
+                                      onClick={() =>
+                                        handleCustomerSelect(customer)
+                                      }
+                                    >
+                                      <div className="customer-info">
+                                        <div className="customer-name">
+                                          {customer.name}
+                                        </div>
+                                        <div className="customer-mobile">
+                                          {customer.mobile}
+                                        </div>
+                                        {customer.total_visits > 0 && (
+                                          <div className="customer-visits">
+                                            {customer.total_visits} visits •{" "}
+                                            {customer.total_spent} EGP spent
+                                          </div>
+                                        )}
+                                      </div>
+                                    </div>
+                                  ))}
+                                {filteredCustomers.length > 5 && (
+                                  <div className="dropdown-more">
+                                    +{filteredCustomers.length - 5} more
+                                    customers
+                                  </div>
+                                )}
                               </div>
                             )}
-                          </div>
-                        </div>
-                      ))}
-                      {filteredCustomers.length > 5 && (
-                        <div className="dropdown-more">
-                          +{filteredCustomers.length - 5} more customers
+
+                          {showCustomerDropdown &&
+                            customerSearch &&
+                            filteredCustomers.length === 0 && (
+                              <div className="customer-dropdown"></div>
+                            )}
+
+                          {!customerId && customerName !== "Walk-in" && (
+                            <div className="new-customer-fields">
+                              <input
+                                type="text"
+                                placeholder="Customer name"
+                                value={customerName}
+                                onChange={(e) =>
+                                  setCustomerName(e.target.value)
+                                }
+                                className="customer-input"
+                              />
+                              <input
+                                type="tel"
+                                placeholder="Mobile number (required)"
+                                value={customerMobile}
+                                onChange={(e) =>
+                                  setCustomerMobile(e.target.value)
+                                }
+                                className="customer-input"
+                              />
+                            </div>
+                          )}
                         </div>
                       )}
                     </div>
-                  )}
+                  </div>
 
-                  {/* No results message */}
-                  {showCustomerDropdown &&
-                    customerSearch &&
-                    filteredCustomers.length === 0 && (
-                      <div className="customer-dropdown">
-                        <div className="no-results">
-                          No customers found. Customer will be created as new.
-                        </div>
-                      </div>
-                    )}
+                  <div className="selection-group">
+                    <label className="selection-label">
+                      <Scissors size={18} />
+                      <span>Barber</span>
+                    </label>
+                    <select
+                      value={selectedBarberId}
+                      onChange={handleBarberChange}
+                      className="barber-select"
+                    >
+                      <option value="">Select a barber</option>
+                      {Array.isArray(barbers) &&
+                        barbers.map((barber) => (
+                          <option key={barber.id} value={barber.id}>
+                            {barber.name} – {barber.specialty}
+                          </option>
+                        ))}
+                    </select>
+                  </div>
 
-                  {/* Manual customer input for new customers */}
-                  {!customerId && customerName !== "Walk-in" && (
-                    <div className="new-customer-inputs">
-                      <input
-                        type="text"
-                        placeholder={t("enterCustomerName")}
-                        value={customerName}
-                        onChange={(e) => setCustomerName(e.target.value)}
-                        className="pos-input"
-                      />
-                      <input
-                        type="tel"
-                        placeholder={t("Mobile number (required)")}
-                        value={customerMobile}
-                        onChange={(e) => setCustomerMobile(e.target.value)}
-                        className="pos-input"
-                      />
-                    </div>
-                  )}
+                  <div className="selection-group">
+                    <label className="selection-label">
+                      <Calendar size={18} />
+                      <span>Date</span>
+                    </label>
+                    <input
+                      type="date"
+                      value={serviceDate.toISOString().split("T")[0]}
+                      onChange={(e) => setServiceDate(new Date(e.target.value))}
+                      className="date-input"
+                    />
+                  </div>
                 </div>
-              )}
-            </div>
-
-            {/* Barber Selection */}
-            <select
-              value={selectedBarberId}
-              onChange={handleBarberChange}
-              className="pos-input"
-            >
-              <option value="">{t("selectBarber")}</option>
-              {Array.isArray(barbers) &&
-                barbers.map((barber) => (
-                  <option key={barber.id} value={barber.id}>
-                    {barber.name} – {barber.specialty}
-                  </option>
-                ))}
-            </select>
-
-            <input
-              type="date"
-              value={serviceDate.toISOString().split("T")[0]}
-              onChange={(e) => setServiceDate(new Date(e.target.value))}
-              className="pos-input"
-            />
+              </div>
+            )}
           </div>
 
-          {/* Service/Product Tabs */}
-          <div className="pos-tabs">
+          {/* Services & Products Tabs */}
+          <div className="content-tabs">
             <button
-              className={`pos-tab ${activeTab === "services" ? "active" : ""}`}
+              className={`content-tab ${
+                activeTab === "services" ? "active" : ""
+              }`}
               onClick={() => setActiveTab("services")}
             >
-              {t("services")} ({services.length})
+              <Scissors size={18} />
+              <span>Services ({services.length})</span>
             </button>
             <button
-              className={`pos-tab ${activeTab === "products" ? "active" : ""}`}
+              className={`content-tab ${
+                activeTab === "products" ? "active" : ""
+              }`}
               onClick={() => setActiveTab("products")}
             >
-              {t("products")} ({products.length})
+              <ShoppingCart size={18} />
+              <span>Products ({products.length})</span>
             </button>
           </div>
 
-          {/* Content based on active tab */}
-          <div className="tab-content">
+          {/* Content Grid */}
+          <div className="content-grid">
             {activeTab === "services" ? (
-              <div className="card-grid">
+              <div className="services-grid">
                 {services.map((service) => (
                   <ServiceCard key={service.id} service={service} />
                 ))}
                 {services.length === 0 && (
-                  <div
-                    style={{
-                      textAlign: "center",
-                      padding: "40px",
-                      color: "#6b7280",
-                    }}
-                  >
-                    <p>{t("noServicesAvailable")}</p>
+                  <div className="empty-state">
+                    <Scissors size={48} />
+                    <h3>No Services Available</h3>
+                    <p>Add services to get started</p>
                   </div>
                 )}
               </div>
             ) : (
-              <div className="card-grid">
+              <div className="products-grid">
                 {products.map((product) => (
                   <ProductCard key={product.id} product={product} />
                 ))}
                 {products.length === 0 && (
-                  <div
-                    style={{
-                      textAlign: "center",
-                      padding: "40px",
-                      color: "#6b7280",
-                    }}
-                  >
-                    <p>{t("noProductsAvailable")}</p>
+                  <div className="empty-state">
+                    <ShoppingCart size={48} />
+                    <h3>No Products Available</h3>
+                    <p>Add products to get started</p>
                   </div>
                 )}
               </div>
             )}
           </div>
-        </div>
+        </section>
 
-        <div className="pos-right">
-          <BillPanel />{" "}
-        </div>
-      </div>
+        {/* Right Panel - Bill */}
+        <aside className="pos-sidebar">
+          <BillPanel />
+        </aside>
+      </main>
     </div>
   );
 };

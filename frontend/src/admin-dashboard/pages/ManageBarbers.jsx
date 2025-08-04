@@ -1,5 +1,14 @@
 import React, { useEffect, useState } from "react";
-import { Plus, Edit2, Trash2, Save, X, Users, UserPlus } from "lucide-react";
+import {
+  Plus,
+  Edit2,
+  Trash2,
+  Save,
+  X,
+  Users,
+  UserPlus,
+  Scissors,
+} from "lucide-react";
 import "../styles/ManageBarbers.css";
 
 export default function ManageBarbers() {
@@ -71,7 +80,6 @@ export default function ManageBarbers() {
     }
   };
 
-  // Replace this entire updateBarber function (lines 66-96):
   const updateBarber = async (id, updatedBarber) => {
     if (
       !updatedBarber.name.trim() ||
@@ -164,40 +172,54 @@ export default function ManageBarbers() {
     <div className="manage-barbers-page">
       {error && (
         <div className="error-message">
-          {error}
-          <button onClick={() => setError("")}>×</button>
+          <span>{error}</span>
+          <button onClick={() => setError("")}>
+            <X size={16} />
+          </button>
         </div>
       )}
 
       {/* Add Barber Card */}
       <div className="barbers-card">
-        <h2>
-          <UserPlus size={18} />
-          Add New Barber
-        </h2>
-        <p className="subtext">Add a new barber to your team</p>
+        <div className="card-header">
+          <div className="header-info">
+            <h2>
+              <UserPlus size={20} />
+              Add New Barber
+            </h2>
+            <p className="subtext">Add a new barber to your team</p>
+          </div>
+        </div>
 
         <div className="barber-form">
-          <input
-            type="text"
-            placeholder="Full Name (e.g., Ahmed Hassan)"
-            value={newBarber.name}
-            onChange={(e) =>
-              setNewBarber({ ...newBarber, name: e.target.value })
-            }
-            disabled={loading}
-          />
-          <input
-            type="tel"
-            placeholder="Mobile Number (e.g., +20 123 456 7890)"
-            value={newBarber.mobile}
-            onChange={(e) =>
-              setNewBarber({ ...newBarber, mobile: e.target.value })
-            }
-            disabled={loading}
-          />
-          <div className="specialty-selector">
-            <label>Specialties:</label>
+          <div className="form-group">
+            <label>Full Name</label>
+            <input
+              type="text"
+              placeholder="e.g., Ahmed Hassan"
+              value={newBarber.name}
+              onChange={(e) =>
+                setNewBarber({ ...newBarber, name: e.target.value })
+              }
+              disabled={loading}
+            />
+          </div>
+
+          <div className="form-group">
+            <label>Mobile Number</label>
+            <input
+              type="tel"
+              placeholder="e.g., +20 123 456 7890"
+              value={newBarber.mobile}
+              onChange={(e) =>
+                setNewBarber({ ...newBarber, mobile: e.target.value })
+              }
+              disabled={loading}
+            />
+          </div>
+
+          <div className="form-group specialty-group">
+            <label>Specialties</label>
             <div className="services-checkboxes">
               {services.map((service) => (
                 <label key={service.id} className="service-checkbox">
@@ -224,15 +246,22 @@ export default function ManageBarbers() {
                     }}
                     disabled={loading}
                   />
-                  {service.name}
+                  <span>{service.name}</span>
                 </label>
               ))}
             </div>
           </div>
-          <button onClick={addBarber} disabled={loading}>
-            <Plus size={16} />
-            {loading ? "Adding..." : "Add Barber"}
-          </button>
+
+          <div className="form-actions">
+            <button
+              className="add-button"
+              onClick={addBarber}
+              disabled={loading}
+            >
+              <Plus size={16} />
+              {loading ? "Adding..." : "Add Barber"}
+            </button>
+          </div>
         </div>
       </div>
 
@@ -240,41 +269,64 @@ export default function ManageBarbers() {
       <div className="barbers-list">
         {barbers.map((barber) => (
           <div key={barber.id} className="barber-card">
-            <div className="barber-avatar">{getInitials(barber.name)}</div>
+            <div className="barber-header">
+              <div className="barber-avatar">{getInitials(barber.name)}</div>
+              <div className="barber-info">
+                <div className="barber-name">{barber.name}</div>
+                <div className="barber-mobile">{barber.mobile}</div>
+              </div>
+            </div>
+
             {editingBarber?.id === barber.id ? (
               <div className="barber-edit-form">
-                <input
-                  type="text"
-                  value={editingBarber.name}
-                  onChange={(e) =>
-                    setEditingBarber({ ...editingBarber, name: e.target.value })
-                  }
-                  disabled={loading}
-                />
-                <input
-                  type="tel"
-                  value={editingBarber.mobile}
-                  onChange={(e) =>
-                    setEditingBarber({
-                      ...editingBarber,
-                      mobile: e.target.value,
-                    })
-                  }
-                  disabled={loading}
-                />
-                <input
-                  type="text"
-                  value={editingBarber.specialty}
-                  onChange={(e) =>
-                    setEditingBarber({
-                      ...editingBarber,
-                      specialty: e.target.value,
-                    })
-                  }
-                  disabled={loading}
-                />
+                <div className="edit-group">
+                  <label>Name</label>
+                  <input
+                    type="text"
+                    value={editingBarber.name}
+                    onChange={(e) =>
+                      setEditingBarber({
+                        ...editingBarber,
+                        name: e.target.value,
+                      })
+                    }
+                    disabled={loading}
+                  />
+                </div>
+
+                <div className="edit-group">
+                  <label>Mobile</label>
+                  <input
+                    type="tel"
+                    value={editingBarber.mobile}
+                    onChange={(e) =>
+                      setEditingBarber({
+                        ...editingBarber,
+                        mobile: e.target.value,
+                      })
+                    }
+                    disabled={loading}
+                  />
+                </div>
+
+                <div className="edit-group">
+                  <label>Specialty</label>
+                  <input
+                    type="text"
+                    value={editingBarber.specialty}
+                    onChange={(e) =>
+                      setEditingBarber({
+                        ...editingBarber,
+                        specialty: e.target.value,
+                      })
+                    }
+                    disabled={loading}
+                  />
+                </div>
+
                 <div className="barber-actions">
                   <button
+                    className="save-button"
                     onClick={() => updateBarber(barber.id, editingBarber)}
                     disabled={loading}
                   >
@@ -282,6 +334,7 @@ export default function ManageBarbers() {
                     {loading ? "Saving..." : "Save"}
                   </button>
                   <button
+                    className="cancel-button"
                     onClick={() => setEditingBarber(null)}
                     disabled={loading}
                   >
@@ -292,16 +345,15 @@ export default function ManageBarbers() {
               </div>
             ) : (
               <>
-                <div className="barber-info">
-                  <div className="barber-name">{barber.name}</div>
+                <div className="barber-details">
                   <div className="barber-specialty">
                     {barber.specialty_names || "No specialties"}
                   </div>
-
-                  <div className="barber-mobile">{barber.mobile}</div>
                 </div>
+
                 <div className="barber-actions">
                   <button
+                    className="edit-button"
                     onClick={() => setEditingBarber(barber)}
                     disabled={loading}
                   >
@@ -309,6 +361,7 @@ export default function ManageBarbers() {
                     Edit
                   </button>
                   <button
+                    className="delete-button"
                     onClick={() => deleteBarber(barber.id)}
                     disabled={loading}
                   >
@@ -333,14 +386,14 @@ export default function ManageBarbers() {
       {/* Summary Card */}
       {barbers.length > 0 && (
         <div className="summary-card">
-          <div>
+          <div className="summary-info">
             <h4>
-              <Users size={16} />
+              <Scissors size={18} />
               Team Summary
             </h4>
             <div className="subtext">Total active barbers</div>
           </div>
-          <span>{barbers.length}</span>
+          <div className="summary-count">{barbers.length}</div>
         </div>
       )}
     </div>
