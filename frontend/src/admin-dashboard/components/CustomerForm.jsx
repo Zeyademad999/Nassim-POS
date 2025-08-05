@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Save, X, User, Phone, Mail, Star, FileText } from "lucide-react";
+import { useLanguage } from "../../context/LanguageContext";
 
 export default function CustomerForm({
   customer = null,
@@ -8,6 +9,7 @@ export default function CustomerForm({
   barbers = [],
   loading = false,
 }) {
+  const { t } = useLanguage();
   const [formData, setFormData] = useState({
     name: "",
     mobile: "",
@@ -37,18 +39,18 @@ export default function CustomerForm({
 
     // Name validation
     if (!formData.name.trim()) {
-      newErrors.name = "Name is required";
+      newErrors.name = t("Name is required");
     } else if (formData.name.length < 2) {
-      newErrors.name = "Name must be at least 2 characters";
+      newErrors.name = t("Name must be at least 2 characters");
     }
 
     // Mobile validation
     if (!formData.mobile.trim()) {
-      newErrors.mobile = "Mobile number is required";
+      newErrors.mobile = t("Mobile number is required");
     } else {
       const mobileRegex = /^\+?[\d\s\-\(\)]{10,}$/;
       if (!mobileRegex.test(formData.mobile)) {
-        newErrors.mobile = "Invalid mobile number format";
+        newErrors.mobile = t("Invalid mobile number format");
       }
     }
 
@@ -56,7 +58,7 @@ export default function CustomerForm({
     if (formData.email && formData.email.trim()) {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(formData.email)) {
-        newErrors.email = "Invalid email format";
+        newErrors.email = t("Invalid email format");
       }
     }
 
@@ -95,20 +97,20 @@ export default function CustomerForm({
       <div className="form-section">
         <h3>
           <User size={16} />
-          Basic Information
+          {t("Basic Information")}
         </h3>
 
         <div className="form-grid">
           <div className="form-group">
             <label htmlFor="name">
-              Full Name <span className="required">*</span>
+              {t("Full Name")} <span className="required">*</span>
             </label>
             <input
               id="name"
               type="text"
               value={formData.name}
               onChange={(e) => handleInputChange("name", e.target.value)}
-              placeholder="Enter customer's full name"
+              placeholder={t("Enter customer's full name")}
               className={errors.name ? "error" : ""}
               disabled={loading}
             />
@@ -117,7 +119,7 @@ export default function CustomerForm({
 
           <div className="form-group">
             <label htmlFor="mobile">
-              Mobile Number <span className="required">*</span>
+              {t("Mobile Number")} <span className="required">*</span>
             </label>
             <input
               id="mobile"
@@ -137,14 +139,14 @@ export default function CustomerForm({
         <div className="form-group">
           <label htmlFor="email">
             <Mail size={16} />
-            Email Address (Optional)
+            {t("Email Address (Optional)")}
           </label>
           <input
             id="email"
             type="email"
             value={formData.email}
             onChange={(e) => handleInputChange("email", e.target.value)}
-            placeholder="customer@example.com"
+            placeholder={t("customer@example.com")}
             className={errors.email ? "error" : ""}
             disabled={loading}
           />
@@ -156,11 +158,11 @@ export default function CustomerForm({
       <div className="form-section">
         <h3>
           <Star size={16} />
-          Preferences
+          {t("Preferences")}
         </h3>
 
         <div className="form-group">
-          <label htmlFor="preferred_barber">Preferred Barber</label>
+          <label htmlFor="preferred_barber">{t("Preferred Barber")}</label>
           <select
             id="preferred_barber"
             value={formData.preferred_barber_id}
@@ -169,7 +171,7 @@ export default function CustomerForm({
             }
             disabled={loading}
           >
-            <option value="">No preference</option>
+            <option value="">{t("No preference")}</option>
             {barbers.map((barber) => (
               <option key={barber.id} value={barber.id}>
                 {barber.name} - {barber.specialty}
@@ -179,19 +181,25 @@ export default function CustomerForm({
         </div>
 
         <div className="form-group">
-          <label htmlFor="service_preferences">Service Preferences</label>
+          <label htmlFor="service_preferences">
+            {t("Service Preferences")}
+          </label>
           <textarea
             id="service_preferences"
             value={formData.service_preferences}
             onChange={(e) =>
               handleInputChange("service_preferences", e.target.value)
             }
-            placeholder="e.g., Beard trimming, specific hair style, preferred products..."
+            placeholder={t(
+              "e.g., Beard trimming, specific hair style, preferred products..."
+            )}
             rows={3}
             disabled={loading}
           />
           <small className="form-hint">
-            Note any specific services, styles, or products the customer prefers
+            {t(
+              "Note any specific services, styles, or products the customer prefers"
+            )}
           </small>
         </div>
       </div>
@@ -200,21 +208,23 @@ export default function CustomerForm({
       <div className="form-section">
         <h3>
           <FileText size={16} />
-          Additional Notes
+          {t("Additional Notes")}
         </h3>
 
         <div className="form-group">
-          <label htmlFor="notes">Notes</label>
+          <label htmlFor="notes">{t("Notes")}</label>
           <textarea
             id="notes"
             value={formData.notes}
             onChange={(e) => handleInputChange("notes", e.target.value)}
-            placeholder="Any additional notes about the customer (allergies, special requests, etc.)"
+            placeholder={t(
+              "Any additional notes about the customer (allergies, special requests, etc.)"
+            )}
             rows={3}
             disabled={loading}
           />
           <small className="form-hint">
-            Include any important information about the customer
+            {t("Include any important information about the customer")}
           </small>
         </div>
       </div>
@@ -228,15 +238,15 @@ export default function CustomerForm({
           disabled={loading}
         >
           <X size={16} />
-          Cancel
+          {t("Cancel")}
         </button>
         <button type="submit" className="btn-primary" disabled={loading}>
           <Save size={16} />
           {loading
-            ? "Saving..."
+            ? t("Saving...")
             : customer
-            ? "Update Customer"
-            : "Add Customer"}
+            ? t("Update Customer")
+            : t("Add Customer")}
         </button>
       </div>
     </form>

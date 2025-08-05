@@ -14,9 +14,11 @@ import {
   Receipt,
   Printer, // Add this for print icon
 } from "lucide-react";
+import { useLanguage } from "../../context/LanguageContext";
 import "../styles/ReceiptModal.css";
 
 export default function ReceiptModal({ receipt, onClose }) {
+  const { t, isRTL } = useLanguage();
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString("en-US", {
       weekday: "short",
@@ -250,8 +252,11 @@ export default function ReceiptModal({ receipt, onClose }) {
   <div class="header">
     <div class="shop-name">NASSIM SELECT</div>
     <div class="shop-subtitle">صالون نسيم سيليكت</div>
-    <div class="shop-subtitle">Premium Grooming Services</div>
-    <div class="receipt-id">Receipt: ${receipt.id.substring(0, 8)}</div>
+            <div class="shop-subtitle">${t("Premium Grooming Services")}</div>
+        <div class="receipt-id">${t("Receipt")}: ${receipt.id.substring(
+      0,
+      8
+    )}</div>
   </div>
   
   <div class="date-info">
@@ -259,18 +264,20 @@ export default function ReceiptModal({ receipt, onClose }) {
   </div>
   
   <div class="customer-info">
-    <strong>Customer:</strong> ${receipt.customer_name || "Walk-in Customer"}
+    <strong>${t("Customer")}:</strong> ${
+      receipt.customer_name || t("Walk-in Customer")
+    }
   </div>
   
   <div class="barber-info">
-    Served by: ${receipt.barber_name || "Staff"}
+    ${t("Served by")}: ${receipt.barber_name || t("Staff")}
   </div>
 
   ${
     receipt.services && receipt.services.length > 0
       ? `
   <div class="items-section">
-    <div class="item-header">SERVICES</div>
+            <div class="item-header">${t("SERVICES")}</div>
     ${receipt.services
       .map(
         (service) => `
@@ -294,7 +301,7 @@ export default function ReceiptModal({ receipt, onClose }) {
     receipt.products && receipt.products.length > 0
       ? `
   <div class="items-section">
-    <div class="item-header">PRODUCTS</div>
+            <div class="item-header">${t("PRODUCTS")}</div>
     ${receipt.products
       .map(
         (product) => `
@@ -374,7 +381,7 @@ export default function ReceiptModal({ receipt, onClose }) {
 
   return (
     <div className="modal-overlay">
-      <div className="receipt-modal">
+      <div className={`receipt-modal ${isRTL ? "rtl" : ""}`}>
         <div className="modal-header">
           <div className="header-info">
             <h2>
@@ -397,7 +404,7 @@ export default function ReceiptModal({ receipt, onClose }) {
               <span>{formatDate(receipt.created_at)}</span>
             </div>
             <div className="receipt-status">
-              <span className="status-badge">Completed</span>
+              <span className="status-badge">{t("Completed")}</span>
             </div>
           </div>
 
@@ -405,24 +412,24 @@ export default function ReceiptModal({ receipt, onClose }) {
             <div className="info-section">
               <h3>
                 <User size={16} />
-                Customer
+                {t("Customer")}
               </h3>
-              <p>{receipt.customer_name || "Walk-in Customer"}</p>
+              <p>{receipt.customer_name || t("Walk-in Customer")}</p>
             </div>
 
             <div className="info-section">
               <h3>
                 <Scissors size={16} />
-                Barber
+                {t("Barber")}
               </h3>
-              <p>{receipt.barber_name || "N/A"}</p>
+              <p>{receipt.barber_name || t("N/A")}</p>
             </div>
           </div>
 
           <div className="items-section">
             <h3>
               <Package size={16} />
-              Items & Services
+              {t("Items & Services")}
             </h3>
 
             {hasItems ? (
@@ -431,7 +438,7 @@ export default function ReceiptModal({ receipt, onClose }) {
                   <div className="item-category">
                     <h4>
                       <Wrench size={14} />
-                      Services ({receipt.services.length})
+                      {t("Services")} ({receipt.services.length})
                     </h4>
                     <div className="items-list">
                       {receipt.services.map((service, index) => (
@@ -460,7 +467,7 @@ export default function ReceiptModal({ receipt, onClose }) {
                   <div className="item-category">
                     <h4>
                       <Package size={14} />
-                      Products ({receipt.products.length})
+                      {t("Products")} ({receipt.products.length})
                     </h4>
                     <div className="items-list">
                       {receipt.products.map((product, index) => (
@@ -487,7 +494,7 @@ export default function ReceiptModal({ receipt, onClose }) {
               </div>
             ) : (
               <div className="empty-items">
-                <p>No items recorded for this receipt</p>
+                <p>{t("No items recorded for this receipt")}</p>
               </div>
             )}
           </div>
@@ -496,36 +503,44 @@ export default function ReceiptModal({ receipt, onClose }) {
             <div className="financial-breakdown">
               <h3>
                 <Receipt size={16} />
-                Financial Summary
+                {t("Financial Summary")}
               </h3>
 
               <div className="breakdown-details">
                 <div className="breakdown-row">
-                  <span>Subtotal</span>
-                  <span>{subtotal.toFixed(2)} EGP</span>
+                  <span>{t("Subtotal")}</span>
+                  <span>
+                    {subtotal.toFixed(2)} {t("currency")}
+                  </span>
                 </div>
 
                 {discountAmount > 0 && (
                   <div className="breakdown-row discount">
                     <span>
                       <Percent size={14} />
-                      Discount
+                      {t("Discount")}
                       {receipt.discount_type === "percentage" &&
                         receipt.discount_percentage &&
                         ` (${receipt.discount_percentage}%)`}
                     </span>
-                    <span>-{discountAmount.toFixed(2)} EGP</span>
+                    <span>
+                      -{discountAmount.toFixed(2)} {t("currency")}
+                    </span>
                   </div>
                 )}
 
                 <div className="breakdown-row">
-                  <span>Tax (0%)</span>
-                  <span>{taxAmount.toFixed(2)} EGP</span>
+                  <span>{t("Tax (0%)")}</span>
+                  <span>
+                    {taxAmount.toFixed(2)} {t("currency")}
+                  </span>
                 </div>
 
                 <div className="breakdown-row total">
-                  <span>Total Amount</span>
-                  <span>{finalTotal.toFixed(2)} EGP</span>
+                  <span>{t("Total Amount")}</span>
+                  <span>
+                    {finalTotal.toFixed(2)} {t("currency")}
+                  </span>
                 </div>
               </div>
             </div>
@@ -533,7 +548,7 @@ export default function ReceiptModal({ receipt, onClose }) {
             <div className="payment-info">
               <div className="payment-method">
                 <CreditCard size={16} />
-                <span>Payment Method</span>
+                <span>{t("Payment Method")}</span>
                 <span
                   className={`payment-badge ${
                     receipt.payment_method || "cash"
@@ -546,7 +561,7 @@ export default function ReceiptModal({ receipt, onClose }) {
               {receipt.send_invoice && (
                 <div className="invoice-status">
                   <FileText size={14} />
-                  <span>Invoice sent to financial records</span>
+                  <span>{t("Invoice sent to financial records")}</span>
                 </div>
               )}
             </div>
@@ -555,24 +570,24 @@ export default function ReceiptModal({ receipt, onClose }) {
           <div className="total-section">
             <div className="total-row">
               <DollarSign size={18} />
-              <span>Total Amount</span>
+              <span>{t("Total Amount")}</span>
               <span className="total-amount">
-                {(receipt.total || 0).toFixed(2)} EGP
+                {(receipt.total || 0).toFixed(2)} {t("currency")}
               </span>
             </div>
           </div>
 
           <div className="modal-actions">
             <button className="btn btn-secondary" onClick={onClose}>
-              Close
+              {t("Close")}
             </button>
             <button className="btn btn-secondary" onClick={printReceipt}>
               <Printer size={16} />
-              Print Receipt
+              {t("Print Receipt")}
             </button>
             <button className="btn btn-primary" onClick={downloadReceipt}>
               <Download size={16} />
-              Download Receipt
+              {t("Download Receipt")}
             </button>
           </div>
         </div>
@@ -581,7 +596,7 @@ export default function ReceiptModal({ receipt, onClose }) {
           <div className="notes-section">
             <h3>
               <FileText size={16} />
-              Additional Notes
+              {t("Additional Notes")}
             </h3>
             <p>{receipt.notes}</p>
           </div>

@@ -125,6 +125,27 @@
     color: #999999;
 }
 
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    cursor: pointer;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #000000;
+}
+
+.checkbox-label input[type="checkbox"] {
+    width: 1.25rem;
+    height: 1.25rem;
+    accent-color: #000000;
+    cursor: pointer;
+}
+
+.checkbox-label span {
+    user-select: none;
+}
+
 
 /* Enhanced Specialties Section */
 

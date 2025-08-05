@@ -8,6 +8,76 @@
 }
 
 
+/* RTL Support for Arabic */
+
+.manage-expenses-page.rtl {
+    direction: rtl;
+}
+
+.manage-expenses-page.rtl .expenses-header {
+    flex-direction: row-reverse;
+}
+
+.manage-expenses-page.rtl .header-left h1 {
+    flex-direction: row-reverse;
+}
+
+.manage-expenses-page.rtl .stat-card {
+    flex-direction: row-reverse;
+}
+
+.manage-expenses-page.rtl .expense-filters {
+    flex-direction: row-reverse;
+}
+
+.manage-expenses-page.rtl .expense-date {
+    flex-direction: row-reverse;
+}
+
+.manage-expenses-page.rtl .expense-type {
+    flex-direction: row-reverse;
+}
+
+.manage-expenses-page.rtl .expense-amount {
+    flex-direction: row-reverse;
+}
+
+.manage-expenses-page.rtl .expense-actions {
+    flex-direction: row-reverse;
+}
+
+.manage-expenses-page.rtl .action-btn {
+    flex-direction: row-reverse;
+}
+
+.manage-expenses-page.rtl .form-actions {
+    flex-direction: row-reverse;
+}
+
+.manage-expenses-page.rtl .btn-primary,
+.manage-expenses-page.rtl .btn-secondary {
+    flex-direction: row-reverse;
+}
+
+
+/* Text alignment for RTL */
+
+.manage-expenses-page.rtl .expenses-table th,
+.manage-expenses-page.rtl .expenses-table td {
+    text-align: right;
+}
+
+.manage-expenses-page.rtl .form-group input,
+.manage-expenses-page.rtl .form-group select,
+.manage-expenses-page.rtl .form-group textarea {
+    text-align: right;
+}
+
+.manage-expenses-page.rtl .form-group label {
+    text-align: right;
+}
+
+
 /* Header */
 
 .expenses-header {

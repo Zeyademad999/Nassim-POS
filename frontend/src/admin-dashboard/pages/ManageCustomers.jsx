@@ -958,7 +958,7 @@ export default function ManageCustomers() {
               <div className="customer-info-section">
                 <h4>
                   <Calendar size={16} />
-                  Upcoming Appointments
+                  {t("Upcoming Appointments")}
                   {viewingCustomer.upcomingBookings &&
                     viewingCustomer.upcomingBookings.length > 0 && (
                       <span className="count-badge">
@@ -993,7 +993,7 @@ export default function ManageCustomers() {
                           <div className="barber-service-info">
                             <span className="barber-name">
                               <User size={14} />
-                              {booking.barber_name || "No barber assigned"}
+                              {booking.barber_name || t("No barber assigned")}
                             </span>
                             {booking.services &&
                               booking.services.length > 0 && (
@@ -1024,7 +1024,7 @@ export default function ManageCustomers() {
                 ) : (
                   <div className="empty-state-small">
                     <Calendar size={24} />
-                    <p>No upcoming appointments</p>
+                    <p>{t("No upcoming appointments")}</p>
                   </div>
                 )}
               </div>
@@ -1035,7 +1035,7 @@ export default function ManageCustomers() {
                   <div className="customer-info-section">
                     <h4>
                       <Clock size={16} />
-                      Recent Appointments (
+                      {t("Recent Appointments")} (
                       {viewingCustomer.recentBookings.length})
                     </h4>
                     <div className="bookings-list recent">
@@ -1058,7 +1058,7 @@ export default function ManageCustomers() {
                             </div>
                             <div className="booking-details">
                               <span className="barber-name">
-                                {booking.barber_name || "No barber"}
+                                {booking.barber_name || t("No barber")}
                               </span>
                               <span
                                 className={`booking-status ${booking.status}`}
@@ -1081,7 +1081,7 @@ export default function ManageCustomers() {
               <div className="customer-info-section">
                 <h4>
                   <DollarSign size={16} />
-                  Recent Transactions
+                  {t("Recent Transactions")}
                   {viewingCustomer.transactions &&
                     viewingCustomer.transactions.length > 0 && (
                       <span className="count-badge">
@@ -1141,7 +1141,7 @@ export default function ManageCustomers() {
                                 (!transaction.products ||
                                   transaction.products.length === 0) && (
                                   <small className="item-count">
-                                    No items specified
+                                    {t("No items specified")}
                                   </small>
                                 )}
                             </div>
@@ -1163,7 +1163,7 @@ export default function ManageCustomers() {
                               onClick={() =>
                                 downloadTransactionReceipt(transaction)
                               }
-                              title="Download Receipt"
+                              title={t("Download Receipt")}
                             >
                               📥
                             </button>
@@ -1172,7 +1172,7 @@ export default function ManageCustomers() {
                               onClick={() =>
                                 printTransactionReceipt(transaction)
                               }
-                              title="Print Receipt"
+                              title={t("Print Receipt")}
                             >
                               🖨️
                             </button>
@@ -1182,8 +1182,9 @@ export default function ManageCustomers() {
                     {viewingCustomer.transactions.length > 10 && (
                       <div className="view-more">
                         <small>
-                          Showing 10 of {viewingCustomer.transactions.length}{" "}
-                          transactions
+                          {t("Showing 10 of")}{" "}
+                          {viewingCustomer.transactions.length}{" "}
+                          {t("transactions")}
                         </small>
                       </div>
                     )}
@@ -1191,7 +1192,7 @@ export default function ManageCustomers() {
                 ) : (
                   <div className="empty-state-small">
                     <DollarSign size={24} />
-                    <p>No transaction history</p>
+                    <p>{t("No transaction history")}</p>
                   </div>
                 )}
               </div>
@@ -1206,7 +1207,7 @@ export default function ManageCustomers() {
                   }}
                 >
                   <Edit2 size={16} />
-                  Edit Customer
+                  {t("Edit Customer")}
                 </button>
               </div>
             </div>
@@ -1248,11 +1249,7 @@ export default function ManageCustomers() {
             </div>
             <div className="modal-body">
               <AlertTriangle size={48} className="modal-icon" />
-              <p>
-                {t("confirmDeleteMessage", {
-                  name: deleteConfirmation.customer.name,
-                })}
-              </p>
+              <p>{t("deleteCustomerConfirm")}</p>
             </div>
             <div className="modal-footer">
               <button className="btn-secondary" onClick={cancelDelete}>

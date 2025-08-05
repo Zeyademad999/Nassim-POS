@@ -11,9 +11,11 @@ import {
   Package,
   AlertTriangle,
 } from "lucide-react";
+import { useLanguage } from "../../context/LanguageContext";
 import "../styles/ManageServices.css";
 
 export default function ManageServices() {
+  const { t, isRTL } = useLanguage();
   const [services, setServices] = useState([]);
   const [editing, setEditing] = useState(null);
   const [newService, setNewService] = useState({
@@ -33,7 +35,7 @@ export default function ManageServices() {
       setServices(data);
     } catch (err) {
       console.error("Failed to fetch services:", err);
-      setError("Failed to load services");
+      setError(t("Failed to load services"));
       setServices([]);
     }
   };
@@ -44,7 +46,7 @@ export default function ManageServices() {
 
   const handleSave = async (service) => {
     if (!service.name.trim() || !service.price || service.price <= 0) {
-      setError("Service name and price are required");
+      setError(t("Service name and price are required"));
       return;
     }
 
@@ -61,7 +63,7 @@ export default function ManageServices() {
 
       if (!res.ok) {
         const errorData = await res.json();
-        throw new Error(errorData.error || "Failed to save service");
+        throw new Error(errorData.error || t("Failed to save service"));
       }
 
       setEditing(null);
@@ -107,7 +109,7 @@ export default function ManageServices() {
       });
       if (!res.ok) {
         const errorData = await res.json();
-        throw new Error(errorData.error || "Failed to delete service");
+        throw new Error(errorData.error || t("Failed to delete service"));
       }
       setDeleteConfirmation(null);
       fetchServices();
@@ -147,9 +149,11 @@ export default function ManageServices() {
           <div className="header-info">
             <h2>
               <Plus size={20} />
-              Add New Service
+              {t("Add New Service")}
             </h2>
-            <p className="subtext">Create a new service for your barbershop</p>
+            <p className="subtext">
+              {t("Create a new service for your barbershop")}
+            </p>
           </div>
         </div>
 
@@ -158,11 +162,11 @@ export default function ManageServices() {
             <div className="form-group">
               <label>
                 <Scissors size={16} />
-                Service Name
+                {t("Service Name")}
               </label>
               <input
                 type="text"
-                placeholder="e.g., Hair Cut"
+                placeholder={t("e.g., Hair Cut")}
                 value={newService.name}
                 onChange={(e) =>
                   setNewService({ ...newService, name: e.target.value })
@@ -174,11 +178,11 @@ export default function ManageServices() {
             <div className="form-group">
               <label>
                 <DollarSign size={16} />
-                Price
+                {t("Price")}
               </label>
               <input
                 type="number"
-                placeholder="25.00"
+                placeholder={t("25.00")}
                 step="0.01"
                 min="0"
                 value={newService.price}
@@ -196,10 +200,10 @@ export default function ManageServices() {
           <div className="form-group">
             <label>
               <FileText size={16} />
-              Description
+              {t("Description")}
             </label>
             <textarea
-              placeholder="Optional description of the service"
+              placeholder={t("Optional description of the service")}
               value={newService.description}
               onChange={(e) =>
                 setNewService({ ...newService, description: e.target.value })
@@ -216,7 +220,7 @@ export default function ManageServices() {
               disabled={loading}
             >
               <Plus size={16} />
-              {loading ? "Adding..." : "Add Service"}
+              {loading ? t("Adding...") : t("Add Service")}
             </button>
           </div>
         </div>
@@ -228,23 +232,32 @@ export default function ManageServices() {
           <div className="header-info">
             <h2>
               <Package size={20} />
-              Services Management
+              {t("Services Management")}
             </h2>
             <p className="subtext">
-              {services.length} service{services.length !== 1 ? "s" : ""}{" "}
-              available
+              {services.length}{" "}
+              {services.length === 1 ? t("service") : t("services")}{" "}
+              {t("available")}
             </p>
           </div>
         </div>
 
         <div className="services-table-container">
-          <table className="services-table">
+          <table className={`services-table ${isRTL ? "rtl" : ""}`}>
             <thead>
               <tr>
-                <th>Service Name</th>
-                <th>Price</th>
-                <th>Description</th>
-                <th>Actions</th>
+                <th className={isRTL ? "text-right" : "text-left"}>
+                  {t("Service Name")}
+                </th>
+                <th className={isRTL ? "text-right" : "text-left"}>
+                  {t("Price")}
+                </th>
+                <th className={isRTL ? "text-right" : "text-left"}>
+                  {t("Description")}
+                </th>
+                <th className={isRTL ? "text-right" : "text-left"}>
+                  {t("Actions")}
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -317,19 +330,19 @@ export default function ManageServices() {
                           className="save-button"
                           onClick={() => handleSave(editing)}
                           disabled={loading}
-                          title="Save"
+                          title={t("Save")}
                         >
                           <Save size={16} />
-                          {loading ? "Saving..." : "Save"}
+                          {loading ? t("Saving...") : t("Save")}
                         </button>
                         <button
                           className="cancel-button"
                           onClick={() => setEditing(null)}
                           disabled={loading}
-                          title="Cancel"
+                          title={t("Cancel")}
                         >
                           <X size={16} />
-                          Cancel
+                          {t("Cancel")}
                         </button>
                       </div>
                     ) : (
@@ -338,19 +351,19 @@ export default function ManageServices() {
                           className="edit-button"
                           onClick={() => handleEdit(service)}
                           disabled={loading}
-                          title="Edit"
+                          title={t("Edit")}
                         >
                           <Edit2 size={16} />
-                          Edit
+                          {t("Edit")}
                         </button>
                         <button
                           className="delete-button"
                           onClick={() => handleDelete(service.id)}
                           disabled={loading}
-                          title="Delete"
+                          title={t("Remove")}
                         >
                           <Trash2 size={16} />
-                          Remove
+                          {t("Remove")}
                         </button>
                       </div>
                     )}
@@ -364,8 +377,8 @@ export default function ManageServices() {
         {services.length === 0 && (
           <div className="empty-state">
             <Package size={48} />
-            <h3>No services yet</h3>
-            <p>Add your first service to get started</p>
+            <h3>{t("No services yet")}</h3>
+            <p>{t("Add your first service to get started")}</p>
           </div>
         )}
       </div>
@@ -376,9 +389,9 @@ export default function ManageServices() {
           <div className="summary-info">
             <h4>
               <Package size={18} />
-              Services Summary
+              {t("Services Summary")}
             </h4>
-            <div className="subtext">Total services available</div>
+            <div className="subtext">{t("Total services available")}</div>
           </div>
           <div className="summary-count">{services.length}</div>
         </div>
@@ -389,7 +402,7 @@ export default function ManageServices() {
         <div className="modal-overlay">
           <div className="modal-content delete-confirmation-modal">
             <div className="modal-header">
-              <h2>Confirm Delete Service</h2>
+              <h2>{t("Confirm Delete Service")}</h2>
               <button className="close-btn" onClick={cancelDelete}>
                 <X size={20} />
               </button>
@@ -397,32 +410,34 @@ export default function ManageServices() {
             <div className="modal-body">
               <AlertTriangle size={48} className="alert-icon" />
               <p>
-                Are you sure you want to delete the service{" "}
+                {t("Are you sure you want to delete the service")}{" "}
                 <strong>"{deleteConfirmation.service?.name}"</strong>?
                 <br />
                 <span className="service-details-text">
-                  Price: {formatPrice(deleteConfirmation.service?.price)}
+                  {t("Price")}: {formatPrice(deleteConfirmation.service?.price)}
                   {deleteConfirmation.service?.description && (
                     <>
                       <br />
-                      Description: {deleteConfirmation.service.description}
+                      {t("Description")}:{" "}
+                      {deleteConfirmation.service.description}
                     </>
                   )}
                 </span>
                 <br />
-                This action cannot be undone and will remove all associated
-                data.
+                {t(
+                  "This action cannot be undone and will remove all associated data."
+                )}
               </p>
               <div className="modal-actions">
                 <button className="cancel-button" onClick={cancelDelete}>
-                  Cancel
+                  {t("Cancel")}
                 </button>
                 <button
                   className="delete-button"
                   onClick={proceedWithDelete}
                   disabled={loading}
                 >
-                  {loading ? "Deleting..." : "Delete Service"}
+                  {loading ? t("Deleting...") : t("Delete Service")}
                 </button>
               </div>
             </div>

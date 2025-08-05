@@ -216,9 +216,11 @@ export default function ManageUsers() {
         <div className="header-info">
           <h1>
             <Users size={24} />
-            User Management
+            {t("User Management")}
           </h1>
-          <p className="subtext">Manage system users and their permissions</p>
+          <p className="subtext">
+            {t("Manage system users and their permissions")}
+          </p>
         </div>
         <button
           className="add-user-button"
@@ -229,7 +231,7 @@ export default function ManageUsers() {
           disabled={loading}
         >
           <UserPlus size={20} />
-          Add New User
+          {t("Add New User")}
         </button>
       </div>
 
@@ -239,10 +241,11 @@ export default function ManageUsers() {
           <div className="header-info">
             <h2>
               <Users size={20} />
-              System Users
+              {t("System Users")}
             </h2>
             <p className="subtext">
-              {users.length} user{users.length !== 1 ? "s" : ""} in the system
+              {users.length} {users.length !== 1 ? t("users") : t("user")}{" "}
+              {t("in the system")}
             </p>
           </div>
         </div>
@@ -251,11 +254,11 @@ export default function ManageUsers() {
           <table className="users-table">
             <thead>
               <tr>
-                <th>User</th>
-                <th>Role</th>
-                <th>Status</th>
-                <th>Created</th>
-                <th>Actions</th>
+                <th>{t("User")}</th>
+                <th>{t("Role")}</th>
+                <th>{t("Status")}</th>
+                <th>{t("Created")}</th>
+                <th>{t("Actions")}</th>
               </tr>
             </thead>
             <tbody>
@@ -288,7 +291,7 @@ export default function ManageUsers() {
                         user.is_active ? "status-active" : "status-inactive"
                       }`}
                     >
-                      {user.is_active ? "Active" : "Inactive"}
+                      {user.is_active ? t("Active") : t("Inactive")}
                     </div>
                   </td>
                   <td>
@@ -306,7 +309,7 @@ export default function ManageUsers() {
                         title="Edit User"
                       >
                         <Edit2 size={16} />
-                        Edit
+                        {t("Edit")}
                       </button>
                       {user.username !== "admin" && (
                         <button
@@ -316,7 +319,7 @@ export default function ManageUsers() {
                           title="Delete User"
                         >
                           <Trash2 size={16} />
-                          Remove
+                          {t("Remove")}
                         </button>
                       )}
                     </div>
@@ -330,8 +333,8 @@ export default function ManageUsers() {
         {users.length === 0 && !loading && (
           <div className="empty-state">
             <Users size={48} />
-            <h3>No users yet</h3>
-            <p>Add your first user to get started</p>
+            <h3>{t("No users yet")}</h3>
+            <p>{t("Add your first user to get started")}</p>
           </div>
         )}
       </div>
@@ -342,9 +345,9 @@ export default function ManageUsers() {
           <div className="summary-info">
             <h4>
               <Users size={18} />
-              Users Summary
+              {t("Users Summary")}
             </h4>
-            <div className="subtext">Total users in system</div>
+            <div className="subtext">{t("Total users in system")}</div>
           </div>
           <div className="summary-count">{users.length}</div>
         </div>
@@ -357,7 +360,7 @@ export default function ManageUsers() {
             <div className="modal-header">
               <h2>
                 {editingUser ? <Edit2 size={20} /> : <UserPlus size={20} />}
-                {editingUser ? "Edit User" : "Add New User"}
+                {editingUser ? t("Edit User") : t("Add New User")}
               </h2>
               <button
                 className="modal-close"
@@ -373,7 +376,7 @@ export default function ManageUsers() {
                 <div className="form-group">
                   <label>
                     <User size={16} />
-                    Username
+                    {t("Username")}
                   </label>
                   <input
                     type="text"
@@ -383,14 +386,14 @@ export default function ManageUsers() {
                     }
                     required
                     disabled={loading}
-                    placeholder="Enter username"
+                    placeholder={t("Enter username")}
                   />
                 </div>
 
                 <div className="form-group">
                   <label>
                     <User size={16} />
-                    Full Name
+                    {t("Full Name")}
                   </label>
                   <input
                     type="text"
@@ -399,7 +402,7 @@ export default function ManageUsers() {
                       setFormData({ ...formData, full_name: e.target.value })
                     }
                     disabled={loading}
-                    placeholder="Enter full name"
+                    placeholder={t("Enter full name")}
                   />
                 </div>
               </div>
@@ -407,7 +410,8 @@ export default function ManageUsers() {
               <div className="form-group">
                 <label>
                   <Shield size={16} />
-                  Password {editingUser && "(leave blank to keep current)"}
+                  {t("Password")}{" "}
+                  {editingUser && t("(leave blank to keep current)")}
                 </label>
                 <div className="password-input">
                   <input
@@ -418,7 +422,7 @@ export default function ManageUsers() {
                     }
                     required={!editingUser}
                     disabled={loading}
-                    placeholder="Enter password"
+                    placeholder={t("Enter password")}
                   />
                   <button
                     type="button"
@@ -435,7 +439,7 @@ export default function ManageUsers() {
                 <div className="form-group">
                   <label>
                     <Shield size={16} />
-                    Role
+                    {t("Role")}
                   </label>
                   <select
                     value={formData.role}
@@ -445,9 +449,9 @@ export default function ManageUsers() {
                     required
                     disabled={loading}
                   >
-                    <option value="cashier">Cashier</option>
-                    <option value="accountant">Accountant</option>
-                    <option value="admin">Admin</option>
+                    <option value="cashier">{t("Cashier")}</option>
+                    <option value="accountant">{t("Accountant")}</option>
+                    <option value="admin">{t("Admin")}</option>
                   </select>
                 </div>
 
@@ -464,7 +468,7 @@ export default function ManageUsers() {
                       }
                       disabled={loading}
                     />
-                    <span>Active User</span>
+                    <span>{t("Active User")}</span>
                   </label>
                 </div>
               </div>
@@ -476,7 +480,7 @@ export default function ManageUsers() {
                   disabled={loading}
                   className="cancel-button"
                 >
-                  Cancel
+                  {t("Cancel")}
                 </button>
                 <button
                   type="submit"
@@ -485,10 +489,10 @@ export default function ManageUsers() {
                 >
                   <Save size={16} />
                   {loading
-                    ? "Saving..."
+                    ? t("Saving...")
                     : editingUser
-                    ? "Update User"
-                    : "Create User"}
+                    ? t("Update User")
+                    : t("Create User")}
                 </button>
               </div>
             </form>
@@ -503,7 +507,7 @@ export default function ManageUsers() {
             <div className="modal-header">
               <h2>
                 <Trash2 size={20} />
-                Confirm Delete
+                {t("Confirm Delete")}
               </h2>
               <button
                 className="modal-close"
@@ -519,8 +523,8 @@ export default function ManageUsers() {
                 <div className="warning-icon">
                   <AlertTriangle size={48} />
                 </div>
-                <h3>Are you sure you want to delete this user?</h3>
-                <p>This action cannot be undone.</p>
+                <h3>{t("Are you sure you want to delete this user?")}</h3>
+                <p>{t("This action cannot be undone.")}</p>
               </div>
 
               <div className="user-details">
@@ -551,7 +555,7 @@ export default function ManageUsers() {
                 disabled={loading}
                 className="cancel-button"
               >
-                Cancel
+                {t("Cancel")}
               </button>
               <button
                 type="button"
@@ -560,7 +564,7 @@ export default function ManageUsers() {
                 className="delete-confirm-button"
               >
                 <Trash2 size={16} />
-                {loading ? "Deleting..." : "Delete User"}
+                {loading ? t("Deleting...") : t("Delete User")}
               </button>
             </div>
           </div>

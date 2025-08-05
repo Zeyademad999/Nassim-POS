@@ -9,6 +9,41 @@
 }
 
 
+/* RTL Support for Arabic */
+
+.services-table.rtl {
+    direction: rtl;
+}
+
+.services-table.rtl th,
+.services-table.rtl td {
+    text-align: right;
+}
+
+.services-table.rtl .service-name {
+    flex-direction: row-reverse;
+}
+
+.services-table.rtl .action-buttons {
+    flex-direction: row-reverse;
+}
+
+.services-table.rtl .action-buttons button {
+    flex-direction: row-reverse;
+}
+
+
+/* Text alignment classes */
+
+.text-right {
+    text-align: right !important;
+}
+
+.text-left {
+    text-align: left !important;
+}
+
+
 /* Error Message */
 
 .error-message {

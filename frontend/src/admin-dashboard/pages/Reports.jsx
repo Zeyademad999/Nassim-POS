@@ -555,25 +555,10 @@ export default function Reports({ user }) {
         </h1>
         <div className="header-actions">
           <button
-            className="action-btn"
-            onClick={exportToPDF}
-            disabled={exportLoading.pdf}
-          >
-            <Download size={16} />
-            {exportLoading.pdf ? t("Exporting...") : t("Export PDF")}
-          </button>
-          <button
-            className="action-btn"
-            onClick={exportToExcel}
-            disabled={exportLoading.excel}
-          >
-            <Download size={16} />
-            {exportLoading.excel ? t("Exporting...") : t("Export Excel")}
-          </button>
-          <button
-            className="action-btn primary"
+            className="refresh-btn"
             onClick={fetchReports}
             disabled={loading}
+            title={t("Refresh Reports")}
           >
             <RefreshCcw size={16} />
             {loading ? t("Loading...") : t("Refresh")}
@@ -1486,7 +1471,7 @@ export default function Reports({ user }) {
                       <X size={20} />
                     </button>
                   </div>
-                  
+
                   <div className="modal-body">
                     <div className="form-row">
                       <div className="form-group">
@@ -1518,7 +1503,7 @@ export default function Reports({ user }) {
                         />
                       </div>
                     </div>
-                    
+
                     <div className="form-row">
                       <div className="form-group">
                         <label>{t("Total Amount")}</label>
@@ -1550,7 +1535,7 @@ export default function Reports({ user }) {
                         </select>
                       </div>
                     </div>
-                    
+
                     <div className="form-row">
                       <div className="form-group">
                         <label>{t("Service Date")}</label>
@@ -1567,7 +1552,7 @@ export default function Reports({ user }) {
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="modal-footer">
                     <button
                       className="action-btn"
@@ -1601,37 +1586,48 @@ export default function Reports({ user }) {
                       <X size={20} />
                     </button>
                   </div>
-                  
+
                   <div className="modal-body">
                     <div className="delete-warning">
                       <AlertTriangle size={48} className="warning-icon" />
-                      <p>{t("Are you sure you want to delete this transaction?")}</p>
+                      <p>
+                        {t("Are you sure you want to delete this transaction?")}
+                      </p>
                       <div className="transaction-details">
                         <div className="detail-item">
                           <span className="detail-label">{t("Customer")}:</span>
-                          <span className="detail-value">{transactionToDelete.customer_name}</span>
+                          <span className="detail-value">
+                            {transactionToDelete.customer_name}
+                          </span>
                         </div>
                         <div className="detail-item">
                           <span className="detail-label">{t("Barber")}:</span>
-                          <span className="detail-value">{transactionToDelete.barber_name}</span>
+                          <span className="detail-value">
+                            {transactionToDelete.barber_name}
+                          </span>
                         </div>
                         <div className="detail-item">
                           <span className="detail-label">{t("Amount")}:</span>
                           <span className="detail-value">
-                            {transactionToDelete.total?.toFixed(2)} {t("currency")}
+                            {transactionToDelete.total?.toFixed(2)}{" "}
+                            {t("currency")}
                           </span>
                         </div>
                         <div className="detail-item">
                           <span className="detail-label">{t("Date")}:</span>
                           <span className="detail-value">
-                            {new Date(transactionToDelete.service_date).toLocaleDateString()}
+                            {new Date(
+                              transactionToDelete.service_date
+                            ).toLocaleDateString()}
                           </span>
                         </div>
                       </div>
-                      <p className="warning-text">{t("This action cannot be undone.")}</p>
+                      <p className="warning-text">
+                        {t("This action cannot be undone.")}
+                      </p>
                     </div>
                   </div>
-                  
+
                   <div className="modal-footer">
                     <button
                       className="action-btn"
@@ -1794,9 +1790,7 @@ export default function Reports({ user }) {
                           </button>
                           <button
                             className="action-btn-small danger"
-                            onClick={() =>
-                              handleDeleteTransaction(transaction)
-                            }
+                            onClick={() => handleDeleteTransaction(transaction)}
                           >
                             <Trash2 size={14} />
                           </button>

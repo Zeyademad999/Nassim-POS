@@ -10,9 +10,11 @@ import {
   X,
   AlertTriangle,
 } from "lucide-react";
+import { useLanguage } from "../../context/LanguageContext";
 import "../styles/ManageSchedule.css";
 
 export default function ManageSchedule() {
+  const { t } = useLanguage();
   const [barbers, setBarbers] = useState([]);
   const [selectedBarber, setSelectedBarber] = useState(null);
   const [schedule, setSchedule] = useState([]);
@@ -68,7 +70,7 @@ export default function ManageSchedule() {
       }
     } catch (err) {
       console.error("Failed to fetch barbers:", err);
-      setError("Failed to load barbers");
+      setError(t("Failed to load barbers"));
     }
   };
 
@@ -128,10 +130,10 @@ export default function ManageSchedule() {
 
       if (!res.ok) throw new Error("Failed to update schedule");
 
-      alert("Schedule updated successfully!");
+      alert(t("Schedule updated successfully!"));
     } catch (err) {
       console.error("Failed to update schedule:", err);
-      setError("Failed to update schedule");
+      setError(t("Failed to update schedule"));
     } finally {
       setLoading(false);
     }
@@ -139,7 +141,7 @@ export default function ManageSchedule() {
 
   const addTimeOff = async () => {
     if (!selectedBarber || !newTimeOff.startDate || !newTimeOff.endDate) {
-      setError("Please fill in all required fields");
+      setError(t("Please fill in all required fields"));
       return;
     }
 
@@ -168,7 +170,7 @@ export default function ManageSchedule() {
       fetchBarberSchedule(selectedBarber.id);
     } catch (err) {
       console.error("Failed to add time off:", err);
-      setError("Failed to add time off");
+      setError(t("Failed to add time off"));
     } finally {
       setLoading(false);
     }
@@ -212,7 +214,7 @@ export default function ManageSchedule() {
       fetchBarberSchedule(selectedBarber.id);
     } catch (err) {
       console.error("Failed to remove time off:", err);
-      setError("Failed to remove time off");
+      setError(t("Failed to remove time off"));
     } finally {
       setLoading(false);
     }
@@ -235,8 +237,8 @@ export default function ManageSchedule() {
       <div className="manage-schedule-page">
         <div className="empty-state">
           <Calendar size={48} />
-          <h3>No barbers found</h3>
-          <p>Please add barbers first to manage their schedules</p>
+          <h3>{t("No barbers found")}</h3>
+          <p>{t("Please add barbers first to manage their schedules")}</p>
         </div>
       </div>
     );
@@ -256,7 +258,7 @@ export default function ManageSchedule() {
       <div className="schedule-header">
         <h1>
           <Calendar size={24} />
-          Manage Barber Schedules
+          {t("Manage Barber Schedules")}
         </h1>
         <select
           value={selectedBarber.id}
@@ -279,7 +281,7 @@ export default function ManageSchedule() {
         <div className="schedule-card">
           <h2>
             <Clock size={18} />
-            Weekly Schedule - {selectedBarber.name}
+            {t("Weekly Schedule")} - {selectedBarber.name}
           </h2>
 
           <div className="schedule-grid">
@@ -296,14 +298,14 @@ export default function ManageSchedule() {
                       }
                       disabled={loading}
                     />
-                    Working
+                    {t("Working")}
                   </label>
                 </div>
 
                 {day.isWorking && (
                   <div className="time-inputs">
                     <div className="time-row">
-                      <label>Start:</label>
+                      <label>{t("Start:")}</label>
                       <input
                         type="time"
                         value={day.startTime}
@@ -314,7 +316,7 @@ export default function ManageSchedule() {
                       />
                     </div>
                     <div className="time-row">
-                      <label>End:</label>
+                      <label>{t("End:")}</label>
                       <input
                         type="time"
                         value={day.endTime}
@@ -325,9 +327,9 @@ export default function ManageSchedule() {
                       />
                     </div>
                     <div className="break-section">
-                      <h4>Break Time (Optional)</h4>
+                      <h4>{t("Break Time (Optional)")}</h4>
                       <div className="time-row">
-                        <label>Break Start:</label>
+                        <label>{t("Break Start:")}</label>
                         <input
                           type="time"
                           value={day.breakStart || ""}
@@ -342,7 +344,7 @@ export default function ManageSchedule() {
                         />
                       </div>
                       <div className="time-row">
-                        <label>Break End:</label>
+                        <label>{t("Break End:")}</label>
                         <input
                           type="time"
                           value={day.breakEnd || ""}
@@ -365,7 +367,7 @@ export default function ManageSchedule() {
             disabled={loading}
           >
             <Save size={16} />
-            {loading ? "Saving..." : "Save Schedule"}
+            {loading ? t("Saving...") : t("Save Schedule")}
           </button>
         </div>
 
@@ -373,16 +375,16 @@ export default function ManageSchedule() {
         <div className="timeoff-card">
           <h2>
             <Calendar size={18} />
-            Time Off Management
+            {t("Time Off Management")}
           </h2>
 
           {/* Add New Time Off */}
           <div className="add-timeoff">
-            <h3>Add Time Off</h3>
+            <h3>{t("Add Time Off")}</h3>
             <div className="timeoff-form">
               <div className="form-row">
                 <div className="form-group">
-                  <label>Start Date:</label>
+                  <label>{t("Start Date:")}</label>
                   <input
                     type="date"
                     value={newTimeOff.startDate}
@@ -396,7 +398,7 @@ export default function ManageSchedule() {
                   />
                 </div>
                 <div className="form-group">
-                  <label>End Date:</label>
+                  <label>{t("End Date:")}</label>
                   <input
                     type="date"
                     value={newTimeOff.endDate}
@@ -409,7 +411,7 @@ export default function ManageSchedule() {
               </div>
               <div className="form-row">
                 <div className="form-group">
-                  <label>Reason:</label>
+                  <label>{t("Reason:")}</label>
                   <select
                     value={newTimeOff.reason}
                     onChange={(e) =>
@@ -417,17 +419,17 @@ export default function ManageSchedule() {
                     }
                     disabled={loading}
                   >
-                    <option value="Personal">Personal</option>
-                    <option value="Vacation">Vacation</option>
-                    <option value="Sick Leave">Sick Leave</option>
-                    <option value="Emergency">Emergency</option>
+                    <option value="Personal">{t("Personal")}</option>
+                    <option value="Vacation">{t("Vacation")}</option>
+                    <option value="Sick Leave">{t("Sick Leave")}</option>
+                    <option value="Emergency">{t("Emergency")}</option>
                   </select>
                 </div>
                 <div className="form-group">
-                  <label>Notes:</label>
+                  <label>{t("Notes:")}</label>
                   <input
                     type="text"
-                    placeholder="Optional notes..."
+                    placeholder={t("Optional notes...")}
                     value={newTimeOff.notes}
                     onChange={(e) =>
                       setNewTimeOff({ ...newTimeOff, notes: e.target.value })
@@ -438,16 +440,16 @@ export default function ManageSchedule() {
               </div>
               <button onClick={addTimeOff} disabled={loading}>
                 <Plus size={16} />
-                Add Time Off
+                {t("Add Time Off")}
               </button>
             </div>
           </div>
 
           {/* Existing Time Off */}
           <div className="timeoff-list">
-            <h3>Scheduled Time Off</h3>
+            <h3>{t("Scheduled Time Off")}</h3>
             {timeOff.length === 0 ? (
-              <p className="no-timeoff">No time off scheduled</p>
+              <p className="no-timeoff">{t("No time off scheduled")}</p>
             ) : (
               <div className="timeoff-items">
                 {timeOff.map((item) => (
@@ -482,7 +484,7 @@ export default function ManageSchedule() {
         <div className="modal-overlay">
           <div className="modal-content delete-confirmation-modal">
             <div className="modal-header">
-              <h2>Confirm Delete Time Off</h2>
+              <h2>{t("Confirm Delete Time Off")}</h2>
               <button className="close-btn" onClick={cancelDelete}>
                 <X size={20} />
               </button>
@@ -490,31 +492,31 @@ export default function ManageSchedule() {
             <div className="modal-body">
               <AlertTriangle size={48} className="alert-icon" />
               <p>
-                Are you sure you want to remove the time off period for{" "}
-                <strong>{selectedBarber?.name}</strong> from{" "}
+                {t("Are you sure you want to remove the time off period for")}{" "}
+                <strong>{selectedBarber?.name}</strong> {t("from")}{" "}
                 <strong>
                   {formatDate(deleteConfirmation.timeOff?.start_date)}
                 </strong>{" "}
-                to{" "}
+                {t("to")}{" "}
                 <strong>
                   {formatDate(deleteConfirmation.timeOff?.end_date)}
                 </strong>
                 ?
                 <br />
                 <span className="timeoff-reason-text">
-                  Reason: {deleteConfirmation.timeOff?.reason}
+                  {t("Reason:")} {deleteConfirmation.timeOff?.reason}
                 </span>
               </p>
               <div className="modal-actions">
                 <button className="cancel-button" onClick={cancelDelete}>
-                  Cancel
+                  {t("Cancel")}
                 </button>
                 <button
                   className="delete-button"
                   onClick={proceedWithDelete}
                   disabled={loading}
                 >
-                  {loading ? "Removing..." : "Remove Time Off"}
+                  {loading ? t("Removing...") : t("Remove Time Off")}
                 </button>
               </div>
             </div>

@@ -1,176 +1,214 @@
 .checkout-modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.6);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 9999;
-  padding: 16px;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    padding: 16px;
+}
+
+
+/* RTL Support for Arabic */
+
+.checkout-modal-overlay.rtl {
+    direction: rtl;
+}
+
+.checkout-modal-overlay.rtl .checkout-header {
+    flex-direction: row-reverse;
+}
+
+.checkout-modal-overlay.rtl .receipt-service-item {
+    flex-direction: row-reverse;
+}
+
+.checkout-modal-overlay.rtl .receipt-totals .line {
+    flex-direction: row-reverse;
+}
+
+.checkout-modal-overlay.rtl .export-buttons {
+    flex-direction: row-reverse;
+}
+
+.checkout-modal-overlay.rtl .export-buttons button {
+    flex-direction: row-reverse;
+}
+
+
+/* Text alignment for RTL */
+
+.checkout-modal-overlay.rtl .receipt-meta,
+.checkout-modal-overlay.rtl .receipt-service-item .name,
+.checkout-modal-overlay.rtl .receipt-service-item .qty,
+.checkout-modal-overlay.rtl .receipt-service-item .total,
+.checkout-modal-overlay.rtl .receipt-totals .line span {
+    text-align: right;
 }
 
 .checkout-modal {
-  background: white;
-  border-radius: 20px;
-  max-width: 480px;
-  width: 100%;
-  max-height: 90vh;
-  overflow-y: auto;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    background: white;
+    border-radius: 20px;
+    max-width: 480px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
 }
 
 .checkout-header {
-  background: black;
-  color: white;
-  padding: 16px 20px;
-  border-top-left-radius: 20px;
-  border-top-right-radius: 20px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+    background: black;
+    color: white;
+    padding: 16px 20px;
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .checkout-content {
-  padding: 24px;
+    padding: 24px;
 }
 
 .receipt-info {
-  text-align: center;
-  margin-bottom: 20px;
+    text-align: center;
+    margin-bottom: 20px;
 }
 
 .receipt-icon {
-  width: 64px;
-  height: 64px;
-  background: #f4f4f4;
-  margin: 0 auto 12px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+    width: 64px;
+    height: 64px;
+    background: #f4f4f4;
+    margin: 0 auto 12px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .receipt-meta {
-  background: #f9f9f9;
-  padding: 12px;
-  border-radius: 10px;
-  margin-bottom: 20px;
-  font-size: 14px;
+    background: #f9f9f9;
+    padding: 12px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    font-size: 14px;
 }
 
 .receipt-services {
-  margin-bottom: 20px;
+    margin-bottom: 20px;
 }
 
 .receipt-services h4 {
-  font-weight: bold;
-  margin-bottom: 12px;
+    font-weight: bold;
+    margin-bottom: 12px;
 }
 
 .receipt-service-item {
-  display: flex;
-  justify-content: space-between;
-  border-bottom: 1px solid #eee;
-  padding: 10px 0;
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px solid #eee;
+    padding: 10px 0;
 }
 
 .receipt-service-item .name {
-  font-weight: 500;
+    font-weight: 500;
 }
 
 .receipt-service-item .qty {
-  font-size: 13px;
-  color: #666;
+    font-size: 13px;
+    color: #666;
 }
 
 .receipt-service-item .total {
-  font-weight: bold;
+    font-weight: bold;
 }
 
 .receipt-totals {
-  background: #f4f4f4;
-  border-radius: 10px;
-  padding: 12px;
-  margin-bottom: 20px;
+    background: #f4f4f4;
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 20px;
 }
 
 .receipt-totals .line {
-  display: flex;
-  justify-content: space-between;
-  font-size: 14px;
-  margin: 4px 0;
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    margin: 4px 0;
 }
 
 .receipt-totals .total {
-  font-size: 16px;
-  font-weight: bold;
-  border-top: 1px solid #ccc;
-  padding-top: 8px;
-  margin-top: 8px;
+    font-size: 16px;
+    font-weight: bold;
+    border-top: 1px solid #ccc;
+    padding-top: 8px;
+    margin-top: 8px;
 }
 
 .export-buttons {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 20px;
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
 }
 
 .pdf-btn,
 .excel-btn {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  justify-content: center;
-  padding: 10px;
-  border: none;
-  border-radius: 10px;
-  font-weight: 500;
-  cursor: pointer;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    justify-content: center;
+    padding: 10px;
+    border: none;
+    border-radius: 10px;
+    font-weight: 500;
+    cursor: pointer;
 }
 
 .pdf-btn {
-  background: #e60000;
-  color: white;
+    background: #e60000;
+    color: white;
 }
 
 .excel-btn {
-  background: #1d8f35;
-  color: white;
+    background: #1d8f35;
+    color: white;
 }
 
 .complete-btn {
-  width: 100%;
-  background: black;
-  color: white;
-  padding: 12px;
-  font-weight: bold;
-  border: none;
-  border-radius: 10px;
-  cursor: pointer;
+    width: 100%;
+    background: black;
+    color: white;
+    padding: 12px;
+    font-weight: bold;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
 }
 
 .print-btn {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  justify-content: center;
-  padding: 10px;
-  border: none;
-  border-radius: 10px;
-  font-weight: 500;
-  cursor: pointer;
-  background: #6366f1;
-  color: white;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    justify-content: center;
+    padding: 10px;
+    border: none;
+    border-radius: 10px;
+    font-weight: 500;
+    cursor: pointer;
+    background: #6366f1;
+    color: white;
 }
 
 .print-btn:hover {
-  background: #5856eb;
+    background: #5856eb;
 }
 
 .export-buttons {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 20px;
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
 }

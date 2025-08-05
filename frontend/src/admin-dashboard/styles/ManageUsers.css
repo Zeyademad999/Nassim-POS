@@ -9,6 +9,130 @@
 }
 
 
+/* RTL Support for Arabic */
+
+.manage-users-page.rtl {
+    direction: rtl;
+}
+
+.manage-users-page.rtl .users-header {
+    flex-direction: row-reverse;
+}
+
+.manage-users-page.rtl .header-info h1 {
+    flex-direction: row-reverse;
+}
+
+.manage-users-page.rtl .add-user-button {
+    flex-direction: row-reverse;
+}
+
+.manage-users-page.rtl .card-header {
+    flex-direction: row-reverse;
+}
+
+.manage-users-page.rtl .card-header .header-info h2 {
+    flex-direction: row-reverse;
+}
+
+.manage-users-page.rtl .user-info-cell {
+    flex-direction: row-reverse;
+}
+
+.manage-users-page.rtl .user-details {
+    flex-direction: row-reverse;
+}
+
+.manage-users-page.rtl .role-badge {
+    flex-direction: row-reverse;
+}
+
+.manage-users-page.rtl .date-cell {
+    flex-direction: row-reverse;
+}
+
+.manage-users-page.rtl .action-buttons {
+    flex-direction: row-reverse;
+}
+
+.manage-users-page.rtl .action-buttons button {
+    flex-direction: row-reverse;
+}
+
+.manage-users-page.rtl .summary-card {
+    flex-direction: row-reverse;
+}
+
+.manage-users-page.rtl .summary-info h4 {
+    flex-direction: row-reverse;
+}
+
+.manage-users-page.rtl .modal-header {
+    flex-direction: row-reverse;
+}
+
+.manage-users-page.rtl .modal-header h2 {
+    flex-direction: row-reverse;
+}
+
+.manage-users-page.rtl .form-row {
+    flex-direction: row-reverse;
+}
+
+.manage-users-page.rtl .form-group {
+    flex-direction: row-reverse;
+}
+
+.manage-users-page.rtl .form-group label {
+    flex-direction: row-reverse;
+}
+
+.manage-users-page.rtl .password-input {
+    flex-direction: row-reverse;
+}
+
+.manage-users-page.rtl .checkbox-label {
+    flex-direction: row-reverse;
+}
+
+.manage-users-page.rtl .modal-actions {
+    flex-direction: row-reverse;
+}
+
+.manage-users-page.rtl .modal-actions button {
+    flex-direction: row-reverse;
+}
+
+.manage-users-page.rtl .delete-content {
+    flex-direction: row-reverse;
+}
+
+.manage-users-page.rtl .delete-warning {
+    flex-direction: row-reverse;
+}
+
+.manage-users-page.rtl .user-details {
+    flex-direction: row-reverse;
+}
+
+.manage-users-page.rtl .user-info {
+    flex-direction: row-reverse;
+}
+
+
+/* Text alignment for RTL */
+
+.manage-users-page.rtl .users-table th,
+.manage-users-page.rtl .users-table td {
+    text-align: right;
+}
+
+.manage-users-page.rtl .form-group input,
+.manage-users-page.rtl .form-group select {
+    text-align: right;
+}
+
+
 /* Error Message */
 
 .error-message {

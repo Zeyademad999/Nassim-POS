@@ -533,8 +533,88 @@
 
 /* RTL Support */
 
-[dir="rtl"] .item-name {
+[dir="rtl"] .bill-header {
     flex-direction: row-reverse;
+}
+
+[dir="rtl"] .bill-title {
+    flex-direction: row-reverse;
+}
+
+[dir="rtl"] .info-item {
+    flex-direction: row-reverse;
+}
+
+[dir="rtl"] .item-header {
+    flex-direction: row-reverse;
+}
+
+[dir="rtl"] .item-info {
+    flex-direction: row-reverse;
+}
+
+[dir="rtl"] .item-type {
+    flex-direction: row-reverse;
+}
+
+[dir="rtl"] .item-controls {
+    flex-direction: row-reverse;
+}
+
+[dir="rtl"] .quantity-controls {
+    flex-direction: row-reverse;
+}
+
+[dir="rtl"] .section-title {
+    flex-direction: row-reverse;
+}
+
+[dir="rtl"] .payment-methods {
+    flex-direction: row-reverse;
+}
+
+[dir="rtl"] .payment-method {
+    flex-direction: row-reverse;
+}
+
+[dir="rtl"] .discount-type-selector {
+    flex-direction: row-reverse;
+}
+
+[dir="rtl"] .discount-input-wrapper {
+    flex-direction: row-reverse;
+}
+
+[dir="rtl"] .invoice-checkbox {
+    flex-direction: row-reverse;
+}
+
+[dir="rtl"] .breakdown-item {
+    flex-direction: row-reverse;
+}
+
+[dir="rtl"] .total-line {
+    flex-direction: row-reverse;
+}
+
+[dir="rtl"] .checkout-button {
+    flex-direction: row-reverse;
+}
+
+
+/* Text alignment for RTL */
+
+[dir="rtl"] .item-name,
+[dir="rtl"] .item-price,
+[dir="rtl"] .item-stock,
+[dir="rtl"] .info-label,
+[dir="rtl"] .info-value,
+[dir="rtl"] .discount-unit,
+[dir="rtl"] .discount-input,
+[dir="rtl"] .discount-preview,
+[dir="rtl"] .breakdown-item span,
+[dir="rtl"] .total-line span {
+    text-align: right;
 }
 
 [dir="rtl"] .discount-unit {
@@ -544,10 +624,6 @@
 
 [dir="rtl"] .discount-input {
     padding: 0.75rem 1rem 0.75rem 2.5rem;
-}
-
-[dir="rtl"] .discount-preview {
-    text-align: left;
 }
 
 

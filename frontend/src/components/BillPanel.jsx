@@ -208,14 +208,14 @@ const BillPanel = () => {
       <div className="bill-header">
         <div className="bill-title">
           <ShoppingCart size={20} />
-          <h2>Current Bill</h2>
+          <h2>{t("Current Bill")}</h2>
           {itemCount > 0 && <span className="item-count">{itemCount}</span>}
         </div>
 
         {itemCount > 0 && (
           <button className="clear-bill-btn" onClick={clearBill}>
             <X size={16} />
-            <span>Clear</span>
+            <span>{t("Clear")}</span>
           </button>
         )}
       </div>
@@ -225,20 +225,20 @@ const BillPanel = () => {
         <div className="bill-info">
           {customerName && (
             <div className="info-item">
-              <span className="info-label">Customer:</span>
+              <span className="info-label">{t("Customer:")}</span>
               <span className="info-value">{customerName}</span>
             </div>
           )}
           {selectedBarber && customerName !== "Walk-in" && (
             <div className="info-item">
-              <span className="info-label">Barber:</span>
+              <span className="info-label">{t("Barber:")}</span>
               <span className="info-value">{selectedBarber}</span>
             </div>
           )}
           {customerName === "Walk-in" && (
             <div className="info-item">
-              <span className="info-label">Type:</span>
-              <span className="info-value">Walk-in</span>
+              <span className="info-label">{t("Type:")}</span>
+              <span className="info-value">{t("Walk-in")}</span>
             </div>
           )}
         </div>
@@ -249,8 +249,8 @@ const BillPanel = () => {
         {itemCount === 0 ? (
           <div className="empty-bill">
             <ShoppingCart size={48} />
-            <h3>No Items Added</h3>
-            <p>Select services or products to add to your bill</p>
+            <h3>{t("No Items Added")}</h3>
+            <p>{t("Select services or products to add to your bill")}</p>
           </div>
         ) : (
           <div className="items-list">
@@ -264,22 +264,22 @@ const BillPanel = () => {
                         {item.itemType === "service" ? (
                           <>
                             <Wrench size={12} />
-                            Service
+                            {t("Service")}
                           </>
                         ) : (
                           <>
                             <Package size={12} />
-                            Product
+                            {t("Product")}
                           </>
                         )}
                       </span>
                     </div>
                     <div className="item-price">
-                      {item.price.toFixed(2)} EGP
+                      {item.price.toFixed(2)} {t("EGP")}
                     </div>
                     {item.itemType === "product" && item.stock_quantity && (
                       <div className="item-stock">
-                        Stock: {item.stock_quantity} available
+                        {t("Stock")}: {item.stock_quantity} {t("available")}
                       </div>
                     )}
                   </div>
@@ -314,7 +314,7 @@ const BillPanel = () => {
                   </div>
 
                   <div className="item-total">
-                    {(item.price * item.quantity).toFixed(2)} EGP
+                    {(item.price * item.quantity).toFixed(2)} {t("EGP")}
                   </div>
                 </div>
               </div>
@@ -328,7 +328,7 @@ const BillPanel = () => {
         <div className="payment-section">
           <div className="section-title">
             <CreditCard size={16} />
-            <span>Payment Options</span>
+            <span>{t("Payment Options")}</span>
           </div>
 
           <div className="payment-methods">
@@ -339,7 +339,7 @@ const BillPanel = () => {
               onClick={() => setPaymentMethod("cash")}
             >
               <DollarSign size={16} />
-              <span>Cash</span>
+              <span>{t("Cash")}</span>
             </button>
             <button
               className={`payment-method ${
@@ -348,7 +348,7 @@ const BillPanel = () => {
               onClick={() => setPaymentMethod("card")}
             >
               <CreditCard size={16} />
-              <span>Card</span>
+              <span>{t("Card")}</span>
             </button>
           </div>
 
@@ -356,7 +356,7 @@ const BillPanel = () => {
           <div className="discount-section">
             <div className="section-title">
               <Percent size={16} />
-              <span>Discount</span>
+              <span>{t("Discount")}</span>
             </div>
 
             <div className="discount-type-selector">
@@ -384,25 +384,29 @@ const BillPanel = () => {
                 inputMode="decimal"
                 value={
                   discountType === "percentage"
-                    ? (discountPercentage === 0 ? "" : discountPercentage.toString())
-                    : (discountAmount === 0 ? "" : discountAmount.toString())
+                    ? discountPercentage === 0
+                      ? ""
+                      : discountPercentage.toString()
+                    : discountAmount === 0
+                    ? ""
+                    : discountAmount.toString()
                 }
                 onChange={handleDiscountChange}
                 className="discount-input"
                 placeholder={
                   discountType === "percentage"
-                    ? "Enter percentage"
-                    : "Enter amount"
+                    ? t("Enter percentage")
+                    : t("Enter amount")
                 }
               />
               <span className="discount-unit">
-                {discountType === "percentage" ? "%" : "EGP"}
+                {discountType === "percentage" ? "%" : t("EGP")}
               </span>
             </div>
 
             {discountType === "percentage" && discountPercentage > 0 && (
               <div className="discount-preview">
-                Discount: {actualDiscountAmount.toFixed(2)} EGP
+                {t("Discount")}: {actualDiscountAmount.toFixed(2)} {t("EGP")}
               </div>
             )}
           </div>
@@ -416,7 +420,7 @@ const BillPanel = () => {
                 onChange={(e) => setSendInvoice(e.target.checked)}
               />
               <Receipt size={16} />
-              <span>Send Invoice</span>
+              <span>{t("Send Invoice")}</span>
             </label>
           </div>
         </div>
@@ -427,45 +431,61 @@ const BillPanel = () => {
         <div className="bill-summary">
           <div className="summary-breakdown">
             <div className="breakdown-item">
-              <span>Services ({selectedServices.length})</span>
-              <span>{serviceSubtotal.toFixed(2)} EGP</span>
+              <span>
+                {t("Services")} ({selectedServices.length})
+              </span>
+              <span>
+                {serviceSubtotal.toFixed(2)} {t("EGP")}
+              </span>
             </div>
             <div className="breakdown-item">
-              <span>Products ({selectedProducts.length})</span>
-              <span>{productSubtotal.toFixed(2)} EGP</span>
+              <span>
+                {t("Products")} ({selectedProducts.length})
+              </span>
+              <span>
+                {productSubtotal.toFixed(2)} {t("EGP")}
+              </span>
             </div>
           </div>
 
           <div className="summary-totals">
             <div className="total-line">
-              <span>Subtotal</span>
-              <span>{subtotal.toFixed(2)} EGP</span>
+              <span>{t("Subtotal")}</span>
+              <span>
+                {subtotal.toFixed(2)} {t("EGP")}
+              </span>
             </div>
 
             {actualDiscountAmount > 0 && (
               <div className="total-line discount">
                 <span>
-                  Discount
+                  {t("Discount")}
                   {discountType === "percentage" && ` (${discountPercentage}%)`}
                 </span>
-                <span>-{actualDiscountAmount.toFixed(2)} EGP</span>
+                <span>
+                  -{actualDiscountAmount.toFixed(2)} {t("EGP")}
+                </span>
               </div>
             )}
 
             <div className="total-line">
-              <span>Tax</span>
-              <span>{tax.toFixed(2)} EGP</span>
+              <span>{t("Tax")}</span>
+              <span>
+                {tax.toFixed(2)} {t("EGP")}
+              </span>
             </div>
 
             <div className="total-line final">
-              <span>Total</span>
-              <span>{total.toFixed(2)} EGP</span>
+              <span>{t("Total")}</span>
+              <span>
+                {total.toFixed(2)} {t("EGP")}
+              </span>
             </div>
           </div>
 
           <button className="checkout-button" onClick={handleCheckout}>
             <Calculator size={18} />
-            <span>Checkout - {total.toFixed(2)} EGP</span>
+            <span>{t("Checkout")} - {total.toFixed(2)} {t("EGP")}</span>
           </button>
         </div>
       )}
@@ -482,7 +502,7 @@ const BillPanel = () => {
           tax={tax}
           total={total}
           customerName={customerName}
-          barberName={selectedBarber || "No Barber Selected"}
+          barberName={selectedBarber || t("No Barber Selected")}
           serviceDate={serviceDate.toISOString().split("T")[0]}
           paymentMethod={paymentMethod}
           sendInvoice={sendInvoice}

@@ -54,7 +54,7 @@ const POS = ({ onLogout }) => {
   const [showCustomerDropdown, setShowCustomerDropdown] = useState(false);
   const [filteredCustomers, setFilteredCustomers] = useState([]);
   const [isDetailsExpanded, setIsDetailsExpanded] = useState(false);
-  const [customerType, setCustomerType] = useState(""); // "walk-in", "new", "returning"
+  const [customerType, setCustomerType] = useState("walk-in"); // "walk-in", "new", "returning"
 
   useEffect(() => {
     const fetchData = async () => {
@@ -134,6 +134,14 @@ const POS = ({ onLogout }) => {
         setProducts(Array.isArray(productsData) ? productsData : []);
         setBarbers(Array.isArray(barbersData) ? barbersData : []);
         setCustomers(Array.isArray(customersData) ? customersData : []);
+
+        // Set default barber if available
+        if (Array.isArray(barbersData) && barbersData.length > 0) {
+          const defaultBarber = barbersData.find((barber) => barber.is_default);
+          if (defaultBarber) {
+            setBarberInfo(defaultBarber.id, defaultBarber.name);
+          }
+        }
 
         console.log("✅ Final state:");
         console.log("- Services count:", servicesData.length);
@@ -284,6 +292,14 @@ const POS = ({ onLogout }) => {
     }
   };
 
+  // Initialize customer type on component mount
+  useEffect(() => {
+    if (customerType === "walk-in") {
+      setCustomerName("Walk-in");
+      setCustomerSearch("Walk-in Customer");
+    }
+  }, []);
+
   const refreshCustomers = async () => {
     try {
       console.log("🔄 Refreshing customers...");
@@ -375,9 +391,9 @@ const POS = ({ onLogout }) => {
               </div>
               <div className="stat-content">
                 <h3 className="stat-value">
-                  {(cashTotal + cardTotal).toFixed(2)} EGP
+                  {(cashTotal + cardTotal).toFixed(2)} {t("EGP")}
                 </h3>
-                <p className="stat-label">Total Revenue</p>
+                <p className="stat-label">{t("Total Revenue")}</p>
               </div>
             </div>
 
@@ -386,8 +402,12 @@ const POS = ({ onLogout }) => {
                 <Banknote size={24} />
               </div>
               <div className="stat-content">
-                <h3 className="stat-value">{cashTotal.toFixed(2)} EGP</h3>
-                <p className="stat-label">Cash ({cashCount})</p>
+                <h3 className="stat-value">
+                  {cashTotal.toFixed(2)} {t("EGP")}
+                </h3>
+                <p className="stat-label">
+                  {t("Cash")} ({cashCount})
+                </p>
               </div>
             </div>
 
@@ -396,8 +416,12 @@ const POS = ({ onLogout }) => {
                 <CreditCard size={24} />
               </div>
               <div className="stat-content">
-                <h3 className="stat-value">{cardTotal.toFixed(2)} EGP</h3>
-                <p className="stat-label">Card ({cardCount})</p>
+                <h3 className="stat-value">
+                  {cardTotal.toFixed(2)} {t("EGP")}
+                </h3>
+                <p className="stat-label">
+                  {t("Card")} ({cardCount})
+                </p>
               </div>
             </div>
           </div>
@@ -424,7 +448,7 @@ const POS = ({ onLogout }) => {
           {/* Collapsible Details Section */}
           <div className="details-section">
             <button className="details-toggle" onClick={toggleDetailsSection}>
-              <span>Fill Details</span>
+              <span>{t("Fill Details")}</span>
               <ChevronDown
                 size={18}
                 className={`chevron ${isDetailsExpanded ? "expanded" : ""}`}
@@ -434,7 +458,7 @@ const POS = ({ onLogout }) => {
             {isDetailsExpanded && (
               <div className="details-content">
                 <div className="details-header">
-                  <h3>Customer & Service Details</h3>
+                  <h3>{t("Customer & Service Details")}</h3>
                   <button
                     className="close-details"
                     onClick={closeDetailsSection}
@@ -448,7 +472,7 @@ const POS = ({ onLogout }) => {
                   <div className="selection-group">
                     <label className="selection-label">
                       <Users size={18} />
-                      <span>Customer</span>
+                      <span>{t("Customer")}</span>
                     </label>
 
                     <div className="customer-selection">
@@ -459,7 +483,7 @@ const POS = ({ onLogout }) => {
                           }`}
                           onClick={() => handleCustomerTypeSelect("walk-in")}
                         >
-                          Walk-in
+                          {t("Walk-in")}
                         </button>
                         <button
                           className={`customer-tab ${
@@ -469,7 +493,7 @@ const POS = ({ onLogout }) => {
                             handleCustomerTypeSelect("returning-customer")
                           }
                         >
-                          Returning
+                          {t("Returning")}
                         </button>
                         <button
                           className={`customer-tab ${
@@ -479,27 +503,27 @@ const POS = ({ onLogout }) => {
                             handleCustomerTypeSelect("new-customer")
                           }
                         >
-                          New
+                          {t("New")}
                         </button>
                       </div>
 
                       {customerType === "walk-in" ? (
                         <div className="walk-in-display">
-                          <span>Walk-in Customer</span>
+                          <span>{t("Walk-in Customer")}</span>
                         </div>
                       ) : customerType === "new" ? (
                         // New customer - show name and mobile input fields
                         <div className="new-customer-fields">
                           <input
                             type="text"
-                            placeholder="Customer name"
+                            placeholder={t("Customer name")}
                             value={customerName}
                             onChange={(e) => setCustomerName(e.target.value)}
                             className="customer-input"
                           />
                           <input
                             type="tel"
-                            placeholder="Mobile number (required)"
+                            placeholder={t("Mobile number (required)")}
                             value={customerMobile}
                             onChange={(e) => setCustomerMobile(e.target.value)}
                             className="customer-input"
@@ -510,7 +534,9 @@ const POS = ({ onLogout }) => {
                         <div className="customer-search-wrapper">
                           <input
                             type="text"
-                            placeholder="Search customers by name or mobile..."
+                            placeholder={t(
+                              "Search customers by name or mobile..."
+                            )}
                             value={customerSearch}
                             onChange={handleCustomerSearchChange}
                             onFocus={() =>
@@ -541,8 +567,10 @@ const POS = ({ onLogout }) => {
                                         </div>
                                         {customer.total_visits > 0 && (
                                           <div className="customer-visits">
-                                            {customer.total_visits} visits •{" "}
-                                            {customer.total_spent} EGP spent
+                                            {customer.total_visits}{" "}
+                                            {t("visits")} •{" "}
+                                            {customer.total_spent} {t("EGP")}{" "}
+                                            {t("spent")}
                                           </div>
                                         )}
                                       </div>
@@ -550,8 +578,8 @@ const POS = ({ onLogout }) => {
                                   ))}
                                 {filteredCustomers.length > 5 && (
                                   <div className="dropdown-more">
-                                    +{filteredCustomers.length - 5} more
-                                    customers
+                                    +{filteredCustomers.length - 5}{" "}
+                                    {t("more customers")}
                                   </div>
                                 )}
                               </div>
@@ -570,14 +598,14 @@ const POS = ({ onLogout }) => {
                   <div className="selection-group">
                     <label className="selection-label">
                       <Scissors size={18} />
-                      <span>Barber</span>
+                      <span>{t("Barber")}</span>
                     </label>
                     <select
                       value={selectedBarberId}
                       onChange={handleBarberChange}
                       className="barber-select"
                     >
-                      <option value="">Select a barber</option>
+                      <option value="">{t("Select a barber")}</option>
                       {Array.isArray(barbers) &&
                         barbers.map((barber) => (
                           <option key={barber.id} value={barber.id}>
@@ -590,7 +618,7 @@ const POS = ({ onLogout }) => {
                   <div className="selection-group">
                     <label className="selection-label">
                       <Calendar size={18} />
-                      <span>Date</span>
+                      <span>{t("Date")}</span>
                     </label>
                     <input
                       type="date"

@@ -440,6 +440,7 @@ export default function ManageProducts() {
           font-family: "Inter", sans-serif;
           background-color: #f9fafb;
           color: #1f2937;
+          direction: ${isRTL ? "rtl" : "ltr"};
         }
 
         .page-header {
@@ -456,6 +457,7 @@ export default function ManageProducts() {
           display: flex;
           align-items: center;
           gap: 12px;
+          flex-direction: ${isRTL ? "row-reverse" : "row"};
         }
 
         .tab-navigation {
@@ -481,6 +483,7 @@ export default function ManageProducts() {
           align-items: center;
           gap: 8px;
           color: #666666;
+          flex-direction: ${isRTL ? "row-reverse" : "row"};
         }
 
         .tab-button.active {
@@ -674,6 +677,7 @@ export default function ManageProducts() {
           align-items: center;
           gap: 8px;
           margin: 0;
+          flex-direction: ${isRTL ? "row-reverse" : "row"};
         }
 
         .subtext {
@@ -699,6 +703,7 @@ export default function ManageProducts() {
           font-size: 14px;
           font-weight: 500;
           color: #374151;
+          text-align: ${isRTL ? "right" : "left"};
         }
 
         .form-input,
@@ -711,6 +716,7 @@ export default function ManageProducts() {
           border-radius: 8px;
           box-sizing: border-box;
           transition: border-color 0.2s ease;
+          text-align: ${isRTL ? "right" : "left"};
         }
 
         .form-input:focus,
@@ -735,6 +741,7 @@ export default function ManageProducts() {
           transition: background-color 0.2s ease;
           white-space: nowrap;
           justify-content: center;
+          flex-direction: ${isRTL ? 'row-reverse' : 'row'};
         }
 
         .form-button:hover:not(:disabled) {
@@ -900,6 +907,7 @@ export default function ManageProducts() {
           justify-content: center;
           gap: 6px;
           transition: all 0.2s ease;
+          flex-direction: ${isRTL ? "row-reverse" : "row"};
         }
 
         .action-button.primary {
@@ -2190,63 +2198,67 @@ export default function ManageProducts() {
               <p>
                 {deleteType === "product" ? (
                   <>
-                    Are you sure you want to delete the product{" "}
+                    {t("Are you sure you want to delete the product")}{" "}
                     <strong>"{deleteConfirmation.item?.name}"</strong>?
                     <br />
                     <span className="item-details-text">
-                      Price: {deleteConfirmation.item?.price?.toFixed(2)} EGP
+                      {t("Price")}: {deleteConfirmation.item?.price?.toFixed(2)}{" "}
+                      EGP
                       {deleteConfirmation.item?.stock_quantity !==
                         undefined && (
                         <>
                           <br />
-                          Stock: {deleteConfirmation.item.stock_quantity} units
+                          {t("Stock")}: {deleteConfirmation.item.stock_quantity}{" "}
+                          {t("units")}
                         </>
                       )}
                       {deleteConfirmation.item?.category && (
                         <>
                           <br />
-                          Category: {deleteConfirmation.item.category}
+                          {t("Category")}: {deleteConfirmation.item.category}
                         </>
                       )}
                     </span>
                   </>
                 ) : (
                   <>
-                    Are you sure you want to delete the supplier{" "}
+                    {t("Are you sure you want to delete the supplier")}{" "}
                     <strong>"{deleteConfirmation.item?.name}"</strong>?
                     <br />
                     <span className="item-details-text">
                       {deleteConfirmation.item?.contact_person && (
                         <>
-                          Contact: {deleteConfirmation.item.contact_person}
+                          {t("Contact")}:{" "}
+                          {deleteConfirmation.item.contact_person}
                           <br />
                         </>
                       )}
                       {deleteConfirmation.item?.phone && (
                         <>
-                          Phone: {deleteConfirmation.item.phone}
+                          {t("Phone")}: {deleteConfirmation.item.phone}
                           <br />
                         </>
                       )}
                       {deleteConfirmation.item?.email && (
                         <>
-                          Email: {deleteConfirmation.item.email}
+                          {t("Email")}: {deleteConfirmation.item.email}
                           <br />
                         </>
                       )}
-                      Products Supplied:{" "}
+                      {t("Products Supplied")}:{" "}
                       {
                         products.filter(
                           (p) => p.supplier_id === deleteConfirmation.item?.id
                         ).length
                       }{" "}
-                      items
+                      {t("items")}
                     </span>
                   </>
                 )}
                 <br />
-                This action cannot be undone and will remove all associated
-                data.
+                {t(
+                  "This action cannot be undone and will remove all associated data."
+                )}
               </p>
               <div className="modal-actions">
                 <button className="cancel-button" onClick={cancelDelete}>

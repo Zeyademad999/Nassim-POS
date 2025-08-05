@@ -1,562 +1,657 @@
 /* ReceiptModal.css - Clean & Organized Design */
 
 .modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.75);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-  padding: 20px;
-  overflow: hidden;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.75);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+    overflow: hidden;
+}
+
+
+/* RTL Support for Arabic */
+
+.receipt-modal.rtl {
+    direction: rtl;
+}
+
+.receipt-modal.rtl .modal-header {
+    flex-direction: row-reverse;
+}
+
+.receipt-modal.rtl .header-info h2 {
+    flex-direction: row-reverse;
+}
+
+.receipt-modal.rtl .receipt-header {
+    flex-direction: row-reverse;
+}
+
+.receipt-modal.rtl .receipt-info-grid {
+    flex-direction: row-reverse;
+}
+
+.receipt-modal.rtl .info-section h3 {
+    flex-direction: row-reverse;
+}
+
+.receipt-modal.rtl .items-section>h3 {
+    flex-direction: row-reverse;
+}
+
+.receipt-modal.rtl .item-category h4 {
+    flex-direction: row-reverse;
+}
+
+.receipt-modal.rtl .item-row {
+    flex-direction: row-reverse;
+}
+
+.receipt-modal.rtl .item-info {
+    flex-direction: row-reverse;
+}
+
+.receipt-modal.rtl .financial-breakdown h3 {
+    flex-direction: row-reverse;
+}
+
+.receipt-modal.rtl .breakdown-row {
+    flex-direction: row-reverse;
+}
+
+.receipt-modal.rtl .payment-method {
+    flex-direction: row-reverse;
+}
+
+.receipt-modal.rtl .invoice-status {
+    flex-direction: row-reverse;
+}
+
+.receipt-modal.rtl .total-row {
+    flex-direction: row-reverse;
+}
+
+.receipt-modal.rtl .notes-section h3 {
+    flex-direction: row-reverse;
+}
+
+.receipt-modal.rtl .modal-actions {
+    flex-direction: row-reverse;
+}
+
+.receipt-modal.rtl .modal-actions .btn {
+    flex-direction: row-reverse;
+}
+
+
+/* Text alignment for RTL */
+
+.receipt-modal.rtl .receipt-id,
+.receipt-modal.rtl .info-section p,
+.receipt-modal.rtl .item-name,
+.receipt-modal.rtl .item-price,
+.receipt-modal.rtl .breakdown-row span,
+.receipt-modal.rtl .payment-badge,
+.receipt-modal.rtl .total-amount,
+.receipt-modal.rtl .notes-section p {
+    text-align: right;
 }
 
 .receipt-modal {
-  background: white;
-  border-radius: 12px;
-  width: 100%;
-  max-width: 600px;
-  max-height: 85vh;
-  display: flex;
-  flex-direction: column;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-  overflow: hidden;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: white;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 600px;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
+
 /* Modal Header */
+
 .modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  padding: 24px 24px 20px 24px;
-  border-bottom: 1px solid #f3f4f6;
-  flex-shrink: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 24px 24px 20px 24px;
+    border-bottom: 1px solid #f3f4f6;
+    flex-shrink: 0;
 }
 
 .header-info h2 {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin: 0 0 8px 0;
-  font-size: 20px;
-  font-weight: 700;
-  color: #111827;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 8px 0;
+    font-size: 20px;
+    font-weight: 700;
+    color: #111827;
 }
 
 .receipt-id {
-  font-size: 13px;
-  color: #6b7280;
-  font-weight: 500;
+    font-size: 13px;
+    color: #6b7280;
+    font-weight: 500;
 }
 
 .receipt-id code {
-  background: #f3f4f6;
-  padding: 3px 8px;
-  border-radius: 6px;
-  font-family: "Monaco", "Consolas", monospace;
-  font-size: 12px;
-  color: #374151;
+    background: #f3f4f6;
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-family: "Monaco", "Consolas", monospace;
+    font-size: 12px;
+    color: #374151;
 }
 
 .close-btn {
-  background: none;
-  border: none;
-  padding: 8px;
-  cursor: pointer;
-  color: #6b7280;
-  border-radius: 8px;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+    background: none;
+    border: none;
+    padding: 8px;
+    cursor: pointer;
+    color: #6b7280;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .close-btn:hover {
-  background: #f3f4f6;
-  color: #374151;
+    background: #f3f4f6;
+    color: #374151;
 }
+
 
 /* Modal Content */
+
 .modal-content {
-  flex: 1;
-  overflow-y: auto;
-  padding: 0 24px 24px 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
+    flex: 1;
+    overflow-y: auto;
+    padding: 0 24px 24px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
 }
 
+
 /* Receipt Header */
+
 .receipt-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 20px;
-  background: #f8fafc;
-  border-radius: 12px;
-  border: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    background: #f8fafc;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
 }
 
 .receipt-date {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-weight: 600;
-  color: #374151;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+    color: #374151;
 }
 
 .receipt-date svg {
-  color: #6b7280;
+    color: #6b7280;
 }
 
 .receipt-status .status-badge {
-  background: #dcfce7;
-  color: #166534;
-  padding: 6px 16px;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+    background: #dcfce7;
+    color: #166534;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
+
 /* Info Grid */
+
 .receipt-info-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
 }
 
 .info-section {
-  background: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
-  padding: 20px;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 20px;
 }
 
 .info-section h3 {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin: 0 0 12px 0;
-  font-size: 14px;
-  font-weight: 600;
-  color: #6b7280;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 12px 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .info-section h3 svg {
-  color: #9ca3af;
+    color: #9ca3af;
 }
 
 .info-section p {
-  margin: 0;
-  font-size: 16px;
-  font-weight: 600;
-  color: #111827;
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #111827;
 }
+
 
 /* Items Section */
+
 .items-section {
-  background: #fafafa;
-  border-radius: 12px;
-  padding: 24px;
-  border: 1px solid #e5e7eb;
+    background: #fafafa;
+    border-radius: 12px;
+    padding: 24px;
+    border: 1px solid #e5e7eb;
 }
 
-.items-section > h3 {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin: 0 0 20px 0;
-  font-size: 16px;
-  font-weight: 700;
-  color: #111827;
+.items-section>h3 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 20px 0;
+    font-size: 16px;
+    font-weight: 700;
+    color: #111827;
 }
 
-.items-section > h3 svg {
-  color: #6b7280;
+.items-section>h3 svg {
+    color: #6b7280;
 }
 
 .items-container {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
 }
 
 .item-category {
-  background: white;
-  border-radius: 10px;
-  padding: 20px;
-  border: 1px solid #e5e7eb;
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    border: 1px solid #e5e7eb;
 }
 
 .item-category h4 {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin: 0 0 16px 0;
-  font-size: 14px;
-  font-weight: 600;
-  color: #374151;
-  padding-bottom: 8px;
-  border-bottom: 1px solid #f3f4f6;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 16px 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: #374151;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #f3f4f6;
 }
 
 .item-category h4 svg {
-  color: #6b7280;
+    color: #6b7280;
 }
 
 .items-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
 }
 
 .item-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px 0;
-  border-bottom: 1px solid #f9fafb;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid #f9fafb;
 }
 
 .item-row:last-child {
-  border-bottom: none;
+    border-bottom: none;
 }
 
 .item-info {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .item-name {
-  font-weight: 500;
-  color: #374151;
-  font-size: 14px;
+    font-weight: 500;
+    color: #374151;
+    font-size: 14px;
 }
 
 .item-quantity {
-  background: #f3f4f6;
-  color: #6b7280;
-  padding: 2px 8px;
-  border-radius: 12px;
-  font-size: 12px;
-  font-weight: 500;
+    background: #f3f4f6;
+    color: #6b7280;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
 }
 
 .item-price {
-  font-weight: 600;
-  color: #111827;
-  font-size: 14px;
+    font-weight: 600;
+    color: #111827;
+    font-size: 14px;
 }
 
 .empty-items {
-  text-align: center;
-  padding: 40px 20px;
-  color: #6b7280;
-  font-style: italic;
+    text-align: center;
+    padding: 40px 20px;
+    color: #6b7280;
+    font-style: italic;
 }
 
 .empty-items p {
-  margin: 0;
-  font-size: 14px;
+    margin: 0;
+    font-size: 14px;
 }
+
 
 /* Payment Section */
+
 .payment-section {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
 }
 
+
 /* Financial Breakdown */
+
 .financial-breakdown {
-  background: #f8f9fa;
-  border-radius: 8px;
-  padding: 16px;
-  margin-bottom: 16px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 16px;
 }
 
 .financial-breakdown h3 {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 16px;
-  font-weight: 600;
-  color: #1f2937;
-  margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 12px;
 }
 
 .breakdown-details {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 }
 
 .breakdown-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 14px;
-  color: #374151;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 14px;
+    color: #374151;
 }
 
 .breakdown-row.discount {
-  color: #059669;
-  font-weight: 500;
+    color: #059669;
+    font-weight: 500;
 }
 
 .breakdown-row.discount span:first-child {
-  display: flex;
-  align-items: center;
-  gap: 4px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
 }
 
 .breakdown-row.total {
-  border-top: 2px solid #e5e7eb;
-  padding-top: 8px;
-  margin-top: 4px;
-  font-size: 16px;
-  font-weight: 700;
-  color: #111827;
+    border-top: 2px solid #e5e7eb;
+    padding-top: 8px;
+    margin-top: 4px;
+    font-size: 16px;
+    font-weight: 700;
+    color: #111827;
 }
 
 .payment-info {
-  background: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
-  padding: 20px;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 20px;
 }
 
 .payment-method {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-weight: 500;
-  color: #374151;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: 500;
+    color: #374151;
 }
 
 .payment-method svg {
-  color: #6b7280;
+    color: #6b7280;
 }
 
 .payment-badge {
-  margin-left: auto;
-  padding: 6px 12px;
-  border-radius: 16px;
-  font-size: 11px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+    margin-left: auto;
+    padding: 6px 12px;
+    border-radius: 16px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .payment-badge.cash {
-  background: #dcfce7;
-  color: #166534;
+    background: #dcfce7;
+    color: #166534;
 }
 
 .payment-badge.card {
-  background: #dbeafe;
-  color: #1d4ed8;
+    background: #dbeafe;
+    color: #1d4ed8;
 }
 
 .invoice-status {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 13px;
-  color: #059669;
-  background: #ecfdf5;
-  padding: 8px 12px;
-  border-radius: 6px;
-  margin-top: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: #059669;
+    background: #ecfdf5;
+    padding: 8px 12px;
+    border-radius: 6px;
+    margin-top: 8px;
 }
 
+
 /* Total Section */
+
 .total-section {
-  background: linear-gradient(135deg, #059669 0%, #047857 100%);
-  border-radius: 12px;
-  padding: 24px;
-  color: white;
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    border-radius: 12px;
+    padding: 24px;
+    color: white;
 }
 
 .total-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-size: 18px;
-  font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 18px;
+    font-weight: 700;
 }
 
 .total-row svg {
-  color: rgba(255, 255, 255, 0.9);
+    color: rgba(255, 255, 255, 0.9);
 }
 
 .total-amount {
-  margin-left: auto;
-  font-size: 24px;
-  font-weight: 800;
+    margin-left: auto;
+    font-size: 24px;
+    font-weight: 800;
 }
 
+
 /* Notes Section */
+
 .notes-section {
-  background: #fffbeb;
-  border: 1px solid #fbbf24;
-  border-radius: 12px;
-  padding: 20px;
+    background: #fffbeb;
+    border: 1px solid #fbbf24;
+    border-radius: 12px;
+    padding: 20px;
 }
 
 .notes-section h3 {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin: 0 0 12px 0;
-  font-size: 14px;
-  font-weight: 600;
-  color: #92400e;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 12px 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: #92400e;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .notes-section h3 svg {
-  color: #d97706;
+    color: #d97706;
 }
 
 .notes-section p {
-  margin: 0;
-  color: #92400e;
-  font-size: 14px;
-  line-height: 1.5;
+    margin: 0;
+    color: #92400e;
+    font-size: 14px;
+    line-height: 1.5;
 }
 
+
 /* Modal Actions - FIXED */
+
 .modal-actions {
-  flex-shrink: 0;
-  padding: 20px 24px;
-  border-top: 1px solid #e5e7eb;
-  background: #f9fafb;
-  display: flex;
-  gap: 12px;
-  justify-content: flex-end;
-  border-bottom-left-radius: 12px;
-  border-bottom-right-radius: 12px;
+    flex-shrink: 0;
+    padding: 20px 24px;
+    border-top: 1px solid #e5e7eb;
+    background: #f9fafb;
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    border-bottom-left-radius: 12px;
+    border-bottom-right-radius: 12px;
 }
 
 .modal-actions .btn {
-  padding: 10px 16px;
-  border-radius: 8px;
-  border: none;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  transition: all 0.2s ease;
+    padding: 10px 16px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s ease;
 }
 
 .modal-actions .btn-secondary {
-  background: #f3f4f6;
-  color: #374151;
-  border: 1px solid #d1d5db;
+    background: #f3f4f6;
+    color: #374151;
+    border: 1px solid #d1d5db;
 }
 
 .modal-actions .btn-secondary:hover {
-  background: #e5e7eb;
+    background: #e5e7eb;
 }
 
 .modal-actions .btn-primary {
-  background: #2563eb;
-  color: white;
+    background: #2563eb;
+    color: white;
 }
 
 
 /* Responsive Design */
+
 @media (max-width: 768px) {
-  .receipt-modal {
-    margin: 10px;
-    max-height: 95vh;
-  }
-
-  .modal-header {
-    padding: 20px 20px 16px 20px;
-  }
-
-  .modal-content {
-    padding: 0 20px 20px 20px;
-    gap: 20px;
-  }
-
-  .receipt-info-grid {
-    grid-template-columns: 1fr;
-    gap: 16px;
-  }
-
-  .info-section {
-    padding: 16px;
-  }
-
-  .items-section {
-    padding: 20px;
-  }
-
-  .item-category {
-    padding: 16px;
-  }
-
-  .modal-actions {
-    padding: 16px 20px;
-    flex-direction: column;
-  }
-
-  .modal-actions .btn {
-    justify-content: center;
-    width: 100%;
-  }
+    .receipt-modal {
+        margin: 10px;
+        max-height: 95vh;
+    }
+    .modal-header {
+        padding: 20px 20px 16px 20px;
+    }
+    .modal-content {
+        padding: 0 20px 20px 20px;
+        gap: 20px;
+    }
+    .receipt-info-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+    .info-section {
+        padding: 16px;
+    }
+    .items-section {
+        padding: 20px;
+    }
+    .item-category {
+        padding: 16px;
+    }
+    .modal-actions {
+        padding: 16px 20px;
+        flex-direction: column;
+    }
+    .modal-actions .btn {
+        justify-content: center;
+        width: 100%;
+    }
 }
 
 @media (max-width: 480px) {
-  .modal-overlay {
-    padding: 10px;
-  }
-
-  .receipt-modal {
-    margin: 0;
-  }
-
-  .modal-header {
-    padding: 16px 16px 12px 16px;
-  }
-
-  .modal-content {
-    padding: 0 16px 16px 16px;
-    gap: 16px;
-  }
-
-  .receipt-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
-    padding: 16px;
-  }
-
-  .total-row {
-    font-size: 16px;
-  }
-
-  .total-amount {
-    font-size: 20px;
-  }
-
-  .modal-actions {
-    padding: 12px 16px;
-  }
+    .modal-overlay {
+        padding: 10px;
+    }
+    .receipt-modal {
+        margin: 0;
+    }
+    .modal-header {
+        padding: 16px 16px 12px 16px;
+    }
+    .modal-content {
+        padding: 0 16px 16px 16px;
+        gap: 16px;
+    }
+    .receipt-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 16px;
+    }
+    .total-row {
+        font-size: 16px;
+    }
+    .total-amount {
+        font-size: 20px;
+    }
+    .modal-actions {
+        padding: 12px 16px;
+    }
 }

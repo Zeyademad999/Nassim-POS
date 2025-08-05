@@ -10,15 +10,18 @@ import {
   Scissors,
   AlertTriangle,
 } from "lucide-react";
+import { useLanguage } from "../../context/LanguageContext";
 import "../styles/ManageBarbers.css";
 
 export default function ManageBarbers() {
+  const { t } = useLanguage();
   const [barbers, setBarbers] = useState([]);
   const [editingBarber, setEditingBarber] = useState(null);
   const [newBarber, setNewBarber] = useState({
     name: "",
     mobile: "",
     specialty_ids: [],
+    is_default: false,
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -27,12 +30,12 @@ export default function ManageBarbers() {
   const fetchBarbers = async () => {
     try {
       const res = await fetch("/api/barbers");
-      if (!res.ok) throw new Error("Failed to fetch barbers");
+      if (!res.ok) throw new Error(t("Failed to fetch barbers"));
       const data = await res.json();
       setBarbers(data);
     } catch (err) {
       console.error("Failed to fetch barbers:", err);
-      setError("Failed to load barbers");
+      setError(t("Failed to load barbers"));
       setBarbers([]);
     }
   };
@@ -48,7 +51,7 @@ export default function ManageBarbers() {
       !newBarber.mobile.trim() ||
       newBarber.specialty_ids.length === 0
     ) {
-      setError("All fields are required");
+      setError(t("All fields are required"));
       return;
     }
 
@@ -63,15 +66,21 @@ export default function ManageBarbers() {
           name: newBarber.name.trim(),
           mobile: newBarber.mobile.trim(),
           specialty_ids: newBarber.specialty_ids.join(","),
+          is_default: newBarber.is_default,
         }),
       });
 
       if (!res.ok) {
         const errorData = await res.json();
-        throw new Error(errorData.error || "Failed to add barber");
+        throw new Error(errorData.error || t("Failed to add barber"));
       }
 
-      setNewBarber({ name: "", mobile: "", specialty_ids: [] });
+      setNewBarber({
+        name: "",
+        mobile: "",
+        specialty_ids: [],
+        is_default: false,
+      });
 
       fetchBarbers();
     } catch (err) {
@@ -89,7 +98,7 @@ export default function ManageBarbers() {
       !updatedBarber.specialty_ids ||
       updatedBarber.specialty_ids.length === 0
     ) {
-      setError("All fields are required");
+      setError(t("All fields are required"));
       return;
     }
 
@@ -106,12 +115,13 @@ export default function ManageBarbers() {
           specialty_ids: Array.isArray(updatedBarber.specialty_ids)
             ? updatedBarber.specialty_ids.join(",")
             : updatedBarber.specialty_ids,
+          is_default: updatedBarber.is_default || false,
         }),
       });
 
       if (!res.ok) {
         const errorData = await res.json();
-        throw new Error(errorData.error || "Failed to update barber");
+        throw new Error(errorData.error || t("Failed to update barber"));
       }
 
       setEditingBarber(null);
@@ -156,7 +166,7 @@ export default function ManageBarbers() {
 
       if (!res.ok) {
         const errorData = await res.json();
-        throw new Error(errorData.error || "Failed to delete barber");
+        throw new Error(errorData.error || t("Failed to delete barber"));
       }
 
       setDeleteConfirmation(null);
@@ -174,7 +184,7 @@ export default function ManageBarbers() {
   const fetchServices = async () => {
     try {
       const res = await fetch("/api/services");
-      if (!res.ok) throw new Error("Failed to fetch services");
+      if (!res.ok) throw new Error(t("Failed to fetch services"));
       const data = await res.json();
       setServices(data);
     } catch (err) {
@@ -206,7 +216,7 @@ export default function ManageBarbers() {
         <div className="modal-overlay">
           <div className="modal-content delete-confirmation-modal">
             <div className="modal-header">
-              <h2>Confirm Delete Barber</h2>
+              <h2>{t("Confirm Delete Barber")}</h2>
               <button className="close-btn" onClick={cancelDelete}>
                 <X size={20} />
               </button>
@@ -214,20 +224,22 @@ export default function ManageBarbers() {
             <div className="modal-body">
               <AlertTriangle size={48} className="alert-icon" />
               <p>
-                Are you sure you want to delete{" "}
-                <strong>{deleteConfirmation.barber?.name}</strong>? This action
-                cannot be undone and will remove all associated data.
+                {t("Are you sure you want to delete")}{" "}
+                <strong>{deleteConfirmation.barber?.name}</strong>?{" "}
+                {t(
+                  "This action cannot be undone and will remove all associated data."
+                )}
               </p>
               <div className="modal-actions">
                 <button className="cancel-button" onClick={cancelDelete}>
-                  Cancel
+                  {t("Cancel")}
                 </button>
                 <button
                   className="delete-button"
                   onClick={proceedWithDelete}
                   disabled={loading}
                 >
-                  {loading ? "Deleting..." : "Delete Barber"}
+                  {loading ? t("Deleting...") : t("Delete Barber")}
                 </button>
               </div>
             </div>
@@ -241,18 +253,18 @@ export default function ManageBarbers() {
           <div className="header-info">
             <h2>
               <UserPlus size={20} />
-              Add New Barber
+              {t("Add New Barber")}
             </h2>
-            <p className="subtext">Add a new barber to your team</p>
+            <p className="subtext">{t("Add a new barber to your team")}</p>
           </div>
         </div>
 
         <div className="barber-form">
           <div className="form-group">
-            <label>Full Name</label>
+            <label>{t("Full Name")}</label>
             <input
               type="text"
-              placeholder="e.g., Ahmed Hassan"
+              placeholder={t("e.g., Ahmed Hassan")}
               value={newBarber.name}
               onChange={(e) =>
                 setNewBarber({ ...newBarber, name: e.target.value })
@@ -262,10 +274,10 @@ export default function ManageBarbers() {
           </div>
 
           <div className="form-group">
-            <label>Mobile Number</label>
+            <label>{t("Mobile Number")}</label>
             <input
               type="tel"
-              placeholder="e.g., +20 123 456 7890"
+              placeholder={t("e.g., +20 123 456 7890")}
               value={newBarber.mobile}
               onChange={(e) =>
                 setNewBarber({ ...newBarber, mobile: e.target.value })
@@ -275,11 +287,12 @@ export default function ManageBarbers() {
           </div>
 
           <div className="form-group specialty-group">
-            <label>Specialties</label>
+            <label>{t("Specialties")}</label>
             <div className="specialties-container">
               <div className="specialties-header">
                 <span className="selected-count">
-                  {newBarber.specialty_ids.length} of {services.length} selected
+                  {newBarber.specialty_ids.length} of {services.length}{" "}
+                  {t("selected")}
                 </span>
                 {newBarber.specialty_ids.length > 0 && (
                   <button
@@ -290,7 +303,7 @@ export default function ManageBarbers() {
                     }
                     disabled={loading}
                   >
-                    Clear All
+                    {t("Clear All")}
                   </button>
                 )}
               </div>
@@ -330,6 +343,20 @@ export default function ManageBarbers() {
             </div>
           </div>
 
+          <div className="form-group">
+            <label className="checkbox-label">
+              <input
+                type="checkbox"
+                checked={newBarber.is_default}
+                onChange={(e) =>
+                  setNewBarber({ ...newBarber, is_default: e.target.checked })
+                }
+                disabled={loading}
+              />
+              <span>{t("Set as Default Barber")}</span>
+            </label>
+          </div>
+
           <div className="form-actions">
             <button
               className="add-button"
@@ -337,7 +364,7 @@ export default function ManageBarbers() {
               disabled={loading}
             >
               <Plus size={16} />
-              {loading ? "Adding..." : "Add Barber"}
+              {loading ? t("Adding...") : t("Add Barber")}
             </button>
           </div>
         </div>
@@ -358,7 +385,7 @@ export default function ManageBarbers() {
             {editingBarber?.id === barber.id ? (
               <div className="barber-edit-form">
                 <div className="edit-group">
-                  <label>Name</label>
+                  <label>{t("Name")}</label>
                   <input
                     type="text"
                     value={editingBarber.name}
@@ -373,7 +400,7 @@ export default function ManageBarbers() {
                 </div>
 
                 <div className="edit-group">
-                  <label>Mobile</label>
+                  <label>{t("Mobile")}</label>
                   <input
                     type="tel"
                     value={editingBarber.mobile}
@@ -388,12 +415,12 @@ export default function ManageBarbers() {
                 </div>
 
                 <div className="edit-group specialty-group">
-                  <label>Specialties</label>
+                  <label>{t("Specialties")}</label>
                   <div className="specialties-container">
                     <div className="specialties-header">
                       <span className="selected-count">
                         {editingBarber.specialty_ids?.length || 0} of{" "}
-                        {services.length} selected
+                        {services.length} {t("selected")}
                       </span>
                       {editingBarber.specialty_ids?.length > 0 && (
                         <button
@@ -407,7 +434,7 @@ export default function ManageBarbers() {
                           }
                           disabled={loading}
                         >
-                          Clear All
+                          {t("Clear All")}
                         </button>
                       )}
                     </div>
@@ -448,6 +475,23 @@ export default function ManageBarbers() {
                       ))}
                     </div>
                   </div>
+                </div>
+
+                <div className="edit-group">
+                  <label className="checkbox-label">
+                    <input
+                      type="checkbox"
+                      checked={editingBarber.is_default || false}
+                      onChange={(e) =>
+                        setEditingBarber({
+                          ...editingBarber,
+                          is_default: e.target.checked,
+                        })
+                      }
+                      disabled={loading}
+                    />
+                    <span>{t("Set as Default Barber")}</span>
+                  </label>
                 </div>
 
                 <div className="barber-actions">

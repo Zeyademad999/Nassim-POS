@@ -696,6 +696,41 @@
     flex-direction: row-reverse;
 }
 
+[dir="rtl"] .selection-label {
+    flex-direction: row-reverse;
+}
+
+[dir="rtl"] .customer-tabs {
+    flex-direction: row-reverse;
+}
+
+[dir="rtl"] .customer-info {
+    flex-direction: row-reverse;
+}
+
+[dir="rtl"] .details-header {
+    flex-direction: row-reverse;
+}
+
+[dir="rtl"] .new-customer-fields {
+    flex-direction: row-reverse;
+}
+
+
+/* Text alignment for RTL */
+
+[dir="rtl"] .stat-label,
+[dir="rtl"] .customer-name,
+[dir="rtl"] .customer-mobile,
+[dir="rtl"] .customer-visits,
+[dir="rtl"] .dropdown-more,
+[dir="rtl"] .customer-search-input,
+[dir="rtl"] .customer-input,
+[dir="rtl"] .barber-select,
+[dir="rtl"] .date-input {
+    text-align: right;
+}
+
 
 /* Scrollbar Styling */
 

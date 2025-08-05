@@ -10,6 +10,187 @@
 }
 
 
+/* RTL Support for Arabic */
+
+.enhanced-reports.rtl {
+    direction: rtl;
+}
+
+.enhanced-reports.rtl .reports-header {
+    flex-direction: row-reverse;
+}
+
+.enhanced-reports.rtl .reports-title {
+    flex-direction: row-reverse;
+}
+
+.enhanced-reports.rtl .header-actions {
+    flex-direction: row-reverse;
+}
+
+.enhanced-reports.rtl .action-btn {
+    flex-direction: row-reverse;
+}
+
+.enhanced-reports.rtl .filters-section {
+    flex-direction: row-reverse;
+}
+
+.enhanced-reports.rtl .filters-grid {
+    flex-direction: row-reverse;
+}
+
+.enhanced-reports.rtl .tabs-navigation {
+    flex-direction: row-reverse;
+}
+
+.enhanced-reports.rtl .tab-button {
+    flex-direction: row-reverse;
+}
+
+.enhanced-reports.rtl .metrics-grid {
+    flex-direction: row-reverse;
+}
+
+.enhanced-reports.rtl .metric-header {
+    flex-direction: row-reverse;
+}
+
+.enhanced-reports.rtl .metric-info {
+    flex-direction: row-reverse;
+}
+
+.enhanced-reports.rtl .metric-change {
+    flex-direction: row-reverse;
+}
+
+.enhanced-reports.rtl .chart-header {
+    flex-direction: row-reverse;
+}
+
+.enhanced-reports.rtl .chart-title {
+    flex-direction: row-reverse;
+}
+
+.enhanced-reports.rtl .table-header {
+    flex-direction: row-reverse;
+}
+
+.enhanced-reports.rtl .table-title {
+    flex-direction: row-reverse;
+}
+
+.enhanced-reports.rtl .export-buttons-group {
+    flex-direction: row-reverse;
+}
+
+.enhanced-reports.rtl .export-btn {
+    flex-direction: row-reverse;
+}
+
+.enhanced-reports.rtl .pl-summary-grid {
+    flex-direction: row-reverse;
+}
+
+.enhanced-reports.rtl .pl-header {
+    flex-direction: row-reverse;
+}
+
+.enhanced-reports.rtl .pl-breakdown {
+    flex-direction: row-reverse;
+}
+
+.enhanced-reports.rtl .pl-item {
+    flex-direction: row-reverse;
+}
+
+.enhanced-reports.rtl .statement-header {
+    flex-direction: row-reverse;
+}
+
+.enhanced-reports.rtl .modal-header {
+    flex-direction: row-reverse;
+}
+
+.enhanced-reports.rtl .modal-footer {
+    flex-direction: row-reverse;
+}
+
+.enhanced-reports.rtl .form-row {
+    flex-direction: row-reverse;
+}
+
+.enhanced-reports.rtl .form-group {
+    flex-direction: row-reverse;
+}
+
+.enhanced-reports.rtl .form-group label {
+    flex-direction: row-reverse;
+}
+
+.enhanced-reports.rtl .password-input {
+    flex-direction: row-reverse;
+}
+
+.enhanced-reports.rtl .action-buttons {
+    flex-direction: row-reverse;
+}
+
+.enhanced-reports.rtl .action-btn-small {
+    flex-direction: row-reverse;
+}
+
+.enhanced-reports.rtl .customer-name,
+.enhanced-reports.rtl .barber-name,
+.enhanced-reports.rtl .product-name {
+    flex-direction: row-reverse;
+}
+
+.enhanced-reports.rtl .amount {
+    flex-direction: row-reverse;
+}
+
+.enhanced-reports.rtl .payment-badge {
+    flex-direction: row-reverse;
+}
+
+.enhanced-reports.rtl .performance-badge {
+    flex-direction: row-reverse;
+}
+
+.enhanced-reports.rtl .transaction-items {
+    flex-direction: row-reverse;
+}
+
+.enhanced-reports.rtl .expense-date {
+    flex-direction: row-reverse;
+}
+
+.enhanced-reports.rtl .edit-field {
+    flex-direction: row-reverse;
+}
+
+.enhanced-reports.rtl .edit-label {
+    flex-direction: row-reverse;
+}
+
+
+/* Text alignment for RTL */
+
+.enhanced-reports.rtl .filter-label,
+.enhanced-reports.rtl .form-group label {
+    text-align: right;
+}
+
+.enhanced-reports.rtl .filter-select,
+.enhanced-reports.rtl .filter-input,
+.enhanced-reports.rtl .form-group input,
+.enhanced-reports.rtl .form-group select,
+.enhanced-reports.rtl .form-group textarea {
+    text-align: right;
+}
+
+
 /* Header */
 
 .reports-header {

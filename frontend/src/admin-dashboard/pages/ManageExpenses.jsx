@@ -945,28 +945,27 @@ export default function ManageExpenses() {
             <div className="modal-body">
               <AlertTriangle size={48} className="alert-icon" />
               <p>
-                Are you sure you want to delete the expense{" "}
+                {t("Are you sure you want to delete the expense")}{" "}
                 <strong>"{deleteConfirmation.expense?.name}"</strong>?
                 <br />
                 <span className="expense-details-text">
-                  Amount: {deleteConfirmation.expense?.amount?.toFixed(2)} EGP
+                  {t("Amount")}: {deleteConfirmation.expense?.amount?.toFixed(2)} EGP
                   <br />
-                  Date:{" "}
+                  {t("Date")}:{" "}
                   {new Date(
                     deleteConfirmation.expense?.expense_date
                   ).toLocaleDateString()}
                   <br />
-                  Type: {getTypeLabel(deleteConfirmation.expense?.expense_type)}
+                  {t("Type")}: {getTypeLabel(deleteConfirmation.expense?.expense_type)}
                   {deleteConfirmation.expense?.category && (
                     <>
                       <br />
-                      Category: {deleteConfirmation.expense.category}
+                      {t("Category")}: {deleteConfirmation.expense.category}
                     </>
                   )}
                 </span>
                 <br />
-                This action cannot be undone and will remove all associated
-                data.
+                {t("This action cannot be undone and will remove all associated data.")}
               </p>
               <div className="modal-actions">
                 <button className="cancel-button" onClick={cancelDelete}>

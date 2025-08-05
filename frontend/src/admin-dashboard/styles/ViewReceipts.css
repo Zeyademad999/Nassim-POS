@@ -10,6 +10,91 @@
 }
 
 
+/* RTL Support for Arabic */
+
+.receipts-page.rtl {
+    direction: rtl;
+}
+
+.receipts-page.rtl .header-content {
+    flex-direction: row-reverse;
+}
+
+.receipts-page.rtl .header-text h1 {
+    flex-direction: row-reverse;
+}
+
+.receipts-page.rtl .header-actions {
+    flex-direction: row-reverse;
+}
+
+.receipts-page.rtl .btn {
+    flex-direction: row-reverse;
+}
+
+.receipts-page.rtl .stats-grid {
+    flex-direction: row-reverse;
+}
+
+.receipts-page.rtl .stat-card {
+    flex-direction: row-reverse;
+}
+
+.receipts-page.rtl .stat-content {
+    flex-direction: row-reverse;
+}
+
+.receipts-page.rtl .filters-section {
+    flex-direction: row-reverse;
+}
+
+.receipts-page.rtl .filters-row {
+    flex-direction: row-reverse;
+}
+
+.receipts-page.rtl .search-wrapper {
+    flex-direction: row-reverse;
+}
+
+.receipts-page.rtl .date-cell {
+    flex-direction: row-reverse;
+}
+
+.receipts-page.rtl .customer-cell,
+.receipts-page.rtl .barber-cell {
+    flex-direction: row-reverse;
+}
+
+.receipts-page.rtl .items-cell {
+    flex-direction: row-reverse;
+}
+
+.receipts-page.rtl .payment-badge {
+    flex-direction: row-reverse;
+}
+
+.receipts-page.rtl .amount-cell {
+    flex-direction: row-reverse;
+}
+
+.receipts-page.rtl .action-btn {
+    flex-direction: row-reverse;
+}
+
+
+/* Text alignment for RTL */
+
+.receipts-page.rtl .receipts-table th,
+.receipts-page.rtl .receipts-table td {
+    text-align: right;
+}
+
+.receipts-page.rtl .filters-section input,
+.receipts-page.rtl .filters-section select {
+    text-align: right;
+}
+
+
 /* Header Section */
 
 .receipts-header {
