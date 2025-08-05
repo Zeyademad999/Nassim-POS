@@ -1,153 +1,139 @@
 /* Language Toggle Button Styles */
+
 .language-toggle-container {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  z-index: 1000;
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
 }
 
 .rtl .language-toggle-container {
-  right: auto;
-  left: 20px;
+    right: auto;
+    left: 20px;
 }
 
 .language-toggle-btn {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
-  background: var(--primary-color, #007bff);
-  color: white;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 500;
-  transition: all 0.2s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  top: 70px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    top: 70px;
 }
 
 .language-toggle-btn:hover {
-  background: var(--primary-dark, #0056b3);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .language-toggle-btn:active {
-  transform: translateY(0);
+    transform: translateY(0);
 }
 
+
 /* RTL Support for Admin Dashboard */
+
 .admin-dashboard.rtl {
-  direction: rtl;
+    direction: rtl;
 }
 
 .admin-dashboard.ltr {
-  direction: ltr;
+    direction: ltr;
 }
 
+
 /* AdminDashboard Layout */
+
 .admin-dashboard {
-  display: flex;
-  min-height: 100vh;
-  background: #f9fafb;
+    display: flex;
+    min-height: 100vh;
+    background: #f9fafb;
 }
 
 .admin-content {
-  flex: 1;
-  margin-left: 280px; /* Space for sidebar */
-  padding: 20px;
-  transition: margin-left 0.3s ease;
-  position: relative;
-  min-height: 100vh;
-  overflow-x: auto;
+    flex: 1;
+    margin-left: 280px;
+    /* Space for sidebar */
+    padding: 20px;
+    transition: margin-left 0.3s ease;
+    position: relative;
+    min-height: 100vh;
+    overflow-x: auto;
 }
+
 
 /* When sidebar is collapsed */
+
 .admin-dashboard:has(.sidebar.collapsed) .admin-content {
-  margin-left: 70px;
+    margin-left: 70px;
 }
+
 
 /* Language Toggle Button Positioning */
+
 .language-toggle-container {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  z-index: 999;
-}
-
-.language-toggle-btn {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
-  background: var(--primary-color, #007bff);
-  color: white;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 500;
-  transition: all 0.2s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.language-toggle-btn:hover {
-  background: var(--primary-dark, #0056b3);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 999;
 }
 
 .language-toggle-btn:active {
-  transform: translateY(0);
+    transform: translateY(0);
 }
 
+
 /* RTL Layout Adjustments */
+
 .admin-dashboard.rtl .admin-content {
-  margin-left: 0;
-  margin-right: 280px;
-  direction: rtl;
+    margin-left: 0;
+    margin-right: 280px;
+    direction: rtl;
 }
 
 .admin-dashboard.rtl:has(.sidebar.collapsed) .admin-content {
-  margin-right: 70px;
+    margin-right: 70px;
 }
 
 .admin-dashboard.rtl .language-toggle-container {
-  right: auto;
-  left: 20px;
+    right: auto;
+    left: 20px;
 }
 
+
 /* Responsive Design */
+
 @media (max-width: 768px) {
-  .admin-content {
-    margin-left: 0;
-    padding: 15px;
-  }
-
-  .admin-dashboard.rtl .admin-content {
-    margin-right: 0;
-  }
-
-  .language-toggle-container {
-    top: 15px;
-    right: 15px;
-  }
-
-  .admin-dashboard.rtl .language-toggle-container {
-    right: auto;
-    left: 15px;
-  }
+    .admin-content {
+        margin-left: 0;
+        padding: 15px;
+    }
+    .admin-dashboard.rtl .admin-content {
+        margin-right: 0;
+    }
+    .language-toggle-container {
+        top: 15px;
+        right: 15px;
+    }
+    .admin-dashboard.rtl .language-toggle-container {
+        right: auto;
+        left: 15px;
+    }
 }
 
 @media (max-width: 480px) {
-  .admin-content {
-    padding: 10px;
-  }
-
-  .language-toggle-btn {
-    padding: 6px 10px;
-    font-size: 13px;
-  }
+    .admin-content {
+        padding: 10px;
+    }
+    .language-toggle-btn {
+        padding: 6px 10px;
+        font-size: 13px;
+    }
 }

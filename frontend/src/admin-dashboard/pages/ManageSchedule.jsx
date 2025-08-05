@@ -1,6 +1,15 @@
 // frontend/src/admin-dashboard/pages/ManageSchedule.jsx
 import React, { useEffect, useState } from "react";
-import { Calendar, Clock, Plus, Trash2, Save, AlertCircle } from "lucide-react";
+import {
+  Calendar,
+  Clock,
+  Plus,
+  Trash2,
+  Save,
+  AlertCircle,
+  X,
+  AlertTriangle,
+} from "lucide-react";
 import "../styles/ManageSchedule.css";
 
 export default function ManageSchedule() {
@@ -10,6 +19,7 @@ export default function ManageSchedule() {
   const [timeOff, setTimeOff] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [deleteConfirmation, setDeleteConfirmation] = useState(null);
   const [newTimeOff, setNewTimeOff] = useState({
     startDate: "",
     endDate: "",
@@ -165,12 +175,32 @@ export default function ManageSchedule() {
   };
 
   const removeTimeOff = async (timeOffId) => {
-    if (!selectedBarber || !confirm("Remove this time off period?")) return;
+    const timeOffItem = timeOff.find((item) => item.id === timeOffId);
+    setDeleteConfirmation({
+      id: timeOffId,
+      timeOff: timeOffItem,
+      isVisible: true,
+    });
+  };
+
+  const cancelDelete = () => {
+    setDeleteConfirmation({
+      ...deleteConfirmation,
+      isVisible: false,
+    });
+    // Remove the confirmation after animation
+    setTimeout(() => {
+      setDeleteConfirmation(null);
+    }, 300);
+  };
+
+  const proceedWithDelete = async () => {
+    if (!deleteConfirmation?.id) return;
 
     try {
       setLoading(true);
       const res = await fetch(
-        `/api/barber-schedule/${selectedBarber.id}/time-off/${timeOffId}`,
+        `/api/barber-schedule/${selectedBarber.id}/time-off/${deleteConfirmation.id}`,
         {
           method: "DELETE",
         }
@@ -178,6 +208,7 @@ export default function ManageSchedule() {
 
       if (!res.ok) throw new Error("Failed to remove time off");
 
+      setDeleteConfirmation(null);
       fetchBarberSchedule(selectedBarber.id);
     } catch (err) {
       console.error("Failed to remove time off:", err);
@@ -445,6 +476,51 @@ export default function ManageSchedule() {
           </div>
         </div>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {deleteConfirmation && (
+        <div className="modal-overlay">
+          <div className="modal-content delete-confirmation-modal">
+            <div className="modal-header">
+              <h2>Confirm Delete Time Off</h2>
+              <button className="close-btn" onClick={cancelDelete}>
+                <X size={20} />
+              </button>
+            </div>
+            <div className="modal-body">
+              <AlertTriangle size={48} className="alert-icon" />
+              <p>
+                Are you sure you want to remove the time off period for{" "}
+                <strong>{selectedBarber?.name}</strong> from{" "}
+                <strong>
+                  {formatDate(deleteConfirmation.timeOff?.start_date)}
+                </strong>{" "}
+                to{" "}
+                <strong>
+                  {formatDate(deleteConfirmation.timeOff?.end_date)}
+                </strong>
+                ?
+                <br />
+                <span className="timeoff-reason-text">
+                  Reason: {deleteConfirmation.timeOff?.reason}
+                </span>
+              </p>
+              <div className="modal-actions">
+                <button className="cancel-button" onClick={cancelDelete}>
+                  Cancel
+                </button>
+                <button
+                  className="delete-button"
+                  onClick={proceedWithDelete}
+                  disabled={loading}
+                >
+                  {loading ? "Removing..." : "Remove Time Off"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

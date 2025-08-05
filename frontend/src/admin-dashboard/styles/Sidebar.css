@@ -1,385 +1,438 @@
 /* Sidebar Styles */
+
 .sidebar {
-  width: 280px;
-  min-height: 100vh;
-  background: #ffffff;
-  color: #000000;
-  position: fixed;
-  left: 0;
-  top: 0;
-  z-index: 1000;
-  display: flex;
-  flex-direction: column;
-  transition: width 0.3s ease;
-  border-right: 1px solid #e5e5e5;
-  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+    width: 280px;
+    height: 100vh;
+    background: #ffffff;
+    color: #000000;
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    border-right: 1px solid #e5e5e5;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    overflow: hidden;
 }
 
 .sidebar.collapsed {
-  width: 60px;
+    width: 64px;
 }
 
+
 /* Sidebar Header */
+
 .sidebar-header {
-  padding: 20px 16px;
-  border-bottom: 1px solid #e5e5e5;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  min-height: 70px;
+    padding: 1.5rem 1.25rem;
+    border-bottom: 1px solid #f0f0f0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 72px;
+    flex-shrink: 0;
+    background: #ffffff;
 }
 
 .brand {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  color: #000000;
-  font-weight: 700;
-  font-size: 18px;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: #000000;
+    font-weight: 700;
+    font-size: 1.125rem;
+    letter-spacing: -0.025em;
 }
 
 .brand-name {
-  white-space: nowrap;
-  overflow: hidden;
+    white-space: nowrap;
+    overflow: hidden;
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 .sidebar-toggle {
-  background: none;
-  border: none;
-  color: #666666;
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 6px;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+    background: #ffffff;
+    border: 1px solid #e5e5e5;
+    color: #666666;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
 }
 
 .sidebar-toggle:hover {
-  color: #000000;
-  background: #f5f5f5;
+    color: #000000;
+    background: #f8f9fa;
+    border-color: #000000;
+    transform: scale(1.05);
 }
 
+.sidebar-toggle:active {
+    transform: scale(0.95);
+}
+
+
 /* Navigation */
+
 .sidebar-nav {
-  flex: 1;
-  padding: 20px 0;
-  overflow-y: auto;
-  overflow-x: hidden;
+    flex: 1;
+    padding: 1rem 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scroll-behavior: smooth;
 }
 
 .nav-group {
-  margin-bottom: 8px;
+    margin-bottom: 0.25rem;
 }
 
 .nav-group-toggle {
-  width: 100%;
-  background: none;
-  border: none;
-  color: #333333;
-  padding: 12px 20px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  font-size: 14px;
-  font-weight: 500;
-  text-align: left;
+    width: 100%;
+    background: none;
+    border: none;
+    color: #333333;
+    padding: 0.875rem 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-align: left;
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+    border-radius: 0;
+    position: relative;
 }
 
 .nav-group-toggle:hover {
-  background: #f5f5f5;
-  color: #000000;
+    background: #f8f9fa;
+    color: #000000;
+    transform: translateX(2px);
 }
 
 .nav-group-toggle.active {
-  background: #000000;
-  color: #ffffff;
-  border-right: 3px solid #000000;
+    background: #000000;
+    color: #ffffff;
+    border-right: 3px solid #000000;
+    font-weight: 600;
 }
 
 .nav-group-toggle .chevron {
-  margin-left: auto;
-  transition: transform 0.2s ease;
+    margin-left: auto;
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    opacity: 0.7;
 }
 
 .nav-group-toggle .chevron.rotated {
-  transform: rotate(180deg);
+    transform: rotate(180deg);
 }
 
 .nav-group-items {
-  background: #f9f9f9;
-  border-left: 2px solid #e5e5e5;
-  margin-left: 20px;
+    background: #f8f9fa;
+    border-left: 2px solid #e5e5e5;
+    margin-left: 1.25rem;
+    border-radius: 0 0 0 0.5rem;
+    overflow: hidden;
+    animation: slideDown 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .nav-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 20px;
-  color: #333333;
-  text-decoration: none;
-  transition: all 0.2s ease;
-  font-size: 14px;
-  font-weight: 500;
-  border-radius: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1.25rem;
+    color: #333333;
+    text-decoration: none;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 0.875rem;
+    font-weight: 500;
+    border-radius: 0;
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+    position: relative;
 }
 
 .nav-item:hover {
-  background: #f5f5f5;
-  color: #000000;
-  text-decoration: none;
+    background: #f0f0f0;
+    color: #000000;
+    text-decoration: none;
+    transform: translateX(2px);
 }
 
 .nav-item.active {
-  background: #000000;
-  color: #ffffff;
-  border-right: 3px solid #000000;
-  font-weight: 600;
+    background: #000000;
+    color: #ffffff;
+    border-right: 3px solid #000000;
+    font-weight: 600;
 }
 
 .nav-item span {
-  white-space: nowrap;
-  overflow: hidden;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
+
 /* Sidebar Footer */
+
 .sidebar-footer {
-  border-top: 1px solid #e5e5e5;
-  padding: 20px 16px;
+    border-top: 1px solid #f0f0f0;
+    padding: 1.25rem;
+    flex-shrink: 0;
+    background: #ffffff;
 }
 
 .user-section {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 16px;
-  padding: 12px 8px;
-  border-radius: 8px;
-  background: #f9f9f9;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    background: #f8f9fa;
+    border: 1px solid #e5e5e5;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.user-section:hover {
+    background: #f0f0f0;
+    border-color: #000000;
 }
 
 .user-avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: #000000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-  font-size: 16px;
-  color: #ffffff;
-  flex-shrink: 0;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    background: #000000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1rem;
+    color: #ffffff;
+    flex-shrink: 0;
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 .user-info {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+    overflow: hidden;
+    flex: 1;
 }
 
 .user-name {
-  font-weight: 600;
-  font-size: 14px;
-  color: #000000;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+    font-weight: 600;
+    font-size: 0.875rem;
+    color: #000000;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 .user-role {
-  font-size: 12px;
-  color: #666666;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+    font-size: 0.75rem;
+    color: #666666;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 .logout-btn {
-  width: 100%;
-  background: #000000;
-  border: none;
-  color: #ffffff;
-  padding: 12px 16px;
-  border-radius: 8px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  font-size: 14px;
-  font-weight: 500;
-  transition: all 0.2s ease;
+    width: 100%;
+    background: #000000;
+    border: 1px solid #000000;
+    color: #ffffff;
+    padding: 0.875rem 1rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
 }
 
 .logout-btn:hover {
-  background: #333333;
-  transform: translateY(-1px);
+    background: #ffffff;
+    color: #000000;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
+.logout-btn:active {
+    transform: translateY(0);
+}
+
+
 /* Collapsed State Adjustments */
+
 .sidebar.collapsed .nav-group-toggle,
 .sidebar.collapsed .nav-item {
-  padding: 12px 16px;
-  justify-content: center;
+    padding: 0.875rem 1rem;
+    justify-content: center;
 }
 
 .sidebar.collapsed .user-section {
-  justify-content: center;
-  padding: 8px;
+    justify-content: center;
+    padding: 0.5rem;
 }
 
 .sidebar.collapsed .logout-btn {
-  padding: 12px;
+    padding: 0.875rem;
 }
 
+.sidebar.collapsed .language-toggle-btn {
+    padding: 0.75rem;
+    justify-content: center;
+}
+
+
 /* Scrollbar Styling */
+
 .sidebar-nav::-webkit-scrollbar {
-  width: 6px;
+    width: 4px;
 }
 
 .sidebar-nav::-webkit-scrollbar-track {
-  background: #f9f9f9;
+    background: transparent;
 }
 
 .sidebar-nav::-webkit-scrollbar-thumb {
-  background: #cccccc;
-  border-radius: 3px;
+    background: #e5e5e5;
+    border-radius: 2px;
+    transition: background 0.2s ease;
 }
 
 .sidebar-nav::-webkit-scrollbar-thumb:hover {
-  background: #999999;
+    background: #cccccc;
 }
 
+
 /* RTL Support */
+
 .rtl .sidebar {
-  left: auto;
-  right: 0;
-  border-right: none;
-  border-left: 1px solid #e5e5e5;
+    left: auto;
+    right: 0;
+    border-right: none;
+    border-left: 1px solid #e5e5e5;
 }
 
 .rtl .nav-item.active {
-  border-right: none;
-  border-left: 3px solid #000000;
+    border-right: none;
+    border-left: 3px solid #000000;
 }
 
 .rtl .nav-group-toggle.active {
-  border-right: none;
-  border-left: 3px solid #000000;
+    border-right: none;
+    border-left: 3px solid #000000;
 }
 
+
 /* Responsive Design */
+
 @media (max-width: 768px) {
-  .sidebar {
-    width: 60px;
-  }
-
-  .sidebar.collapsed {
-    width: 0;
-    overflow: hidden;
-  }
-
-  .sidebar-toggle {
-    position: fixed;
-    top: 20px;
-    left: 20px;
-    z-index: 1001;
-    background: #ffffff;
-    border: 1px solid #e5e5e5;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  }
-
-  .rtl .sidebar-toggle {
-    left: auto;
-    right: 20px;
-  }
+    .sidebar {
+        width: 60px;
+    }
+    .sidebar.collapsed {
+        width: 0;
+        overflow: hidden;
+    }
+    .sidebar-toggle {
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        z-index: 1001;
+        background: #ffffff;
+        border: 1px solid #e5e5e5;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+    .rtl .sidebar-toggle {
+        left: auto;
+        right: 20px;
+    }
 }
 
 .language-toggle-btn {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  background: none;
-  border: none;
-  color: inherit;
-  padding: 8px;
-  margin-bottom: 10px;
-  cursor: pointer;
-  transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: #000000;
+    border: 1px solid #000000;
+    color: #ffffff;
+    padding: 0.75rem;
+    margin-bottom: 1rem;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 0.5rem;
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 0.875rem;
+    font-weight: 500;
+    width: 100%;
+    justify-content: center;
 }
 
 .language-toggle-btn:hover {
-  color: #007bff;
+    background: #ffffff;
+    color: #000000;
+    border-color: #000000;
+    transform: translateY(-1px);
 }
 
-/* Add these styles to your Sidebar.css file */
-
-.sidebar {
-  height: 100vh; /* Full viewport height */
-  display: flex;
-  flex-direction: column;
-  overflow: hidden; /* Prevent the entire sidebar from scrolling */
+.language-toggle-btn:active {
+    transform: translateY(0);
 }
 
-.sidebar-header {
-  flex-shrink: 0; /* Prevent header from shrinking */
-  /* Keep your existing header styles */
-}
-
-.sidebar-nav {
-  flex: 1; /* Take up remaining space */
-  overflow-y: auto; /* Enable vertical scrolling */
-  overflow-x: hidden; /* Hide horizontal scrollbar */
-  padding: 0.5rem 0; /* Add some padding */
-}
-
-/* Custom scrollbar styling (optional) */
-.sidebar-nav::-webkit-scrollbar {
-  width: 4px;
-}
-
-.sidebar-nav::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.sidebar-nav::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 2px;
-}
-
-.sidebar-nav::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.3);
-}
 
 /* For Firefox */
+
 .sidebar-nav {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+    scrollbar-width: thin;
+    scrollbar-color: #e5e5e5 transparent;
 }
 
-.sidebar-footer {
-  flex-shrink: 0; /* Prevent footer from shrinking */
-  margin-top: auto; /* Push to bottom */
-  /* Keep your existing footer styles */
-}
 
 /* Ensure nav items have proper spacing when scrolling */
+
 .nav-item,
 .nav-group {
-  margin-bottom: 0.25rem;
+    margin-bottom: 0.25rem;
 }
 
 .nav-group-items {
-  margin-bottom: 0.5rem;
+    margin-bottom: 0.5rem;
 }
 
+
 /* When sidebar is collapsed, ensure scroll still works */
+
 .sidebar.collapsed .sidebar-nav {
-  overflow-y: auto;
+    overflow-y: auto;
 }

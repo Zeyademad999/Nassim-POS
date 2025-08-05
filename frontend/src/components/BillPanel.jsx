@@ -147,7 +147,24 @@ const BillPanel = () => {
 
   // Enhanced discount change handler
   const handleDiscountChange = (e) => {
-    const value = parseFloat(e.target.value) || 0;
+    const inputValue = e.target.value;
+
+    // Allow empty input for better UX
+    if (inputValue === "" || inputValue === null || inputValue === undefined) {
+      if (discountType === "percentage") {
+        setDiscountPercentage(0);
+      } else {
+        setDiscountAmount(0);
+      }
+      return;
+    }
+
+    const value = parseFloat(inputValue);
+
+    // Handle invalid input
+    if (isNaN(value)) {
+      return; // Don't update state for invalid input
+    }
 
     if (discountType === "percentage") {
       const clampedPercentage = Math.max(0, Math.min(value, 100));
@@ -363,14 +380,12 @@ const BillPanel = () => {
 
             <div className="discount-input-wrapper">
               <input
-                type="number"
-                min="0"
-                max={discountType === "percentage" ? 100 : subtotal}
-                step={discountType === "percentage" ? "1" : "0.01"}
+                type="text"
+                inputMode="decimal"
                 value={
                   discountType === "percentage"
-                    ? discountPercentage
-                    : discountAmount
+                    ? (discountPercentage === 0 ? "" : discountPercentage.toString())
+                    : (discountAmount === 0 ? "" : discountAmount.toString())
                 }
                 onChange={handleDiscountChange}
                 className="discount-input"

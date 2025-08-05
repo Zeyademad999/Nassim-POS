@@ -55,6 +55,8 @@ export default function ManageProducts() {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [deleteConfirmation, setDeleteConfirmation] = useState(null);
+  const [deleteType, setDeleteType] = useState(null); // "product" or "supplier"
 
   const fetchProducts = async () => {
     try {
@@ -302,49 +304,67 @@ export default function ManageProducts() {
   };
 
   const deleteProduct = async (id) => {
-    if (!confirm(t("Are you sure you want to delete this product?"))) return;
-
-    setLoading(true);
-    setError("");
-
-    try {
-      const res = await fetch(`/api/products/${id}`, {
-        method: "DELETE",
-      });
-
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.error || t("Failed to delete product"));
-      }
-
-      fetchProducts();
-    } catch (err) {
-      console.error("Error deleting product:", err);
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
+    const product = products.find((p) => p.id === id);
+    setDeleteConfirmation({
+      id: id,
+      item: product,
+      isVisible: true,
+    });
+    setDeleteType("product");
   };
 
   const deleteSupplier = async (id) => {
-    if (!confirm(t("Are you sure you want to delete this supplier?"))) return;
+    const supplier = suppliers.find((s) => s.id === id);
+    setDeleteConfirmation({
+      id: id,
+      item: supplier,
+      isVisible: true,
+    });
+    setDeleteType("supplier");
+  };
+
+  const cancelDelete = () => {
+    setDeleteConfirmation({
+      ...deleteConfirmation,
+      isVisible: false,
+    });
+    // Remove the confirmation after animation
+    setTimeout(() => {
+      setDeleteConfirmation(null);
+      setDeleteType(null);
+    }, 300);
+  };
+
+  const proceedWithDelete = async () => {
+    if (!deleteConfirmation?.id || !deleteType) return;
 
     setLoading(true);
     setError("");
 
     try {
-      const res = await fetch(`/api/suppliers/${id}`, {
+      const endpoint =
+        deleteType === "product"
+          ? `/api/products/${deleteConfirmation.id}`
+          : `/api/suppliers/${deleteConfirmation.id}`;
+      const res = await fetch(endpoint, {
         method: "DELETE",
       });
 
       if (!res.ok) {
         const errorData = await res.json();
-        throw new Error(errorData.error || t("Failed to delete supplier"));
+        throw new Error(errorData.error || `Failed to delete ${deleteType}`);
       }
 
-      fetchSuppliers();
+      setDeleteConfirmation(null);
+      setDeleteType(null);
+
+      if (deleteType === "product") {
+        fetchProducts();
+      } else {
+        fetchSuppliers();
+      }
     } catch (err) {
-      console.error("Error deleting supplier:", err);
+      console.error(`Error deleting ${deleteType}:`, err);
       setError(err.message);
     } finally {
       setLoading(false);
@@ -441,14 +461,44 @@ export default function ManageProducts() {
         .tab-navigation {
           display: flex;
           gap: 4px;
-          background: white;
+          background: #ffffff;
           padding: 4px;
           border-radius: 8px;
-          border: 1px solid #e5e7eb;
+          border: 1px solid #e5e5e5;
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         }
-        /* Add these CSS updates to your existing styles in ManageProducts.jsx */
 
-        .edit-form {
+        .tab-button {
+          padding: 8px 16px;
+          border: none;
+          background: none;
+          border-radius: 6px;
+          cursor: pointer;
+          font-size: 14px;
+          font-weight: 500;
+          transition: all 0.2s ease;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          color: #666666;
+        }
+
+        .tab-button.active {
+          background: #000000;
+          color: #ffffff;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .tab-button:not(.active) {
+          color: #666666;
+        }
+
+        .tab-button:not(.active):hover {
+          background: #f5f5f5;
+          color: #000000;
+        }
+
+        /* Add these CSS updates to your existing styles in ManageProducts.jsx */
           display: flex;
           flex-direction: column;
           gap: 16px; /* Increased gap for better spacing */
@@ -574,33 +624,7 @@ export default function ManageProducts() {
           }
         }
 
-        .tab-button {
-          padding: 8px 16px;
-          border: none;
-          background: none;
-          border-radius: 6px;
-          cursor: pointer;
-          font-size: 14px;
-          font-weight: 500;
-          transition: all 0.2s ease;
-          display: flex;
-          align-items: center;
-          gap: 8px;
-        }
 
-        .tab-button.active {
-          background: #2563eb;
-          color: white;
-        }
-
-        .tab-button:not(.active) {
-          color: #6b7280;
-        }
-
-        .tab-button:not(.active):hover {
-          background: #f3f4f6;
-          color: #374151;
-        }
 
         .error-message {
           background: #fee2e2;
@@ -974,6 +998,210 @@ export default function ManageProducts() {
             flex-direction: column;
             gap: 12px;
             align-items: stretch;
+          }
+        }
+
+        /* Delete Confirmation Modal Styles */
+        .modal-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: rgba(0, 0, 0, 0.6);
+          backdrop-filter: blur(4px);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 1000;
+          padding: 1.5rem;
+          animation: fadeIn 0.3s ease-out;
+        }
+
+        .modal-content {
+          background: #ffffff;
+          border-radius: 0.5rem;
+          max-width: 500px;
+          width: 100%;
+          max-height: 90vh;
+          overflow-y: auto;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+          border: 1px solid #e5e5e5;
+          animation: slideIn 0.3s ease-out;
+          transform-origin: center;
+        }
+
+        .modal-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 1.5rem 1.5rem 0 1.5rem;
+          border-bottom: 1px solid #e2e8f0;
+          margin-bottom: 1.5rem;
+        }
+
+        .modal-header h2 {
+          font-size: 1.25rem;
+          font-weight: 600;
+          color: #1a202c;
+          margin: 0;
+        }
+
+        .close-btn {
+          background: none;
+          border: none;
+          cursor: pointer;
+          color: #64748b;
+          padding: 0.5rem;
+          border-radius: 8px;
+          transition: all 0.2s ease;
+        }
+
+        .close-btn:hover {
+          background: #f1f5f9;
+          color: #1a202c;
+        }
+
+        .modal-body {
+          padding: 0 1.5rem 1.5rem 1.5rem;
+          text-align: center;
+        }
+
+        .alert-icon {
+          color: #dc2626;
+          margin-bottom: 1rem;
+          animation: pulse 2s infinite;
+        }
+
+        .modal-body p {
+          font-size: 1rem;
+          color: #374151;
+          margin: 0 0 2rem 0;
+          line-height: 1.5;
+        }
+
+        .item-details-text {
+          display: block;
+          margin: 0.75rem 0;
+          font-size: 0.9rem;
+          color: #666666;
+          font-style: italic;
+          line-height: 1.4;
+        }
+
+        .modal-actions {
+          display: flex;
+          gap: 1rem;
+          justify-content: center;
+          margin-top: 2rem;
+        }
+
+        .cancel-button {
+          background: #ffffff;
+          color: #666666;
+          border: 1px solid #e5e5e5;
+          border-radius: 0.5rem;
+          padding: 0.875rem 1.5rem;
+          font-size: 0.875rem;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+          font-family: inherit;
+        }
+
+        .cancel-button:hover:not(:disabled) {
+          background: #f5f5f5;
+          border-color: #000000;
+          color: #000000;
+          transform: translateY(-1px);
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .cancel-button:disabled {
+          background: #f5f5f5;
+          color: #999999;
+          cursor: not-allowed;
+          transform: none;
+          box-shadow: none;
+        }
+
+        .delete-confirmation-modal .delete-button {
+          background: #dc2626;
+          color: #ffffff;
+          border: 1px solid #dc2626;
+          border-radius: 0.5rem;
+          padding: 0.875rem 1.5rem;
+          font-size: 0.875rem;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+          font-family: inherit;
+        }
+
+        .delete-confirmation-modal .delete-button:hover:not(:disabled) {
+          background: #b91c1c;
+          border-color: #b91c1c;
+          transform: translateY(-1px);
+          box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3);
+        }
+
+        .delete-confirmation-modal .delete-button:disabled {
+          background: #9ca3af;
+          border-color: #9ca3af;
+          cursor: not-allowed;
+          transform: none;
+          box-shadow: none;
+        }
+
+        /* Animation Keyframes */
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+          }
+          to {
+            opacity: 1;
+          }
+        }
+
+        @keyframes slideIn {
+          from {
+            opacity: 0;
+            transform: scale(0.9) translateY(-20px);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+          }
+        }
+
+        @keyframes pulse {
+          0%,
+          100% {
+            transform: scale(1);
+          }
+          50% {
+            transform: scale(1.05);
+          }
+        }
+
+        /* Responsive adjustments for delete modal */
+        @media (max-width: 768px) {
+          .modal-actions {
+            flex-direction: column-reverse;
+          }
+          .modal-actions .cancel-button,
+          .modal-actions .delete-button {
+            width: 100%;
+            justify-content: center;
+          }
+          .modal-content {
+            margin: 0.5rem;
+            max-width: none;
+            width: auto;
           }
         }
       `}</style>
@@ -1939,6 +2167,100 @@ export default function ManageProducts() {
                 </li>
               ))}
             </ul>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {deleteConfirmation && (
+        <div className="modal-overlay">
+          <div className="modal-content delete-confirmation-modal">
+            <div className="modal-header">
+              <h2>
+                {deleteType === "product"
+                  ? t("Confirm Delete Product")
+                  : t("Confirm Delete Supplier")}
+              </h2>
+              <button className="close-btn" onClick={cancelDelete}>
+                <X size={20} />
+              </button>
+            </div>
+            <div className="modal-body">
+              <AlertTriangle size={48} className="alert-icon" />
+              <p>
+                {deleteType === "product" ? (
+                  <>
+                    Are you sure you want to delete the product{" "}
+                    <strong>"{deleteConfirmation.item?.name}"</strong>?
+                    <br />
+                    <span className="item-details-text">
+                      Price: {deleteConfirmation.item?.price?.toFixed(2)} EGP
+                      {deleteConfirmation.item?.stock_quantity !==
+                        undefined && (
+                        <>
+                          <br />
+                          Stock: {deleteConfirmation.item.stock_quantity} units
+                        </>
+                      )}
+                      {deleteConfirmation.item?.category && (
+                        <>
+                          <br />
+                          Category: {deleteConfirmation.item.category}
+                        </>
+                      )}
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    Are you sure you want to delete the supplier{" "}
+                    <strong>"{deleteConfirmation.item?.name}"</strong>?
+                    <br />
+                    <span className="item-details-text">
+                      {deleteConfirmation.item?.contact_person && (
+                        <>
+                          Contact: {deleteConfirmation.item.contact_person}
+                          <br />
+                        </>
+                      )}
+                      {deleteConfirmation.item?.phone && (
+                        <>
+                          Phone: {deleteConfirmation.item.phone}
+                          <br />
+                        </>
+                      )}
+                      {deleteConfirmation.item?.email && (
+                        <>
+                          Email: {deleteConfirmation.item.email}
+                          <br />
+                        </>
+                      )}
+                      Products Supplied:{" "}
+                      {
+                        products.filter(
+                          (p) => p.supplier_id === deleteConfirmation.item?.id
+                        ).length
+                      }{" "}
+                      items
+                    </span>
+                  </>
+                )}
+                <br />
+                This action cannot be undone and will remove all associated
+                data.
+              </p>
+              <div className="modal-actions">
+                <button className="cancel-button" onClick={cancelDelete}>
+                  {t("Cancel")}
+                </button>
+                <button
+                  className="delete-button"
+                  onClick={proceedWithDelete}
+                  disabled={loading}
+                >
+                  {loading ? t("Deleting...") : t("Delete")}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}

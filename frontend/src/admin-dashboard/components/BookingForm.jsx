@@ -6,6 +6,13 @@ import {
   AlertCircle,
   CheckCircle,
   Info,
+  Save,
+  X,
+  Scissors,
+  DollarSign,
+  FileText,
+  Users,
+  CalendarDays,
 } from "lucide-react";
 import "../styles/BookingForm.css";
 
@@ -278,9 +285,9 @@ export default function BookingForm({
         {error && (
           <div className="error-message">
             <AlertCircle size={16} />
-            {error}
+            <span>{error}</span>
             <button type="button" onClick={() => setError("")}>
-              ×
+              <X size={16} />
             </button>
           </div>
         )}
@@ -289,7 +296,7 @@ export default function BookingForm({
           {/* Customer Selection */}
           <div className="form-group">
             <label>
-              <User size={16} />
+              <Users size={16} />
               Customer *
             </label>
             <select
@@ -319,7 +326,7 @@ export default function BookingForm({
           {/* Barber Selection */}
           <div className="form-group">
             <label>
-              <User size={16} />
+              <Scissors size={16} />
               Barber *
             </label>
             <select
@@ -350,7 +357,7 @@ export default function BookingForm({
           {/* Date Selection */}
           <div className="form-group">
             <label>
-              <Calendar size={16} />
+              <CalendarDays size={16} />
               Date *
             </label>
             <input
@@ -369,7 +376,10 @@ export default function BookingForm({
 
           {/* Duration Selection */}
           <div className="form-group">
-            <label>Duration (minutes)</label>
+            <label>
+              <Clock size={16} />
+              Duration (minutes)
+            </label>
             <select
               value={booking.duration_minutes}
               onChange={(e) => {
@@ -471,7 +481,10 @@ export default function BookingForm({
 
         {/* Services Selection */}
         <div className="form-group services-group">
-          <label>Services *</label>
+          <label>
+            <Scissors size={16} />
+            Services *
+          </label>
           <div className="services-grid">
             {services && Array.isArray(services) && services.length > 0 ? (
               services.map((service) => (
@@ -497,7 +510,7 @@ export default function BookingForm({
                   />
                   <span className="service-info">
                     <span className="service-name">{service.name}</span>
-                    <span className="service-price">${service.price}</span>
+                    <span className="service-price">{service.price} EGP</span>
                   </span>
                 </label>
               ))
@@ -513,15 +526,21 @@ export default function BookingForm({
 
         {/* Estimated Cost Display */}
         <div className="form-group">
-          <label>Estimated Cost</label>
+          <label>
+            <DollarSign size={16} />
+            Estimated Cost
+          </label>
           <div className="estimated-cost">
-            ${booking.estimated_cost.toFixed(2)}
+            {booking.estimated_cost.toFixed(2)} EGP
           </div>
         </div>
 
         {/* Notes */}
         <div className="form-group">
-          <label>Notes</label>
+          <label>
+            <FileText size={16} />
+            Notes
+          </label>
           <textarea
             value={booking.notes}
             onChange={(e) =>
@@ -535,9 +554,11 @@ export default function BookingForm({
         {/* Form Actions */}
         <div className="form-actions">
           <button type="submit" disabled={loading}>
+            <Save size={16} />
             {editingBooking ? "Update Booking" : "Create Booking"}
           </button>
           <button type="button" onClick={onCancel}>
+            <X size={16} />
             Cancel
           </button>
         </div>

@@ -54,6 +54,7 @@ const POS = ({ onLogout }) => {
   const [showCustomerDropdown, setShowCustomerDropdown] = useState(false);
   const [filteredCustomers, setFilteredCustomers] = useState([]);
   const [isDetailsExpanded, setIsDetailsExpanded] = useState(false);
+  const [customerType, setCustomerType] = useState(""); // "walk-in", "new", "returning"
 
   useEffect(() => {
     const fetchData = async () => {
@@ -226,6 +227,7 @@ const POS = ({ onLogout }) => {
       setCustomerMobile(customer.mobile || "");
       setCustomerSearch(`${customer.name} - ${customer.mobile}`);
       setShowCustomerDropdown(false);
+      setCustomerType("returning"); // Set type when customer is selected
     }
   };
 
@@ -252,20 +254,23 @@ const POS = ({ onLogout }) => {
     console.log("👤 Customer type selected:", type);
 
     if (type === "walk-in") {
+      setCustomerType("walk-in");
       setCustomerId("");
       setCustomerName("Walk-in");
       setCustomerMobile("");
       setCustomerSearch("Walk-in Customer");
       setShowCustomerDropdown(false);
     } else if (type === "new-customer") {
+      setCustomerType("new");
       setCustomerId("");
-      setCustomerName("");
+      setCustomerName(""); // This will trigger showing the new customer fields
       setCustomerMobile("");
       setCustomerSearch("");
       setShowCustomerDropdown(false);
     } else if (type === "returning-customer") {
+      setCustomerType("returning");
       setCustomerId("");
-      setCustomerName("");
+      setCustomerName(""); // This will trigger showing the search field
       setCustomerMobile("");
       setCustomerSearch("");
       setShowCustomerDropdown(false);
@@ -450,7 +455,7 @@ const POS = ({ onLogout }) => {
                       <div className="customer-tabs">
                         <button
                           className={`customer-tab ${
-                            customerName === "Walk-in" ? "active" : ""
+                            customerType === "walk-in" ? "active" : ""
                           }`}
                           onClick={() => handleCustomerTypeSelect("walk-in")}
                         >
@@ -458,9 +463,7 @@ const POS = ({ onLogout }) => {
                         </button>
                         <button
                           className={`customer-tab ${
-                            customerId && customerName !== "Walk-in"
-                              ? "active"
-                              : ""
+                            customerType === "returning" ? "active" : ""
                           }`}
                           onClick={() =>
                             handleCustomerTypeSelect("returning-customer")
@@ -470,11 +473,7 @@ const POS = ({ onLogout }) => {
                         </button>
                         <button
                           className={`customer-tab ${
-                            !customerId &&
-                            customerName !== "Walk-in" &&
-                            customerName
-                              ? "active"
-                              : ""
+                            customerType === "new" ? "active" : ""
                           }`}
                           onClick={() =>
                             handleCustomerTypeSelect("new-customer")
@@ -484,11 +483,30 @@ const POS = ({ onLogout }) => {
                         </button>
                       </div>
 
-                      {customerName === "Walk-in" ? (
+                      {customerType === "walk-in" ? (
                         <div className="walk-in-display">
                           <span>Walk-in Customer</span>
                         </div>
-                      ) : (
+                      ) : customerType === "new" ? (
+                        // New customer - show name and mobile input fields
+                        <div className="new-customer-fields">
+                          <input
+                            type="text"
+                            placeholder="Customer name"
+                            value={customerName}
+                            onChange={(e) => setCustomerName(e.target.value)}
+                            className="customer-input"
+                          />
+                          <input
+                            type="tel"
+                            placeholder="Mobile number (required)"
+                            value={customerMobile}
+                            onChange={(e) => setCustomerMobile(e.target.value)}
+                            className="customer-input"
+                          />
+                        </div>
+                      ) : customerType === "returning" ? (
+                        // Returning customer - show search input
                         <div className="customer-search-wrapper">
                           <input
                             type="text"
@@ -544,31 +562,8 @@ const POS = ({ onLogout }) => {
                             filteredCustomers.length === 0 && (
                               <div className="customer-dropdown"></div>
                             )}
-
-                          {!customerId && customerName !== "Walk-in" && (
-                            <div className="new-customer-fields">
-                              <input
-                                type="text"
-                                placeholder="Customer name"
-                                value={customerName}
-                                onChange={(e) =>
-                                  setCustomerName(e.target.value)
-                                }
-                                className="customer-input"
-                              />
-                              <input
-                                type="tel"
-                                placeholder="Mobile number (required)"
-                                value={customerMobile}
-                                onChange={(e) =>
-                                  setCustomerMobile(e.target.value)
-                                }
-                                className="customer-input"
-                              />
-                            </div>
-                          )}
                         </div>
-                      )}
+                      ) : null}
                     </div>
                   </div>
 
@@ -609,53 +604,61 @@ const POS = ({ onLogout }) => {
             )}
           </div>
 
-          {/* Services & Products Tabs */}
-          <div className="content-tabs">
+          {/* Service/Product Tabs */}
+          <div className="pos-tabs">
             <button
-              className={`content-tab ${
-                activeTab === "services" ? "active" : ""
-              }`}
+              className={`pos-tab ${activeTab === "services" ? "active" : ""}`}
               onClick={() => setActiveTab("services")}
             >
               <Scissors size={18} />
-              <span>Services ({services.length})</span>
+              <span>
+                {t("services")} ({services.length})
+              </span>
             </button>
             <button
-              className={`content-tab ${
-                activeTab === "products" ? "active" : ""
-              }`}
+              className={`pos-tab ${activeTab === "products" ? "active" : ""}`}
               onClick={() => setActiveTab("products")}
             >
               <ShoppingCart size={18} />
-              <span>Products ({products.length})</span>
+              <span>
+                {t("products")} ({products.length})
+              </span>
             </button>
           </div>
 
-          {/* Content Grid */}
-          <div className="content-grid">
+          {/* Content based on active tab */}
+          <div className="tab-content">
             {activeTab === "services" ? (
-              <div className="services-grid">
+              <div className="card-grid">
                 {services.map((service) => (
                   <ServiceCard key={service.id} service={service} />
                 ))}
                 {services.length === 0 && (
-                  <div className="empty-state">
-                    <Scissors size={48} />
-                    <h3>No Services Available</h3>
-                    <p>Add services to get started</p>
+                  <div
+                    style={{
+                      textAlign: "center",
+                      padding: "40px",
+                      color: "#6b7280",
+                    }}
+                  >
+                    <p>{t("noServicesAvailable")}</p>
                   </div>
                 )}
               </div>
             ) : (
-              <div className="products-grid">
+              <div className="card-grid">
                 {products.map((product) => (
                   <ProductCard key={product.id} product={product} />
                 ))}
                 {products.length === 0 && (
-                  <div className="empty-state">
-                    <ShoppingCart size={48} />
-                    <h3>No Products Available</h3>
-                    <p>Add products to get started</p>
+                  <div
+                    style={{
+                      textAlign: "center",
+                      padding: "40px",
+                      color: "#6b7280",
+                    }}
+                  >
+                    <p>{t("noProductsAvailable")}</p>
                   </div>
                 )}
               </div>

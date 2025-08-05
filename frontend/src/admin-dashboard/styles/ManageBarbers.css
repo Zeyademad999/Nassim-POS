@@ -125,44 +125,322 @@
     color: #999999;
 }
 
+
+/* Enhanced Specialties Section */
+
 .specialty-group {
     grid-column: 1 / -1;
 }
 
-.services-checkboxes {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.75rem;
-    padding: 1rem;
-    background: #f5f5f5;
+.specialty-group label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #000000;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.75rem;
+    display: block;
+}
+
+.specialties-container {
+    background: #ffffff;
     border: 1px solid #e5e5e5;
+    border-radius: 0.75rem;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    transition: all 0.2s ease;
+}
+
+.specialties-container:hover {
+    border-color: #000000;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.specialties-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.25rem 1.5rem;
+    background: linear-gradient(135deg, #f8f9fa 0%, #f1f3f4 100%);
+    border-bottom: 1px solid #e5e5e5;
+    position: relative;
+}
+
+.specialties-header::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #000000 0%, #333333 100%);
+}
+
+.selected-count {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #000000;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.selected-count::before {
+    content: "✓";
+    font-size: 1rem;
+    color: #000000;
+    font-weight: 700;
+}
+
+.clear-all-btn {
+    background: #ffffff;
+    border: 1px solid #e5e5e5;
+    color: #666666;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 0.5rem 1rem;
     border-radius: 0.5rem;
-    max-height: 120px;
+    transition: all 0.2s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.clear-all-btn::before {
+    content: "×";
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+.clear-all-btn:hover:not(:disabled) {
+    background: #000000;
+    border-color: #000000;
+    color: #ffffff;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.clear-all-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.services-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 0;
+    max-height: 240px;
     overflow-y: auto;
+    background: #ffffff;
+}
+
+.service-item {
+    border-bottom: 1px solid #f0f0f0;
+    border-right: 1px solid #f0f0f0;
+    position: relative;
+    transition: all 0.2s ease;
+}
+
+.service-item:last-child {
+    border-bottom: none;
+}
+
+.service-item:nth-child(3n) {
+    border-right: none;
+}
+
+.service-item:hover {
+    background: #fafafa;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    z-index: 1;
 }
 
 .service-checkbox {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: #000000;
+    gap: 1rem;
+    padding: 1.25rem 1.5rem;
     cursor: pointer;
-    white-space: nowrap;
+    transition: all 0.2s ease;
+    position: relative;
+    width: 100%;
+    height: 100%;
+    min-height: 60px;
+}
+
+.service-checkbox:hover {
+    background: #f8f9fa;
 }
 
 .service-checkbox input[type="checkbox"] {
-    width: 1rem;
-    height: 1rem;
-    accent-color: #000000;
-    margin: 0;
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+}
+
+
+/* Enhanced Custom Checkbox */
+
+.checkbox-custom {
+    width: 1.75rem;
+    height: 1.75rem;
+    border: 2px solid #d1d5db;
+    border-radius: 0.5rem;
+    background: #ffffff;
+    position: relative;
+    flex-shrink: 0;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+
+/* Checkbox hover state */
+
+.service-checkbox:hover .checkbox-custom {
+    border-color: #000000;
+    transform: scale(1.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+
+/* Checkbox checked state */
+
+.service-checkbox input[type="checkbox"]:checked+.checkbox-custom {
+    background: linear-gradient(135deg, #000000 0%, #333333 100%);
+    border-color: #000000;
+    transform: scale(1.15);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+
+/* Checkmark animation */
+
+.service-checkbox input[type="checkbox"]:checked+.checkbox-custom::after {
+    content: "";
+    position: absolute;
+    width: 0.75rem;
+    height: 0.75rem;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z'/%3E%3C/svg%3E") no-repeat center;
+    background-size: contain;
+    opacity: 0;
+    transform: scale(0.5) rotate(-45deg);
+    animation: checkmarkAppear 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+
+/* Checkbox focus state */
+
+.service-checkbox input[type="checkbox"]:focus+.checkbox-custom {
+    box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.1), 0 2px 8px rgba(0, 0, 0, 0.15);
+    outline: none;
+}
+
+
+/* Checkbox disabled state */
+
+.service-checkbox input[type="checkbox"]:disabled+.checkbox-custom {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+
+/* Checkbox ripple effect */
+
+.checkbox-custom::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.1);
+    transform: translate(-50%, -50%);
+    transition: width 0.3s ease, height 0.3s ease;
+}
+
+.service-checkbox:active .checkbox-custom::before {
+    width: 2.5rem;
+    height: 2.5rem;
+}
+
+
+/* Checkmark animation keyframes */
+
+@keyframes checkmarkAppear {
+    0% {
+        opacity: 0;
+        transform: scale(0.5) rotate(-45deg);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.2) rotate(0deg);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1) rotate(0deg);
+    }
+}
+
+
+/* Service name styling */
+
+.service-name {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #374151;
+    flex: 1;
+    line-height: 1.4;
+    letter-spacing: -0.025em;
+    transition: all 0.2s ease;
+    text-transform: uppercase;
+}
+
+.service-checkbox:hover .service-name {
+    color: #000000;
+    font-weight: 700;
+}
+
+.service-checkbox input[type="checkbox"]:checked~.service-name {
+    color: #000000;
+    font-weight: 700;
+    transform: translateX(2px);
+}
+
+
+/* Service item selected state */
+
+.service-item.selected {
+    background: #f8f9fa;
+    border-color: #000000;
+}
+
+.service-item.selected .service-checkbox {
+    background: #f8f9fa;
+}
+
+.service-item.selected .service-name {
+    color: #000000;
+    font-weight: 700;
 }
 
 .form-actions {
     grid-column: 1 / -1;
     display: flex;
     justify-content: flex-start;
+    margin-top: 1rem;
 }
 
 .add-button {
@@ -185,12 +463,16 @@
 .add-button:hover:not(:disabled) {
     background: #ffffff;
     color: #000000;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 .add-button:disabled {
     background: #cccccc;
     border-color: #cccccc;
     cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
 }
 
 
@@ -480,8 +762,17 @@
         width: 100%;
         justify-content: center;
     }
-    .services-checkboxes {
-        max-height: 100px;
+    .services-grid {
+        grid-template-columns: 1fr;
+        max-height: 200px;
+    }
+    .specialties-header {
+        flex-direction: column;
+        gap: 0.75rem;
+        align-items: stretch;
+    }
+    .clear-all-btn {
+        align-self: flex-end;
     }
 }
 
@@ -501,22 +792,23 @@
 
 /* Scrollbar Styling */
 
-.services-checkboxes::-webkit-scrollbar {
-    width: 6px;
+.services-grid::-webkit-scrollbar {
+    width: 8px;
 }
 
-.services-checkboxes::-webkit-scrollbar-track {
-    background: #f5f5f5;
-    border-radius: 3px;
+.services-grid::-webkit-scrollbar-track {
+    background: #f8f9fa;
+    border-radius: 4px;
 }
 
-.services-checkboxes::-webkit-scrollbar-thumb {
-    background: #cccccc;
-    border-radius: 3px;
+.services-grid::-webkit-scrollbar-thumb {
+    background: #d1d5db;
+    border-radius: 4px;
+    transition: background 0.2s ease;
 }
 
-.services-checkboxes::-webkit-scrollbar-thumb:hover {
-    background: #999999;
+.services-grid::-webkit-scrollbar-thumb:hover {
+    background: #9ca3af;
 }
 
 
@@ -526,7 +818,209 @@
 .edit-group input:focus,
 .barber-actions button:focus,
 .add-button:focus,
-.error-message button:focus {
+.error-message button:focus,
+.service-checkbox:focus-within {
     outline: 2px solid #000000;
     outline-offset: 2px;
+}
+
+
+/* Delete Confirmation Modal Styles */
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 1.5rem;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.modal-content {
+    background: #ffffff;
+    border-radius: 0.5rem;
+    max-width: 500px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e5e5e5;
+    animation: slideIn 0.3s ease-out;
+    transform-origin: center;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 1.5rem 0 1.5rem;
+    border-bottom: 1px solid #e2e8f0;
+    margin-bottom: 1.5rem;
+}
+
+.modal-header h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1a202c;
+    margin: 0;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #64748b;
+    padding: 0.5rem;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.close-btn:hover {
+    background: #f1f5f9;
+    color: #1a202c;
+}
+
+.modal-body {
+    padding: 0 1.5rem 1.5rem 1.5rem;
+    text-align: center;
+}
+
+.alert-icon {
+    color: #dc2626;
+    margin-bottom: 1rem;
+    animation: pulse 2s infinite;
+}
+
+.modal-body p {
+    font-size: 1rem;
+    color: #374151;
+    margin: 0 0 2rem 0;
+    line-height: 1.5;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 2rem;
+}
+
+.cancel-button {
+    background: #ffffff;
+    color: #666666;
+    border: 1px solid #e5e5e5;
+    border-radius: 0.5rem;
+    padding: 0.875rem 1.5rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-family: inherit;
+}
+
+.cancel-button:hover:not(:disabled) {
+    background: #f5f5f5;
+    border-color: #000000;
+    color: #000000;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.cancel-button:disabled {
+    background: #f5f5f5;
+    color: #999999;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.delete-confirmation-modal .delete-button {
+    background: #dc2626;
+    color: #ffffff;
+    border: 1px solid #dc2626;
+    border-radius: 0.5rem;
+    padding: 0.875rem 1.5rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-family: inherit;
+}
+
+.delete-confirmation-modal .delete-button:hover:not(:disabled) {
+    background: #b91c1c;
+    border-color: #b91c1c;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3);
+}
+
+.delete-confirmation-modal .delete-button:disabled {
+    background: #9ca3af;
+    border-color: #9ca3af;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+
+/* Animation Keyframes */
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9) translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+@keyframes pulse {
+    0%,
+    100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+
+/* Responsive adjustments for delete modal */
+
+@media (max-width: 768px) {
+    .modal-actions {
+        flex-direction: column-reverse;
+    }
+    .modal-actions .cancel-button,
+    .modal-actions .delete-button {
+        width: 100%;
+        justify-content: center;
+    }
+    .modal-content {
+        margin: 0.5rem;
+        max-width: none;
+        width: auto;
+    }
 }

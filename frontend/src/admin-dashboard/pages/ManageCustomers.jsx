@@ -18,6 +18,7 @@ import {
   User,
   Clock,
   DollarSign,
+  AlertTriangle,
 } from "lucide-react";
 import CustomerForm from "../components/CustomerForm";
 import BookingForm from "../components/BookingForm";
@@ -39,6 +40,7 @@ export default function ManageCustomers() {
   const [sortBy, setSortBy] = useState("name");
   const [sortOrder, setSortOrder] = useState("ASC");
   const [stats, setStats] = useState(null);
+  const [deleteConfirmation, setDeleteConfirmation] = useState(null);
 
   const fetchCustomers = async () => {
     try {
@@ -77,6 +79,7 @@ export default function ManageCustomers() {
       setCustomers([]); // Ensure customers is always an array
     }
   };
+
   const fetchBarbers = async () => {
     try {
       const res = await fetch("/api/barbers");
@@ -161,8 +164,6 @@ export default function ManageCustomers() {
   };
 
   const handleDeleteCustomer = async (id) => {
-    if (!confirm(t("deleteCustomerConfirm"))) return;
-
     setLoading(true);
     setError("");
 
@@ -176,6 +177,7 @@ export default function ManageCustomers() {
         throw new Error(errorData.error || "Failed to delete customer");
       }
 
+      setDeleteConfirmation(null);
       fetchCustomers();
       fetchStats();
     } catch (err) {
@@ -186,7 +188,29 @@ export default function ManageCustomers() {
     }
   };
 
-  // Update the handleViewCustomer function in your ManageCustomers.jsx
+  const confirmDeleteCustomer = (customer) => {
+    setDeleteConfirmation({
+      customer,
+      isVisible: true,
+    });
+  };
+
+  const cancelDelete = () => {
+    setDeleteConfirmation({
+      ...deleteConfirmation,
+      isVisible: false,
+    });
+    // Remove the confirmation after animation
+    setTimeout(() => {
+      setDeleteConfirmation(null);
+    }, 300);
+  };
+
+  const proceedWithDelete = () => {
+    if (deleteConfirmation?.customer) {
+      handleDeleteCustomer(deleteConfirmation.customer.id);
+    }
+  };
 
   const handleViewCustomer = async (customer) => {
     setLoading(true);
@@ -196,8 +220,8 @@ export default function ManageCustomers() {
         fetch(`/api/customers/${customer.id}`),
         fetch(
           `/api/transactions?customer_id=${customer.id}&limit=20&order=DESC`
-        ), // Get more recent transactions
-        fetch(`/api/bookings?customer_id=${customer.id}&limit=20&order=DESC`), // Get customer-specific bookings
+        ),
+        fetch(`/api/bookings?customer_id=${customer.id}&limit=20&order=DESC`),
       ]);
 
       const customerData = customerRes.ok ? await customerRes.json() : customer;
@@ -223,7 +247,6 @@ export default function ManageCustomers() {
           );
         })
         .sort((a, b) => {
-          // Sort by date and time
           const dateA = new Date(`${a.booking_date}T${a.booking_time}`);
           const dateB = new Date(`${b.booking_date}T${b.booking_time}`);
           return dateA - dateB;
@@ -240,16 +263,11 @@ export default function ManageCustomers() {
           );
         })
         .sort((a, b) => {
-          // Sort by date descending (most recent first)
           const dateA = new Date(`${a.booking_date}T${a.booking_time}`);
           const dateB = new Date(`${b.booking_date}T${b.booking_time}`);
           return dateB - dateA;
         })
-        .slice(0, 10); // Limit to 10 most recent
-
-      console.log("Customer transactions:", transactions);
-      console.log("Upcoming bookings:", upcomingBookings);
-      console.log("Recent bookings:", recentBookings);
+        .slice(0, 10);
 
       setViewingCustomer({
         ...customerData,
@@ -271,6 +289,7 @@ export default function ManageCustomers() {
       setLoading(false);
     }
   };
+
   const generateReceiptHTML = (transaction) => {
     const formatDate = (dateString) => {
       return new Date(dateString).toLocaleDateString("en-US", {
@@ -304,7 +323,7 @@ export default function ManageCustomers() {
     
     @media screen {
       body { 
-        font-family: 'Arial', sans-serif; 
+        font-family: 'Inter', sans-serif; 
         width: 80mm; 
         padding: 10px; 
         background: white;
@@ -317,7 +336,7 @@ export default function ManageCustomers() {
     
     @media print {
       body { 
-        font-family: 'Arial', sans-serif; 
+        font-family: 'Inter', sans-serif; 
         width: 58mm; 
         padding: 2mm; 
         background: white;
@@ -596,7 +615,6 @@ export default function ManageCustomers() {
   const handleBookingCreated = () => {
     setShowBookingForm(false);
     setSelectedCustomer(null);
-    // Optionally refresh customer data to update visit counts
     fetchCustomers();
   };
 
@@ -616,10 +634,13 @@ export default function ManageCustomers() {
     <div className={`manage-customers-page ${isRTL ? "rtl" : "ltr"}`}>
       {error && (
         <div className="error-message">
-          {error}
-          <button onClick={() => setError("")}>×</button>
+          <span>{error}</span>
+          <button onClick={() => setError("")}>
+            <X size={16} />
+          </button>
         </div>
       )}
+
       {/* Header Section */}
       <div className="customers-header">
         <div className="header-left">
@@ -632,16 +653,18 @@ export default function ManageCustomers() {
         <button
           className="btn-primary"
           onClick={() => setShowAddCustomer(true)}
+          disabled={loading}
         >
           <UserPlus size={16} />
           {t("addCustomer")}
         </button>
       </div>
+
       {/* Statistics Cards */}
       {stats && (
         <div className="stats-grid">
           <div className="stat-card">
-            <div className="stat-icon users">
+            <div className="stat-icon">
               <Users size={20} />
             </div>
             <div className="stat-content">
@@ -650,7 +673,7 @@ export default function ManageCustomers() {
             </div>
           </div>
           <div className="stat-card">
-            <div className="stat-icon active">
+            <div className="stat-icon">
               <User size={20} />
             </div>
             <div className="stat-content">
@@ -659,7 +682,7 @@ export default function ManageCustomers() {
             </div>
           </div>
           <div className="stat-card">
-            <div className="stat-icon revenue">
+            <div className="stat-icon">
               <DollarSign size={20} />
             </div>
             <div className="stat-content">
@@ -668,7 +691,7 @@ export default function ManageCustomers() {
             </div>
           </div>
           <div className="stat-card">
-            <div className="stat-icon preferences">
+            <div className="stat-icon">
               <Star size={20} />
             </div>
             <div className="stat-content">
@@ -678,6 +701,7 @@ export default function ManageCustomers() {
           </div>
         </div>
       )}
+
       {/* Search and Filter Section */}
       <div className="customers-controls">
         <div className="search-section">
@@ -709,6 +733,7 @@ export default function ManageCustomers() {
           </select>
         </div>
       </div>
+
       {/* Customers Grid */}
       <div className="customers-grid">
         {customers.map((customer) => (
@@ -721,7 +746,7 @@ export default function ManageCustomers() {
                 <h3 className="customer-name">
                   {customer.name}
                   {customer.total_visits > 0 && (
-                    <span className="customer-source pos">POS</span>
+                    <span className="customer-source">POS</span>
                   )}
                 </h3>
                 <div className="customer-contact">
@@ -752,7 +777,7 @@ export default function ManageCustomers() {
                 </button>
                 <button
                   className="action-btn danger"
-                  onClick={() => handleDeleteCustomer(customer.id)}
+                  onClick={() => confirmDeleteCustomer(customer)}
                   title={t("deleteCustomer")}
                 >
                   <Trash2 size={14} />
@@ -812,6 +837,7 @@ export default function ManageCustomers() {
           </div>
         ))}
       </div>
+
       {customers.length === 0 && !loading && (
         <div className="empty-state">
           <Users size={48} />
@@ -828,6 +854,7 @@ export default function ManageCustomers() {
           )}
         </div>
       )}
+
       {/* Add Customer Modal */}
       {showAddCustomer && (
         <div className="modal-overlay">
@@ -847,6 +874,7 @@ export default function ManageCustomers() {
           </div>
         </div>
       )}
+
       {/* Edit Customer Modal */}
       {editingCustomer && (
         <div className="modal-overlay">
@@ -1185,6 +1213,7 @@ export default function ManageCustomers() {
           </div>
         </div>
       )}
+
       {/* Booking Form Modal */}
       {showBookingForm && selectedCustomer && (
         <div className="modal-overlay">
@@ -1203,6 +1232,40 @@ export default function ManageCustomers() {
               onCancel={() => setShowBookingForm(false)}
               barbers={barbers}
             />
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {deleteConfirmation && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h2>{t("confirmDelete")}</h2>
+              <button onClick={cancelDelete}>
+                <X size={20} />
+              </button>
+            </div>
+            <div className="modal-body">
+              <AlertTriangle size={48} className="modal-icon" />
+              <p>
+                {t("confirmDeleteMessage", {
+                  name: deleteConfirmation.customer.name,
+                })}
+              </p>
+            </div>
+            <div className="modal-footer">
+              <button className="btn-secondary" onClick={cancelDelete}>
+                {t("cancel")}
+              </button>
+              <button
+                className="btn-danger"
+                onClick={proceedWithDelete}
+                disabled={loading}
+              >
+                {loading ? t("deleting") : t("delete")}
+              </button>
+            </div>
           </div>
         </div>
       )}

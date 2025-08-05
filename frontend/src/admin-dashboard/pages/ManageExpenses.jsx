@@ -14,6 +14,7 @@ import {
   Filter,
   Repeat,
   Package,
+  AlertTriangle,
 } from "lucide-react";
 import { useLanguage } from "../../context/LanguageContext";
 import "../styles/ManageExpenses.css";
@@ -28,6 +29,7 @@ export default function ManageExpenses() {
   const [selectedPeriod, setSelectedPeriod] = useState("30days");
   const [selectedType, setSelectedType] = useState("all");
   const [stats, setStats] = useState(null);
+  const [deleteConfirmation, setDeleteConfirmation] = useState(null);
 
   // Category state management
   const [categories, setCategories] = useState([]);
@@ -246,13 +248,33 @@ export default function ManageExpenses() {
   };
 
   const handleDeleteExpense = async (id) => {
-    if (!confirm(t("Are you sure you want to delete this expense?"))) return;
+    const expense = expenses.find((e) => e.id === id);
+    setDeleteConfirmation({
+      id: id,
+      expense: expense,
+      isVisible: true,
+    });
+  };
+
+  const cancelDelete = () => {
+    setDeleteConfirmation({
+      ...deleteConfirmation,
+      isVisible: false,
+    });
+    // Remove the confirmation after animation
+    setTimeout(() => {
+      setDeleteConfirmation(null);
+    }, 300);
+  };
+
+  const proceedWithDelete = async () => {
+    if (!deleteConfirmation?.id) return;
 
     setLoading(true);
     setError("");
 
     try {
-      const res = await fetch(`/api/expenses/${id}`, {
+      const res = await fetch(`/api/expenses/${deleteConfirmation.id}`, {
         method: "DELETE",
       });
 
@@ -261,6 +283,7 @@ export default function ManageExpenses() {
         throw new Error(errorData.error || t("Failed to delete expense"));
       }
 
+      setDeleteConfirmation(null);
       fetchExpenses();
       fetchStats();
     } catch (err) {
@@ -444,16 +467,19 @@ export default function ManageExpenses() {
                   <tr key={expense.id}>
                     <td className="date-col">
                       {editingExpense?.id === expense.id ? (
-                        <input
-                          type="date"
-                          value={editingExpense.expense_date}
-                          onChange={(e) =>
-                            setEditingExpense({
-                              ...editingExpense,
-                              expense_date: e.target.value,
-                            })
-                          }
-                        />
+                        <div className="edit-field">
+                          <label className="edit-label">{t("Date")}:</label>
+                          <input
+                            type="date"
+                            value={editingExpense.expense_date}
+                            onChange={(e) =>
+                              setEditingExpense({
+                                ...editingExpense,
+                                expense_date: e.target.value,
+                              })
+                            }
+                          />
+                        </div>
                       ) : (
                         <div className="expense-date">
                           <Calendar size={14} />
@@ -467,35 +493,41 @@ export default function ManageExpenses() {
                     </td>
                     <td className="name-col">
                       {editingExpense?.id === expense.id ? (
-                        <input
-                          type="text"
-                          value={editingExpense.name}
-                          onChange={(e) =>
-                            setEditingExpense({
-                              ...editingExpense,
-                              name: e.target.value,
-                            })
-                          }
-                          placeholder={t("Expense name")}
-                        />
+                        <div className="edit-field">
+                          <label className="edit-label">{t("Name")}:</label>
+                          <input
+                            type="text"
+                            value={editingExpense.name}
+                            onChange={(e) =>
+                              setEditingExpense({
+                                ...editingExpense,
+                                name: e.target.value,
+                              })
+                            }
+                            placeholder={t("Expense name")}
+                          />
+                        </div>
                       ) : (
                         <span className="expense-name">{expense.name}</span>
                       )}
                     </td>
                     <td className="type-col">
                       {editingExpense?.id === expense.id ? (
-                        <select
-                          value={editingExpense.expense_type}
-                          onChange={(e) =>
-                            setEditingExpense({
-                              ...editingExpense,
-                              expense_type: e.target.value,
-                            })
-                          }
-                        >
-                          <option value="general">{t("General")}</option>
-                          <option value="recurring">{t("Recurring")}</option>
-                        </select>
+                        <div className="edit-field">
+                          <label className="edit-label">{t("Type")}:</label>
+                          <select
+                            value={editingExpense.expense_type}
+                            onChange={(e) =>
+                              setEditingExpense({
+                                ...editingExpense,
+                                expense_type: e.target.value,
+                              })
+                            }
+                          >
+                            <option value="general">{t("General")}</option>
+                            <option value="recurring">{t("Recurring")}</option>
+                          </select>
+                        </div>
                       ) : (
                         <div className="expense-type">
                           {getTypeIcon(expense.expense_type)}
@@ -505,22 +537,25 @@ export default function ManageExpenses() {
                     </td>
                     <td className="category-col">
                       {editingExpense?.id === expense.id ? (
-                        <select
-                          value={editingExpense.category || ""}
-                          onChange={(e) =>
-                            setEditingExpense({
-                              ...editingExpense,
-                              category: e.target.value,
-                            })
-                          }
-                        >
-                          <option value="">{t("Select Category")}</option>
-                          {categories.map((cat) => (
-                            <option key={cat.id} value={cat.name}>
-                              {cat.name}
-                            </option>
-                          ))}
-                        </select>
+                        <div className="edit-field">
+                          <label className="edit-label">{t("Category")}:</label>
+                          <select
+                            value={editingExpense.category || ""}
+                            onChange={(e) =>
+                              setEditingExpense({
+                                ...editingExpense,
+                                category: e.target.value,
+                              })
+                            }
+                          >
+                            <option value="">{t("Select Category")}</option>
+                            {categories.map((cat) => (
+                              <option key={cat.id} value={cat.name}>
+                                {cat.name}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
                       ) : (
                         <span className="expense-category">
                           {expense.category ? (
@@ -535,18 +570,21 @@ export default function ManageExpenses() {
                     </td>
                     <td className="amount-col">
                       {editingExpense?.id === expense.id ? (
-                        <input
-                          type="number"
-                          step="0.01"
-                          value={editingExpense.amount}
-                          onChange={(e) =>
-                            setEditingExpense({
-                              ...editingExpense,
-                              amount: e.target.value,
-                            })
-                          }
-                          placeholder={t("amountPlaceholder")}
-                        />
+                        <div className="edit-field">
+                          <label className="edit-label">{t("Amount")}:</label>
+                          <input
+                            type="number"
+                            step="0.01"
+                            value={editingExpense.amount}
+                            onChange={(e) =>
+                              setEditingExpense({
+                                ...editingExpense,
+                                amount: e.target.value,
+                              })
+                            }
+                            placeholder={t("amountPlaceholder")}
+                          />
+                        </div>
                       ) : (
                         <span className="expense-amount">
                           <DollarSign size={14} />
@@ -556,17 +594,20 @@ export default function ManageExpenses() {
                     </td>
                     <td className="notes-col">
                       {editingExpense?.id === expense.id ? (
-                        <input
-                          type="text"
-                          value={editingExpense.notes || ""}
-                          onChange={(e) =>
-                            setEditingExpense({
-                              ...editingExpense,
-                              notes: e.target.value,
-                            })
-                          }
-                          placeholder={t("notesPlaceholder")}
-                        />
+                        <div className="edit-field">
+                          <label className="edit-label">{t("Notes")}:</label>
+                          <input
+                            type="text"
+                            value={editingExpense.notes || ""}
+                            onChange={(e) =>
+                              setEditingExpense({
+                                ...editingExpense,
+                                notes: e.target.value,
+                              })
+                            }
+                            placeholder={t("notesPlaceholder")}
+                          />
+                        </div>
                       ) : (
                         <span className="expense-notes">
                           {expense.notes || "-"}
@@ -886,6 +927,59 @@ export default function ManageExpenses() {
                   {t("No categories yet. Add your first category above.")}
                 </div>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {deleteConfirmation && (
+        <div className="modal-overlay">
+          <div className="modal-content delete-confirmation-modal">
+            <div className="modal-header">
+              <h2>{t("Confirm Delete Expense")}</h2>
+              <button className="close-btn" onClick={cancelDelete}>
+                <X size={20} />
+              </button>
+            </div>
+            <div className="modal-body">
+              <AlertTriangle size={48} className="alert-icon" />
+              <p>
+                Are you sure you want to delete the expense{" "}
+                <strong>"{deleteConfirmation.expense?.name}"</strong>?
+                <br />
+                <span className="expense-details-text">
+                  Amount: {deleteConfirmation.expense?.amount?.toFixed(2)} EGP
+                  <br />
+                  Date:{" "}
+                  {new Date(
+                    deleteConfirmation.expense?.expense_date
+                  ).toLocaleDateString()}
+                  <br />
+                  Type: {getTypeLabel(deleteConfirmation.expense?.expense_type)}
+                  {deleteConfirmation.expense?.category && (
+                    <>
+                      <br />
+                      Category: {deleteConfirmation.expense.category}
+                    </>
+                  )}
+                </span>
+                <br />
+                This action cannot be undone and will remove all associated
+                data.
+              </p>
+              <div className="modal-actions">
+                <button className="cancel-button" onClick={cancelDelete}>
+                  {t("Cancel")}
+                </button>
+                <button
+                  className="delete-button"
+                  onClick={proceedWithDelete}
+                  disabled={loading}
+                >
+                  {loading ? t("Deleting...") : t("Delete Expense")}
+                </button>
+              </div>
             </div>
           </div>
         </div>

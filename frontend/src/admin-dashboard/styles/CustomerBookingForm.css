@@ -1,0 +1,1170 @@
+/* Customer Booking Form - Modern Professional Design */
+
+.customer-booking-form-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2rem;
+    background: #ffffff;
+    border-radius: 1rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e5e5e5;
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+    color: #000000;
+}
+
+
+/* Progress Steps */
+
+.progress-steps {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 3rem;
+    padding: 0 1rem;
+    position: relative;
+}
+
+.progress-steps::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: #e5e5e5;
+    z-index: 1;
+}
+
+.step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    position: relative;
+    z-index: 2;
+    transition: all 0.3s ease;
+}
+
+.step-number {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+    background: #f5f5f5;
+    border: 2px solid #e5e5e5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1rem;
+    color: #666666;
+    transition: all 0.3s ease;
+}
+
+.step.active .step-number {
+    background: #000000;
+    border-color: #000000;
+    color: #ffffff;
+    transform: scale(1.1);
+}
+
+.step span {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #666666;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.step.active span {
+    color: #000000;
+}
+
+
+/* Form Steps */
+
+.form-step {
+    display: none;
+    animation: fadeIn 0.3s ease;
+}
+
+.form-step.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
+/* Step Headers */
+
+.step-header {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid #f5f5f5;
+}
+
+.step-header h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #000000;
+    margin: 0 0 0.5rem 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+}
+
+.step-header p {
+    color: #666666;
+    font-size: 0.875rem;
+    margin: 0;
+}
+
+
+/* Customer Booking Form Specific Styles */
+
+.customer-booking-form .form-group {
+    margin-bottom: 1.5rem;
+}
+
+.customer-booking-form .form-group label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+    color: #000000;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.5rem;
+}
+
+.customer-booking-form .form-group input,
+.customer-booking-form .form-group select {
+    width: 100%;
+    padding: 1rem 1.25rem;
+    border: 2px solid #e5e5e5;
+    border-radius: 0.75rem;
+    font-size: 1rem;
+    background: #ffffff;
+    color: #000000;
+    transition: all 0.3s ease;
+    font-family: "Inter", sans-serif;
+}
+
+.customer-booking-form .form-group input:focus,
+.customer-booking-form .form-group select:focus {
+    outline: none;
+    border-color: #000000;
+    box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.1);
+}
+
+.customer-booking-form .form-group input.error,
+.customer-booking-form .form-group select.error {
+    border-color: #dc2626;
+}
+
+.customer-booking-form .error-text {
+    color: #dc2626;
+    font-size: 0.75rem;
+    margin-top: 0.25rem;
+    display: block;
+}
+
+
+/* Customer Selection */
+
+.customer-selection {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.selected-customer-card {
+    background: #f8fafc;
+    border: 2px solid #e5e5e5;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    margin-top: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: all 0.3s ease;
+}
+
+.selected-customer-card:hover {
+    border-color: #000000;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.customer-avatar {
+    width: 3.5rem;
+    height: 3.5rem;
+    border-radius: 50%;
+    background: #000000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    flex-shrink: 0;
+}
+
+.customer-details {
+    flex: 1;
+}
+
+.customer-details h3 {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: #000000;
+    margin: 0 0 0.5rem 0;
+}
+
+.customer-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    margin-bottom: 0.75rem;
+}
+
+.customer-info span {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    color: #666666;
+}
+
+.customer-stats {
+    display: flex;
+    gap: 1rem;
+}
+
+.customer-stats span {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #000000;
+    background: #ffffff;
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    border: 1px solid #e5e5e5;
+}
+
+.details-toggle {
+    background: none;
+    border: none;
+    color: #666666;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    transition: all 0.3s ease;
+}
+
+.details-toggle:hover {
+    background: #f5f5f5;
+    color: #000000;
+}
+
+
+/* Schedule Selection */
+
+.schedule-selection {
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+.customer-booking-form .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+
+/* Barber Info Card */
+
+.barber-info-card {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border: 2px solid #e5e5e5;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: all 0.3s ease;
+}
+
+.barber-info-card:hover {
+    border-color: #000000;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.barber-avatar {
+    width: 3.5rem;
+    height: 3.5rem;
+    border-radius: 50%;
+    background: #000000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    flex-shrink: 0;
+}
+
+.barber-details h3 {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: #000000;
+    margin: 0 0 0.25rem 0;
+}
+
+.barber-details .specialty {
+    color: #666666;
+    font-size: 0.875rem;
+    margin: 0 0 0.75rem 0;
+}
+
+.barber-stats {
+    display: flex;
+    gap: 1rem;
+}
+
+.barber-stats span {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #000000;
+    background: #ffffff;
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    border: 1px solid #e5e5e5;
+}
+
+
+/* Time Slots */
+
+.time-slots-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 0.75rem;
+    margin-top: 1rem;
+}
+
+.time-slot {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 1rem;
+    border: 2px solid #e5e5e5;
+    border-radius: 0.75rem;
+    background: #ffffff;
+    color: #000000;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.875rem;
+}
+
+.time-slot:hover {
+    border-color: #000000;
+    background: #f5f5f5;
+}
+
+.time-slot.selected {
+    background: #000000;
+    color: #ffffff;
+    border-color: #000000;
+}
+
+.loading-message {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    padding: 2rem;
+    color: #666666;
+    font-size: 0.875rem;
+}
+
+.loading-spinner {
+    width: 1.5rem;
+    height: 1.5rem;
+    border: 2px solid #e5e5e5;
+    border-top: 2px solid #000000;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.no-slots-message,
+.select-barber-message {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 2rem;
+    color: #666666;
+    font-size: 0.875rem;
+    background: #f5f5f5;
+    border-radius: 0.75rem;
+    border: 1px solid #e5e5e5;
+}
+
+
+/* Services Selection */
+
+.services-selection {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+
+/* Services Summary */
+
+.services-summary {
+    background: #f8fafc;
+    border: 2px solid #e5e5e5;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.summary-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 1.5rem;
+    align-items: center;
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 0.5rem;
+}
+
+.stat-item.total {
+    background: #000000;
+    color: #ffffff;
+    padding: 1rem;
+    border-radius: 0.75rem;
+    margin: 0 -0.5rem;
+}
+
+.stat-number {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #000000;
+}
+
+.stat-item.total .stat-number {
+    color: #ffffff;
+}
+
+.stat-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #666666;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.stat-item.total .stat-label {
+    color: #cccccc;
+}
+
+
+/* Selected Services Preview */
+
+.selected-services-preview {
+    background: #f8fafc;
+    border: 2px solid #e5e5e5;
+    border-radius: 1rem;
+    padding: 1.5rem;
+}
+
+.selected-services-preview h3 {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: #000000;
+    margin: 0 0 1rem 0;
+}
+
+.selected-services-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+}
+
+.selected-service-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background: #ffffff;
+    border: 1px solid #e5e5e5;
+    border-radius: 0.75rem;
+    transition: all 0.3s ease;
+}
+
+.selected-service-item:hover {
+    border-color: #000000;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.selected-service-item .service-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.selected-service-item .service-name {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #000000;
+    margin: 0;
+}
+
+.selected-service-item .service-duration {
+    font-size: 0.75rem;
+    color: #666666;
+}
+
+.selected-service-item .service-price {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #000000;
+}
+
+.remove-service {
+    background: #fef2f2;
+    color: #dc2626;
+    border: 1px solid #fecaca;
+    border-radius: 0.5rem;
+    padding: 0.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.remove-service:hover {
+    background: #fecaca;
+    border-color: #dc2626;
+}
+
+.total-estimate {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background: #000000;
+    color: #ffffff;
+    border-radius: 0.75rem;
+    font-weight: 600;
+}
+
+.total-amount {
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+
+
+/* Scrollbar Styling for Services Grid */
+
+.customer-booking-form .services-grid::-webkit-scrollbar {
+    width: 6px;
+}
+
+.customer-booking-form .services-grid::-webkit-scrollbar-track {
+    background: #f5f5f5;
+    border-radius: 3px;
+}
+
+.customer-booking-form .services-grid::-webkit-scrollbar-thumb {
+    background: #e5e5e5;
+    border-radius: 3px;
+}
+
+.customer-booking-form .services-grid::-webkit-scrollbar-thumb:hover {
+    background: #000000;
+}
+
+
+/* Booking Summary */
+
+.booking-summary {
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+.summary-card {
+    background: #f8fafc;
+    border: 2px solid #e5e5e5;
+    border-radius: 1rem;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 2rem;
+}
+
+.summary-section h3 {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #666666;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 0 0 0.75rem 0;
+}
+
+.summary-section p {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #000000;
+    margin: 0 0 0.25rem 0;
+}
+
+.text-muted {
+    color: #666666 !important;
+    font-weight: 400 !important;
+    font-size: 0.875rem !important;
+}
+
+.total-cost {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #000000;
+    margin: 0;
+}
+
+.selected-services {
+    background: #ffffff;
+    border: 2px solid #e5e5e5;
+    border-radius: 1rem;
+    padding: 1.5rem;
+}
+
+.selected-services h3 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #000000;
+    margin: 0 0 1rem 0;
+}
+
+.services-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.service-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem;
+    background: #f5f5f5;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+}
+
+.service-item span:first-child {
+    font-weight: 600;
+    color: #000000;
+}
+
+.service-item span:last-child {
+    font-weight: 700;
+    color: #000000;
+}
+
+
+/* Navigation */
+
+.form-navigation {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid #e5e5e5;
+}
+
+.btn-primary,
+.btn-secondary {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem 2rem;
+    border-radius: 0.75rem;
+    font-weight: 600;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 2px solid;
+    font-family: "Inter", sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.btn-primary {
+    background: #000000;
+    color: #ffffff;
+    border-color: #000000;
+}
+
+.btn-primary:hover:not(:disabled) {
+    background: #ffffff;
+    color: #000000;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn-primary:disabled {
+    background: #666666;
+    border-color: #666666;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.btn-secondary {
+    background: #ffffff;
+    color: #000000;
+    border-color: #e5e5e5;
+}
+
+.btn-secondary:hover {
+    background: #f5f5f5;
+    border-color: #000000;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+
+/* Form Actions */
+
+.customer-booking-form .form-actions {
+    display: flex;
+    justify-content: center;
+    margin-top: 2rem;
+}
+
+.btn-cancel {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background: #ffffff;
+    color: #666666;
+    border: 2px solid #e5e5e5;
+    border-radius: 0.75rem;
+    font-weight: 600;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: "Inter", sans-serif;
+}
+
+.btn-cancel:hover {
+    background: #f5f5f5;
+    color: #000000;
+    border-color: #000000;
+}
+
+
+/* Error Message */
+
+.customer-booking-form .error-message {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #dc2626;
+    padding: 1rem 1.25rem;
+    border-radius: 0.75rem;
+    margin-bottom: 1.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.customer-booking-form .error-message button {
+    margin-left: auto;
+    background: none;
+    border: none;
+    color: #dc2626;
+    cursor: pointer;
+    padding: 0.25rem;
+    border-radius: 0.25rem;
+    transition: background-color 0.3s ease;
+}
+
+.customer-booking-form .error-message button:hover {
+    background-color: #fca5a5;
+}
+
+
+/* Responsive Design */
+
+@media (max-width: 768px) {
+    .customer-booking-form-container {
+        padding: 1rem;
+        margin: 0.5rem;
+    }
+    .progress-steps {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+    .progress-steps::before {
+        display: none;
+    }
+    .customer-booking-form .form-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    .time-slots-grid {
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    }
+    .customer-booking-form .services-grid {
+        grid-template-columns: 1fr;
+    }
+    .summary-card {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+    .form-navigation {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    .btn-primary,
+    .btn-secondary {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .customer-booking-form-container {
+        padding: 0.75rem;
+    }
+    .step-header h2 {
+        font-size: 1.25rem;
+    }
+    .selected-customer-card,
+    .barber-info-card {
+        flex-direction: column;
+        text-align: center;
+    }
+    .customer-stats,
+    .barber-stats {
+        justify-content: center;
+    }
+}
+
+
+/* Focus indicators for accessibility */
+
+.customer-booking-form .form-group input:focus,
+.customer-booking-form .form-group select:focus,
+.time-slot:focus,
+.service-card:focus,
+.btn-primary:focus,
+.btn-secondary:focus,
+.btn-cancel:focus {
+    outline: 2px solid #000000;
+    outline-offset: 2px;
+}
+
+
+/* High Contrast Mode */
+
+@media (prefers-contrast: high) {
+    .customer-booking-form-container {
+        border: 2px solid #000000;
+    }
+    .service-card,
+    .selected-customer-card,
+    .barber-info-card {
+        border: 2px solid #000000;
+    }
+}
+
+
+/* Reduced Motion */
+
+@media (prefers-reduced-motion: reduce) {
+    .form-step,
+    .service-card,
+    .btn-primary,
+    .btn-secondary {
+        transition: none;
+    }
+    .loading-spinner {
+        animation: none;
+    }
+}
+
+
+/* Services Dropdown */
+
+.services-dropdown-container {
+    background: #ffffff;
+    border: 2px solid #e5e5e5;
+    border-radius: 1rem;
+    overflow: hidden;
+    margin-bottom: 2rem;
+}
+
+.services-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem;
+    background: #f8fafc;
+    border-bottom: 1px solid #e5e5e5;
+}
+
+.services-header h3 {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: #000000;
+    margin: 0;
+}
+
+.select-all-btn {
+    background: #ffffff;
+    color: #000000;
+    border: 2px solid #e5e5e5;
+    border-radius: 0.5rem;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.select-all-btn:hover {
+    background: #000000;
+    color: #ffffff;
+    border-color: #000000;
+}
+
+.services-dropdown {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.dropdown-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    background: #f5f5f5;
+    border-bottom: 1px solid #e5e5e5;
+    font-size: 0.875rem;
+    color: #666666;
+}
+
+.selected-count {
+    font-weight: 600;
+    color: #000000;
+}
+
+.services-list {
+    padding: 0;
+}
+
+.service-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #f5f5f5;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: #ffffff;
+}
+
+.service-item:hover {
+    background: #f8fafc;
+}
+
+.service-item.selected {
+    background: #000000;
+    color: #ffffff;
+}
+
+.service-item:last-child {
+    border-bottom: none;
+}
+
+.service-checkbox {
+    position: relative;
+    width: 1.5rem;
+    height: 1.5rem;
+    flex-shrink: 0;
+}
+
+.service-checkbox input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.service-checkbox svg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 1.5rem;
+    height: 1.5rem;
+    color: #e5e5e5;
+    transition: all 0.3s ease;
+}
+
+.service-item.selected .service-checkbox svg {
+    color: #ffffff;
+}
+
+.service-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.service-main {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.service-name {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #000000;
+    margin: 0;
+}
+
+.service-item.selected .service-name {
+    color: #ffffff;
+}
+
+.service-description {
+    font-size: 0.875rem;
+    color: #666666;
+    margin: 0;
+    line-height: 1.4;
+}
+
+.service-item.selected .service-description {
+    color: #cccccc;
+}
+
+.service-details {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.service-duration,
+.service-category {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #666666;
+    background: #f5f5f5;
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+}
+
+.service-item.selected .service-duration,
+.service-item.selected .service-category {
+    background: #333333;
+    color: #ffffff;
+}
+
+.popular-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #f59e0b;
+    background: #fef3c7;
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+}
+
+.service-item.selected .popular-badge {
+    background: #333333;
+    color: #fbbf24;
+}
+
+.service-price {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: #000000;
+    flex-shrink: 0;
+    min-width: 80px;
+    text-align: right;
+}
+
+.service-item.selected .service-price {
+    color: #ffffff;
+}
+
+
+/* Scrollbar Styling for Services Dropdown */
+
+.services-dropdown::-webkit-scrollbar {
+    width: 6px;
+}
+
+.services-dropdown::-webkit-scrollbar-track {
+    background: #f5f5f5;
+    border-radius: 3px;
+}
+
+.services-dropdown::-webkit-scrollbar-thumb {
+    background: #e5e5e5;
+    border-radius: 3px;
+}
+
+.services-dropdown::-webkit-scrollbar-thumb:hover {
+    background: #000000;
+}

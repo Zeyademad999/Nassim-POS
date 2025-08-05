@@ -74,6 +74,8 @@ export default function Reports({ user }) {
   const [transactions, setTransactions] = useState([]);
   const [editingTransaction, setEditingTransaction] = useState(null);
   const [showAddTransaction, setShowAddTransaction] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [transactionToDelete, setTransactionToDelete] = useState(null);
   const [newTransaction, setNewTransaction] = useState({
     customer_name: "",
     barber_name: "",
@@ -337,23 +339,25 @@ export default function Reports({ user }) {
     }
   };
 
-  const handleDeleteTransaction = async (transactionId) => {
-    if (
-      !confirm(
-        t(
-          "Are you sure you want to delete this transaction? This action cannot be undone."
-        )
-      )
-    ) {
-      return;
-    }
+  const handleDeleteTransaction = async (transaction) => {
+    setTransactionToDelete(transaction);
+    setShowDeleteConfirm(true);
+  };
+
+  const confirmDeleteTransaction = async () => {
+    if (!transactionToDelete) return;
 
     try {
-      const response = await fetch(`/api/transactions/${transactionId}`, {
-        method: "DELETE",
-      });
+      const response = await fetch(
+        `/api/transactions/${transactionToDelete.id}`,
+        {
+          method: "DELETE",
+        }
+      );
 
       if (response.ok) {
+        setShowDeleteConfirm(false);
+        setTransactionToDelete(null);
         fetchTransactions();
         fetchReports(); // Refresh reports to reflect changes
       } else {
@@ -363,6 +367,11 @@ export default function Reports({ user }) {
       console.error("Failed to delete transaction:", err);
       alert(t("Failed to delete transaction. Please try again."));
     }
+  };
+
+  const cancelDeleteTransaction = () => {
+    setShowDeleteConfirm(false);
+    setTransactionToDelete(null);
   };
 
   const handleAddTransaction = async () => {
@@ -1464,82 +1473,180 @@ export default function Reports({ user }) {
               </button>
             </div>
 
-            {/* Add Transaction Form */}
+            {/* Add Transaction Modal */}
             {showAddTransaction && (
-              <div className="transaction-form">
-                <h3>{t("Add New Transaction")}</h3>
-                <div className="form-grid">
-                  <input
-                    type="text"
-                    placeholder={t("Customer Name")}
-                    value={newTransaction.customer_name}
-                    onChange={(e) =>
-                      setNewTransaction({
-                        ...newTransaction,
-                        customer_name: e.target.value,
-                      })
-                    }
-                  />
-                  <input
-                    type="text"
-                    placeholder={t("Barber Name")}
-                    value={newTransaction.barber_name}
-                    onChange={(e) =>
-                      setNewTransaction({
-                        ...newTransaction,
-                        barber_name: e.target.value,
-                      })
-                    }
-                  />
-                  <input
-                    type="number"
-                    placeholder={t("Total Amount")}
-                    value={newTransaction.total}
-                    onChange={(e) =>
-                      setNewTransaction({
-                        ...newTransaction,
-                        total: e.target.value,
-                      })
-                    }
-                  />
-                  <select
-                    value={newTransaction.payment_method}
-                    onChange={(e) =>
-                      setNewTransaction({
-                        ...newTransaction,
-                        payment_method: e.target.value,
-                      })
-                    }
-                  >
-                    <option value="cash">{t("Cash")}</option>
-                    <option value="card">{t("Card")}</option>
-                  </select>
-                  <input
-                    type="date"
-                    value={newTransaction.service_date}
-                    onChange={(e) =>
-                      setNewTransaction({
-                        ...newTransaction,
-                        service_date: e.target.value,
-                      })
-                    }
-                  />
+              <div className="modal-overlay">
+                <div className="transaction-modal">
+                  <div className="modal-header">
+                    <h3>{t("Add New Transaction")}</h3>
+                    <button
+                      className="modal-close-btn"
+                      onClick={() => setShowAddTransaction(false)}
+                    >
+                      <X size={20} />
+                    </button>
+                  </div>
+                  
+                  <div className="modal-body">
+                    <div className="form-row">
+                      <div className="form-group">
+                        <label>{t("Customer Name")}</label>
+                        <input
+                          type="text"
+                          placeholder={t("Enter customer name")}
+                          value={newTransaction.customer_name}
+                          onChange={(e) =>
+                            setNewTransaction({
+                              ...newTransaction,
+                              customer_name: e.target.value,
+                            })
+                          }
+                        />
+                      </div>
+                      <div className="form-group">
+                        <label>{t("Barber Name")}</label>
+                        <input
+                          type="text"
+                          placeholder={t("Enter barber name")}
+                          value={newTransaction.barber_name}
+                          onChange={(e) =>
+                            setNewTransaction({
+                              ...newTransaction,
+                              barber_name: e.target.value,
+                            })
+                          }
+                        />
+                      </div>
+                    </div>
+                    
+                    <div className="form-row">
+                      <div className="form-group">
+                        <label>{t("Total Amount")}</label>
+                        <input
+                          type="number"
+                          placeholder={t("Enter amount")}
+                          value={newTransaction.total}
+                          onChange={(e) =>
+                            setNewTransaction({
+                              ...newTransaction,
+                              total: e.target.value,
+                            })
+                          }
+                        />
+                      </div>
+                      <div className="form-group">
+                        <label>{t("Payment Method")}</label>
+                        <select
+                          value={newTransaction.payment_method}
+                          onChange={(e) =>
+                            setNewTransaction({
+                              ...newTransaction,
+                              payment_method: e.target.value,
+                            })
+                          }
+                        >
+                          <option value="cash">{t("Cash")}</option>
+                          <option value="card">{t("Card")}</option>
+                        </select>
+                      </div>
+                    </div>
+                    
+                    <div className="form-row">
+                      <div className="form-group">
+                        <label>{t("Service Date")}</label>
+                        <input
+                          type="date"
+                          value={newTransaction.service_date}
+                          onChange={(e) =>
+                            setNewTransaction({
+                              ...newTransaction,
+                              service_date: e.target.value,
+                            })
+                          }
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="modal-footer">
+                    <button
+                      className="action-btn"
+                      onClick={() => setShowAddTransaction(false)}
+                    >
+                      <X size={16} />
+                      {t("Cancel")}
+                    </button>
+                    <button
+                      className="action-btn primary"
+                      onClick={handleAddTransaction}
+                    >
+                      <Save size={16} />
+                      {t("Save Transaction")}
+                    </button>
+                  </div>
                 </div>
-                <div className="form-actions">
-                  <button
-                    className="action-btn primary"
-                    onClick={handleAddTransaction}
-                  >
-                    <Save size={16} />
-                    {t("Save Transaction")}
-                  </button>
-                  <button
-                    className="action-btn"
-                    onClick={() => setShowAddTransaction(false)}
-                  >
-                    <X size={16} />
-                    {t("Cancel")}
-                  </button>
+              </div>
+            )}
+
+            {/* Delete Confirmation Modal */}
+            {showDeleteConfirm && transactionToDelete && (
+              <div className="modal-overlay">
+                <div className="delete-confirm-modal">
+                  <div className="modal-header">
+                    <h3>{t("Confirm Delete")}</h3>
+                    <button
+                      className="modal-close-btn"
+                      onClick={cancelDeleteTransaction}
+                    >
+                      <X size={20} />
+                    </button>
+                  </div>
+                  
+                  <div className="modal-body">
+                    <div className="delete-warning">
+                      <AlertTriangle size={48} className="warning-icon" />
+                      <p>{t("Are you sure you want to delete this transaction?")}</p>
+                      <div className="transaction-details">
+                        <div className="detail-item">
+                          <span className="detail-label">{t("Customer")}:</span>
+                          <span className="detail-value">{transactionToDelete.customer_name}</span>
+                        </div>
+                        <div className="detail-item">
+                          <span className="detail-label">{t("Barber")}:</span>
+                          <span className="detail-value">{transactionToDelete.barber_name}</span>
+                        </div>
+                        <div className="detail-item">
+                          <span className="detail-label">{t("Amount")}:</span>
+                          <span className="detail-value">
+                            {transactionToDelete.total?.toFixed(2)} {t("currency")}
+                          </span>
+                        </div>
+                        <div className="detail-item">
+                          <span className="detail-label">{t("Date")}:</span>
+                          <span className="detail-value">
+                            {new Date(transactionToDelete.service_date).toLocaleDateString()}
+                          </span>
+                        </div>
+                      </div>
+                      <p className="warning-text">{t("This action cannot be undone.")}</p>
+                    </div>
+                  </div>
+                  
+                  <div className="modal-footer">
+                    <button
+                      className="action-btn"
+                      onClick={cancelDeleteTransaction}
+                    >
+                      {t("Cancel")}
+                    </button>
+                    <button
+                      className="action-btn danger"
+                      onClick={confirmDeleteTransaction}
+                    >
+                      <Trash2 size={16} />
+                      {t("Delete Transaction")}
+                    </button>
+                  </div>
                 </div>
               </div>
             )}
@@ -1560,66 +1667,78 @@ export default function Reports({ user }) {
                   <tr key={transaction.id}>
                     <td>
                       {editingTransaction?.id === transaction.id ? (
-                        <input
-                          type="date"
-                          value={editingTransaction.service_date}
-                          onChange={(e) =>
-                            setEditingTransaction({
-                              ...editingTransaction,
-                              service_date: e.target.value,
-                            })
-                          }
-                        />
+                        <div className="edit-field">
+                          <label className="edit-label">{t("Date")}</label>
+                          <input
+                            type="date"
+                            value={editingTransaction.service_date}
+                            onChange={(e) =>
+                              setEditingTransaction({
+                                ...editingTransaction,
+                                service_date: e.target.value,
+                              })
+                            }
+                          />
+                        </div>
                       ) : (
                         new Date(transaction.service_date).toLocaleDateString()
                       )}
                     </td>
                     <td>
                       {editingTransaction?.id === transaction.id ? (
-                        <input
-                          type="text"
-                          value={editingTransaction.customer_name}
-                          onChange={(e) =>
-                            setEditingTransaction({
-                              ...editingTransaction,
-                              customer_name: e.target.value,
-                            })
-                          }
-                        />
+                        <div className="edit-field">
+                          <label className="edit-label">{t("Customer")}</label>
+                          <input
+                            type="text"
+                            value={editingTransaction.customer_name}
+                            onChange={(e) =>
+                              setEditingTransaction({
+                                ...editingTransaction,
+                                customer_name: e.target.value,
+                              })
+                            }
+                          />
+                        </div>
                       ) : (
                         transaction.customer_name
                       )}
                     </td>
                     <td>
                       {editingTransaction?.id === transaction.id ? (
-                        <input
-                          type="text"
-                          value={editingTransaction.barber_name}
-                          onChange={(e) =>
-                            setEditingTransaction({
-                              ...editingTransaction,
-                              barber_name: e.target.value,
-                            })
-                          }
-                        />
+                        <div className="edit-field">
+                          <label className="edit-label">{t("Barber")}</label>
+                          <input
+                            type="text"
+                            value={editingTransaction.barber_name}
+                            onChange={(e) =>
+                              setEditingTransaction({
+                                ...editingTransaction,
+                                barber_name: e.target.value,
+                              })
+                            }
+                          />
+                        </div>
                       ) : (
                         transaction.barber_name
                       )}
                     </td>
                     <td>
                       {editingTransaction?.id === transaction.id ? (
-                        <select
-                          value={editingTransaction.payment_method}
-                          onChange={(e) =>
-                            setEditingTransaction({
-                              ...editingTransaction,
-                              payment_method: e.target.value,
-                            })
-                          }
-                        >
-                          <option value="cash">{t("Cash")}</option>
-                          <option value="card">{t("Card")}</option>
-                        </select>
+                        <div className="edit-field">
+                          <label className="edit-label">{t("Payment")}</label>
+                          <select
+                            value={editingTransaction.payment_method}
+                            onChange={(e) =>
+                              setEditingTransaction({
+                                ...editingTransaction,
+                                payment_method: e.target.value,
+                              })
+                            }
+                          >
+                            <option value="cash">{t("Cash")}</option>
+                            <option value="card">{t("Card")}</option>
+                          </select>
+                        </div>
                       ) : (
                         <span
                           className={`payment-badge ${transaction.payment_method}`}
@@ -1630,16 +1749,19 @@ export default function Reports({ user }) {
                     </td>
                     <td>
                       {editingTransaction?.id === transaction.id ? (
-                        <input
-                          type="number"
-                          value={editingTransaction.total}
-                          onChange={(e) =>
-                            setEditingTransaction({
-                              ...editingTransaction,
-                              total: parseFloat(e.target.value),
-                            })
-                          }
-                        />
+                        <div className="edit-field">
+                          <label className="edit-label">{t("Amount")}</label>
+                          <input
+                            type="number"
+                            value={editingTransaction.total}
+                            onChange={(e) =>
+                              setEditingTransaction({
+                                ...editingTransaction,
+                                total: parseFloat(e.target.value),
+                              })
+                            }
+                          />
+                        </div>
                       ) : (
                         <span className="amount">
                           {transaction.total?.toFixed(2)} {t("currency")}
@@ -1673,7 +1795,7 @@ export default function Reports({ user }) {
                           <button
                             className="action-btn-small danger"
                             onClick={() =>
-                              handleDeleteTransaction(transaction.id)
+                              handleDeleteTransaction(transaction)
                             }
                           >
                             <Trash2 size={14} />

@@ -19,6 +19,12 @@ import {
   FileText,
   RefreshCcw,
   X,
+  ChevronDown,
+  CalendarDays,
+  UserCheck,
+  Clock3,
+  TrendingUp,
+  AlertTriangle,
 } from "lucide-react";
 import BookingForm from "../components/BookingForm";
 import { useLanguage } from "../../context/LanguageContext";
@@ -44,12 +50,14 @@ export default function BookingManagement() {
 
   const [editingBooking, setEditingBooking] = useState(null);
   const [stats, setStats] = useState(null);
+  const [deleteConfirmation, setDeleteConfirmation] = useState(null);
+  const [completionConfirmation, setCompletionConfirmation] = useState(null);
 
   const statusColors = {
-    scheduled: { bg: "#dbeafe", color: "#1d4ed8", icon: Clock },
-    confirmed: { bg: "#dcfce7", color: "#059669", icon: CheckCircle },
-    completed: { bg: "#f3f4f6", color: "#374151", icon: CheckCircle },
-    cancelled: { bg: "#fef2f2", color: "#dc2626", icon: XCircle },
+    scheduled: { bg: "#f8f9fa", color: "#000000", icon: Clock3 },
+    confirmed: { bg: "#f8f9fa", color: "#000000", icon: CheckCircle },
+    completed: { bg: "#f8f9fa", color: "#000000", icon: CheckCircle },
+    cancelled: { bg: "#f8f9fa", color: "#000000", icon: XCircle },
   };
 
   useEffect(() => {
@@ -211,7 +219,8 @@ export default function BookingManagement() {
   };
 
   const handleDeleteBooking = async (bookingId) => {
-    if (!confirm(t("deleteBookingConfirm"))) return;
+    setLoading(true);
+    setError("");
 
     try {
       const res = await fetch(`/api/bookings/${bookingId}`, {
@@ -223,16 +232,44 @@ export default function BookingManagement() {
         throw new Error(errorData.error || "Failed to delete booking");
       }
 
+      setDeleteConfirmation(null);
       fetchBookings();
       fetchStats();
     } catch (err) {
       console.error("Error deleting booking:", err);
       setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const confirmDeleteBooking = (booking) => {
+    setDeleteConfirmation({
+      booking,
+      isVisible: true,
+    });
+  };
+
+  const cancelDelete = () => {
+    setDeleteConfirmation({
+      ...deleteConfirmation,
+      isVisible: false,
+    });
+    // Remove the confirmation after animation
+    setTimeout(() => {
+      setDeleteConfirmation(null);
+    }, 300);
+  };
+
+  const proceedWithDelete = () => {
+    if (deleteConfirmation?.booking) {
+      handleDeleteBooking(deleteConfirmation.booking.id);
     }
   };
 
   const handleCompleteBooking = async (bookingId) => {
-    if (!confirm(t("completeBookingConfirm"))) return;
+    setLoading(true);
+    setError("");
 
     try {
       const res = await fetch(`/api/bookings/${bookingId}/complete`, {
@@ -246,13 +283,33 @@ export default function BookingManagement() {
         throw new Error(errorData.error || "Failed to complete booking");
       }
 
+      const completedBooking = await res.json();
+
+      // Show completion confirmation modal
+      setCompletionConfirmation({
+        booking: completedBooking,
+        isVisible: true,
+      });
+
       fetchBookings();
       fetchStats();
-      alert(t("bookingCompletedSuccess"));
     } catch (err) {
       console.error("Error completing booking:", err);
       setError(err.message);
+    } finally {
+      setLoading(false);
     }
+  };
+
+  const closeCompletionConfirmation = () => {
+    setCompletionConfirmation({
+      ...completionConfirmation,
+      isVisible: false,
+    });
+    // Remove the confirmation after animation
+    setTimeout(() => {
+      setCompletionConfirmation(null);
+    }, 300);
   };
 
   // 🔧 FIX: Enhanced booking creation handler
@@ -276,12 +333,12 @@ export default function BookingManagement() {
 
     console.log("✅ Bookings refreshed");
 
-    // Enhanced success message
-    if (createdBooking) {
-      alert(
-        `✅ Booking created successfully!\n\nCustomer: ${createdBooking.customer_name}\nDate: ${createdBooking.booking_date}\nTime: ${createdBooking.booking_time}\n\n📅 Showing bookings for ${createdBooking.booking_date}`
-      );
-    }
+    // Show completion confirmation modal instead of alert
+    setCompletionConfirmation({
+      booking: createdBooking,
+      isVisible: true,
+      isNewBooking: true,
+    });
   };
 
   const handleBookingUpdated = () => {
@@ -324,14 +381,17 @@ export default function BookingManagement() {
     <div className={`booking-management-page ${isRTL ? "rtl" : "ltr"}`}>
       {error && (
         <div className="error-message">
-          {error}
-          <button onClick={() => setError("")}>×</button>
+          <AlertCircle size={16} />
+          <span>{error}</span>
+          <button onClick={() => setError("")}>
+            <X size={16} />
+          </button>
         </div>
       )}
 
       {/* Header */}
       <div className="bookings-header">
-        <div className="header-left">
+        <div className="header-info">
           <h1>
             <Calendar size={24} />
             {t("bookingManagement")}
@@ -340,7 +400,7 @@ export default function BookingManagement() {
         </div>
         <div className="header-actions">
           <button
-            className="btn-secondary"
+            className="refresh-button"
             onClick={() => fetchBookings()}
             disabled={loading}
           >
@@ -348,7 +408,7 @@ export default function BookingManagement() {
             {t("refresh")}
           </button>
           <button
-            className="btn-primary"
+            className="add-booking-button"
             onClick={() => setShowAddBooking(true)}
           >
             <Plus size={16} />
@@ -362,7 +422,7 @@ export default function BookingManagement() {
         <div className="booking-stats-grid">
           <div className="stat-card">
             <div className="stat-icon total">
-              <Calendar size={20} />
+              <CalendarDays size={20} />
             </div>
             <div className="stat-content">
               <h3>{stats.total_bookings}</h3>
@@ -371,7 +431,7 @@ export default function BookingManagement() {
           </div>
           <div className="stat-card">
             <div className="stat-icon scheduled">
-              <Clock size={20} />
+              <Clock3 size={20} />
             </div>
             <div className="stat-content">
               <h3>{stats.scheduled}</h3>
@@ -380,7 +440,7 @@ export default function BookingManagement() {
           </div>
           <div className="stat-card">
             <div className="stat-icon confirmed">
-              <CheckCircle size={20} />
+              <UserCheck size={20} />
             </div>
             <div className="stat-content">
               <h3>{stats.confirmed}</h3>
@@ -389,7 +449,7 @@ export default function BookingManagement() {
           </div>
           <div className="stat-card">
             <div className="stat-icon revenue">
-              <DollarSign size={20} />
+              <TrendingUp size={20} />
             </div>
             <div className="stat-content">
               <h3>{stats.total_estimated_revenue?.toFixed(0)} EGP</h3>
@@ -399,7 +459,7 @@ export default function BookingManagement() {
         </div>
       )}
 
-      {/* 🔧 FIX: Enhanced Filters with Quick Date Buttons */}
+      {/* Enhanced Filters */}
       <div className="booking-filters">
         {/* Quick Date Buttons */}
         <div className="filter-group">
@@ -433,21 +493,23 @@ export default function BookingManagement() {
         {/* Date Picker */}
         <div className="filter-group">
           <label>{t("date") || "Specific Date"}</label>
-          <input
-            type="date"
-            value={selectedDate}
-            onChange={(e) => setSelectedDate(e.target.value)}
-            placeholder="Select specific date"
-          />
-          {selectedDate && (
-            <button
-              className="clear-date-btn"
-              onClick={() => setSelectedDate("")}
-              title="Clear date filter"
-            >
-              <X size={14} />
-            </button>
-          )}
+          <div className="date-input-wrapper">
+            <input
+              type="date"
+              value={selectedDate}
+              onChange={(e) => setSelectedDate(e.target.value)}
+              placeholder="Select specific date"
+            />
+            {selectedDate && (
+              <button
+                className="clear-date-btn"
+                onClick={() => setSelectedDate("")}
+                title="Clear date filter"
+              >
+                <X size={14} />
+              </button>
+            )}
+          </div>
         </div>
 
         <div className="filter-group">
@@ -512,7 +574,7 @@ export default function BookingManagement() {
             {/* Quick actions for empty state */}
             <div className="empty-state-actions">
               <button
-                className="btn-primary"
+                className="add-booking-button"
                 onClick={() => setShowAddBooking(true)}
               >
                 <Plus size={16} />
@@ -520,7 +582,7 @@ export default function BookingManagement() {
               </button>
               {(selectedDate || selectedBarber || selectedStatus !== "all") && (
                 <button
-                  className="btn-secondary"
+                  className="clear-filters-button"
                   onClick={() => {
                     setSelectedDate("");
                     setSelectedBarber("");
@@ -658,7 +720,7 @@ export default function BookingManagement() {
 
                     <button
                       className="action-btn delete"
-                      onClick={() => handleDeleteBooking(booking.id)}
+                      onClick={() => confirmDeleteBooking(booking)}
                       title={t("deleteBooking")}
                     >
                       <Trash2 size={14} />
@@ -690,13 +752,13 @@ export default function BookingManagement() {
                   <p>{t("selectCustomerMessage")}</p>
                   <div className="modal-actions">
                     <button
-                      className="btn-secondary"
+                      className="cancel-button"
                       onClick={() => setShowAddBooking(false)}
                     >
                       {t("cancel")}
                     </button>
                     <button
-                      className="btn-primary"
+                      className="save-button"
                       onClick={() => {
                         setShowAddBooking(false);
                         window.location.href = "/admin/customers";
@@ -739,6 +801,146 @@ export default function BookingManagement() {
                 onSubmit={handleBookingUpdated}
                 onCancel={() => setEditingBooking(null)}
               />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {deleteConfirmation && (
+        <div className="modal-overlay">
+          <div className="modal-content delete-confirmation-modal">
+            <div className="modal-header">
+              <h2>{t("confirmDeleteBooking")}</h2>
+              <button className="close-btn" onClick={cancelDelete}>
+                <X size={20} />
+              </button>
+            </div>
+            <div className="modal-body">
+              <AlertTriangle size={48} className="alert-icon" />
+              <p>
+                {t("confirmDeleteBookingMessage", {
+                  bookingDate: new Date(
+                    deleteConfirmation.booking.booking_date
+                  ).toLocaleDateString(),
+                  bookingTime: formatTime(
+                    deleteConfirmation.booking.booking_time
+                  ),
+                  bookingCustomer: deleteConfirmation.booking.customer_name,
+                })}
+              </p>
+              <div className="modal-actions">
+                <button className="cancel-button" onClick={cancelDelete}>
+                  {t("cancel")}
+                </button>
+                <button
+                  className="delete-button"
+                  onClick={proceedWithDelete}
+                  disabled={loading}
+                >
+                  {loading ? t("deleting") : t("delete")}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Completion Confirmation Modal */}
+      {completionConfirmation && (
+        <div className="modal-overlay">
+          <div className="modal-content completion-confirmation-modal">
+            <div className="modal-header">
+              <h2>
+                {completionConfirmation.isNewBooking
+                  ? t("bookingCreatedSuccessfully") ||
+                    "Booking Created Successfully"
+                  : t("bookingCompleted") || "Booking Completed"}
+              </h2>
+              <button
+                className="close-btn"
+                onClick={closeCompletionConfirmation}
+              >
+                <X size={20} />
+              </button>
+            </div>
+            <div className="modal-body">
+              <CheckCircle size={48} className="check-icon" />
+
+              <div className="booking-details-summary">
+                <div className="detail-row">
+                  <span className="detail-label">Customer:</span>
+                  <span className="detail-value">
+                    {completionConfirmation.booking.customer_name}
+                  </span>
+                </div>
+
+                <div className="detail-row">
+                  <span className="detail-label">Date:</span>
+                  <span className="detail-value">
+                    {new Date(
+                      completionConfirmation.booking.booking_date
+                    ).toLocaleDateString()}
+                  </span>
+                </div>
+
+                <div className="detail-row">
+                  <span className="detail-label">Time:</span>
+                  <span className="detail-value">
+                    {formatTime(completionConfirmation.booking.booking_time)}
+                  </span>
+                </div>
+
+                <div className="detail-row">
+                  <span className="detail-label">Barber:</span>
+                  <span className="detail-value">
+                    {completionConfirmation.booking.barber_name}
+                  </span>
+                </div>
+
+                {completionConfirmation.booking.services &&
+                  completionConfirmation.booking.services.length > 0 && (
+                    <div className="detail-row">
+                      <span className="detail-label">Services:</span>
+                      <div className="services-list">
+                        {completionConfirmation.booking.services.map(
+                          (service, index) => (
+                            <span key={index} className="service-item">
+                              {service.name} - {service.price} EGP
+                            </span>
+                          )
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                {completionConfirmation.booking.estimated_cost && (
+                  <div className="detail-row total-cost">
+                    <span className="detail-label">Total Cost:</span>
+                    <span className="detail-value cost-amount">
+                      {completionConfirmation.booking.estimated_cost} EGP
+                    </span>
+                  </div>
+                )}
+
+                {completionConfirmation.booking.notes && (
+                  <div className="detail-row">
+                    <span className="detail-label">Notes:</span>
+                    <span className="detail-value notes">
+                      {completionConfirmation.booking.notes}
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              <div className="modal-actions">
+                <button
+                  className="close-button"
+                  onClick={closeCompletionConfirmation}
+                >
+                  {t("close") || "Close"}
+                </button>
+              </div>
             </div>
           </div>
         </div>

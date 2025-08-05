@@ -8,6 +8,7 @@ import {
   Users,
   UserPlus,
   Scissors,
+  AlertTriangle,
 } from "lucide-react";
 import "../styles/ManageBarbers.css";
 
@@ -21,6 +22,7 @@ export default function ManageBarbers() {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [deleteConfirmation, setDeleteConfirmation] = useState(null);
 
   const fetchBarbers = async () => {
     try {
@@ -123,13 +125,32 @@ export default function ManageBarbers() {
   };
 
   const deleteBarber = async (id) => {
-    if (!confirm("Are you sure you want to delete this barber?")) return;
+    setDeleteConfirmation({
+      id: id,
+      barber: barbers.find((b) => b.id === id),
+      isVisible: true,
+    });
+  };
+
+  const cancelDelete = () => {
+    setDeleteConfirmation({
+      ...deleteConfirmation,
+      isVisible: false,
+    });
+    // Remove the confirmation after animation
+    setTimeout(() => {
+      setDeleteConfirmation(null);
+    }, 300);
+  };
+
+  const proceedWithDelete = async () => {
+    if (!deleteConfirmation?.id) return;
 
     setLoading(true);
     setError("");
 
     try {
-      const res = await fetch(`/api/barbers/${id}`, {
+      const res = await fetch(`/api/barbers/${deleteConfirmation.id}`, {
         method: "DELETE",
       });
 
@@ -138,6 +159,7 @@ export default function ManageBarbers() {
         throw new Error(errorData.error || "Failed to delete barber");
       }
 
+      setDeleteConfirmation(null);
       fetchBarbers();
     } catch (err) {
       console.error("Error deleting barber:", err);
@@ -176,6 +198,40 @@ export default function ManageBarbers() {
           <button onClick={() => setError("")}>
             <X size={16} />
           </button>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {deleteConfirmation && (
+        <div className="modal-overlay">
+          <div className="modal-content delete-confirmation-modal">
+            <div className="modal-header">
+              <h2>Confirm Delete Barber</h2>
+              <button className="close-btn" onClick={cancelDelete}>
+                <X size={20} />
+              </button>
+            </div>
+            <div className="modal-body">
+              <AlertTriangle size={48} className="alert-icon" />
+              <p>
+                Are you sure you want to delete{" "}
+                <strong>{deleteConfirmation.barber?.name}</strong>? This action
+                cannot be undone and will remove all associated data.
+              </p>
+              <div className="modal-actions">
+                <button className="cancel-button" onClick={cancelDelete}>
+                  Cancel
+                </button>
+                <button
+                  className="delete-button"
+                  onClick={proceedWithDelete}
+                  disabled={loading}
+                >
+                  {loading ? "Deleting..." : "Delete Barber"}
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
 
@@ -220,35 +276,57 @@ export default function ManageBarbers() {
 
           <div className="form-group specialty-group">
             <label>Specialties</label>
-            <div className="services-checkboxes">
-              {services.map((service) => (
-                <label key={service.id} className="service-checkbox">
-                  <input
-                    type="checkbox"
-                    checked={newBarber.specialty_ids.includes(service.id)}
-                    onChange={(e) => {
-                      if (e.target.checked) {
-                        setNewBarber({
-                          ...newBarber,
-                          specialty_ids: [
-                            ...newBarber.specialty_ids,
-                            service.id,
-                          ],
-                        });
-                      } else {
-                        setNewBarber({
-                          ...newBarber,
-                          specialty_ids: newBarber.specialty_ids.filter(
-                            (id) => id !== service.id
-                          ),
-                        });
-                      }
-                    }}
+            <div className="specialties-container">
+              <div className="specialties-header">
+                <span className="selected-count">
+                  {newBarber.specialty_ids.length} of {services.length} selected
+                </span>
+                {newBarber.specialty_ids.length > 0 && (
+                  <button
+                    type="button"
+                    className="clear-all-btn"
+                    onClick={() =>
+                      setNewBarber({ ...newBarber, specialty_ids: [] })
+                    }
                     disabled={loading}
-                  />
-                  <span>{service.name}</span>
-                </label>
-              ))}
+                  >
+                    Clear All
+                  </button>
+                )}
+              </div>
+              <div className="services-grid">
+                {services.map((service) => (
+                  <div key={service.id} className="service-item">
+                    <label className="service-checkbox">
+                      <input
+                        type="checkbox"
+                        checked={newBarber.specialty_ids.includes(service.id)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setNewBarber({
+                              ...newBarber,
+                              specialty_ids: [
+                                ...newBarber.specialty_ids,
+                                service.id,
+                              ],
+                            });
+                          } else {
+                            setNewBarber({
+                              ...newBarber,
+                              specialty_ids: newBarber.specialty_ids.filter(
+                                (id) => id !== service.id
+                              ),
+                            });
+                          }
+                        }}
+                        disabled={loading}
+                      />
+                      <div className="checkbox-custom"></div>
+                      <span className="service-name">{service.name}</span>
+                    </label>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
 
@@ -309,19 +387,67 @@ export default function ManageBarbers() {
                   />
                 </div>
 
-                <div className="edit-group">
-                  <label>Specialty</label>
-                  <input
-                    type="text"
-                    value={editingBarber.specialty}
-                    onChange={(e) =>
-                      setEditingBarber({
-                        ...editingBarber,
-                        specialty: e.target.value,
-                      })
-                    }
-                    disabled={loading}
-                  />
+                <div className="edit-group specialty-group">
+                  <label>Specialties</label>
+                  <div className="specialties-container">
+                    <div className="specialties-header">
+                      <span className="selected-count">
+                        {editingBarber.specialty_ids?.length || 0} of{" "}
+                        {services.length} selected
+                      </span>
+                      {editingBarber.specialty_ids?.length > 0 && (
+                        <button
+                          type="button"
+                          className="clear-all-btn"
+                          onClick={() =>
+                            setEditingBarber({
+                              ...editingBarber,
+                              specialty_ids: [],
+                            })
+                          }
+                          disabled={loading}
+                        >
+                          Clear All
+                        </button>
+                      )}
+                    </div>
+                    <div className="services-grid">
+                      {services.map((service) => (
+                        <div key={service.id} className="service-item">
+                          <label className="service-checkbox">
+                            <input
+                              type="checkbox"
+                              checked={
+                                editingBarber.specialty_ids?.includes(
+                                  service.id
+                                ) || false
+                              }
+                              onChange={(e) => {
+                                const currentIds =
+                                  editingBarber.specialty_ids || [];
+                                if (e.target.checked) {
+                                  setEditingBarber({
+                                    ...editingBarber,
+                                    specialty_ids: [...currentIds, service.id],
+                                  });
+                                } else {
+                                  setEditingBarber({
+                                    ...editingBarber,
+                                    specialty_ids: currentIds.filter(
+                                      (id) => id !== service.id
+                                    ),
+                                  });
+                                }
+                              }}
+                              disabled={loading}
+                            />
+                            <div className="checkbox-custom"></div>
+                            <span className="service-name">{service.name}</span>
+                          </label>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 </div>
 
                 <div className="barber-actions">
